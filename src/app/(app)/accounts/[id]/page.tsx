@@ -14,6 +14,7 @@ import {
   Phone,
   Trash2,
   Users,
+  Plus,
 } from "lucide-react"
 
 import { accounts, contacts, opportunities, users } from "@/lib/data"
@@ -43,6 +44,12 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import type { OpportunityStage } from "@/lib/types"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -73,6 +80,19 @@ export default function AccountDetailPage({ params }: { params: { id: string } }
         <div className="flex items-center">
             <h1 className="text-2xl font-bold">Accounts / {account.name}</h1>
             <div className="ml-auto flex items-center gap-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                            <Plus className="mr-2 h-4 w-4" />
+                            New
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem>New Contact</DropdownMenuItem>
+                        <DropdownMenuItem>New Opportunity</DropdownMenuItem>
+                        <DropdownMenuItem>New Task</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
                  <Button>Edit</Button>
             </div>
         </div>

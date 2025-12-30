@@ -14,6 +14,7 @@ import {
   Paperclip,
   Trash2,
   Calendar,
+  Plus,
 } from "lucide-react"
 
 import { opportunities, users, accounts } from "@/lib/data"
@@ -36,6 +37,12 @@ import * as React from "react"
 import { Badge } from "@/components/ui/badge"
 import type { OpportunityStage } from "@/lib/types"
 import Link from "next/link"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -64,6 +71,18 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
         <div className="flex items-center">
             <h1 className="text-2xl font-bold">Opportunities / {opportunity.name}</h1>
             <div className="ml-auto flex items-center gap-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                            <Plus className="mr-2 h-4 w-4" />
+                            New
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem>New Task</DropdownMenuItem>
+                        <DropdownMenuItem>Log a Call</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
                  <Button>Edit</Button>
             </div>
         </div>

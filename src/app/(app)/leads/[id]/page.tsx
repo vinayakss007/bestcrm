@@ -64,6 +64,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline">
+                            <Plus className="mr-2 h-4 w-4" />
                             New
                         </Button>
                     </DropdownMenuTrigger>

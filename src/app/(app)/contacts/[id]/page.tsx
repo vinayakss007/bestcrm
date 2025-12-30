@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Paperclip,
   Phone,
+  Plus,
   Trash2,
   User,
 } from "lucide-react"
@@ -33,6 +34,12 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import * as React from "react"
 import Link from "next/link"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function ContactDetailPage({ params }: { params: { id: string } }) {
   const contact = contacts.find((c) => c.id === params.id)
@@ -51,6 +58,19 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
         <div className="flex items-center">
             <h1 className="text-2xl font-bold">Contacts / {contact.name}</h1>
             <div className="ml-auto flex items-center gap-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                            <Plus className="mr-2 h-4 w-4" />
+                            New
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem>Email</DropdownMenuItem>
+                        <DropdownMenuItem>Call</DropdownMenuItem>
+                        <DropdownMenuItem>Task</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
                  <Button>Edit</Button>
             </div>
         </div>
