@@ -9,6 +9,8 @@ This document outlines the system architecture for the Zenith CRM platform, an e
 *   **Security:** Multi-tenancy requires strict data isolation and role-based access control (RBAC) at every layer.
 *   **Maintainability:** A clean, well-documented, and modular codebase is essential for long-term development and support.
 *   **Developer Experience:** The system should be easy to set up, test, and deploy, enabling rapid feature development.
+*   **API-First:** All core functionality should be exposed through a secure, well-documented API to enable integrations and an ecosystem.
+*   **Reliability & Redundancy:** Leverage cloud-native, managed services to ensure high availability and automatic backups.
 
 ---
 
@@ -42,11 +44,11 @@ The frontend will remain a Next.js application but will evolve to be data-driven
 
 ### 3.2. Backend Architecture
 
-The backend will be built entirely on Google Cloud and Firebase services.
+The backend will be built entirely on Google Cloud and Firebase services. Our backend logic will be written in **TypeScript** and deployed as **Cloud Functions for Firebase** to maintain a consistent, full-stack TypeScript ecosystem.
 
 *   **Core Services:**
     *   **Firebase Authentication:** To manage user identity, supporting providers like Google, email/password, and SAML for enterprise clients. Custom claims will be used to manage user roles (`super_admin`, `company_admin`, `user`).
-    *   **Firestore:** Our primary database. It will be structured for multi-tenancy.
+    *   **Firestore:** Our primary database. It will be structured for multi-tenancy and its security will be paramount.
     *   **Cloud Functions for Firebase:** For all backend business logic, background workers, and API endpoints.
 
 *   **Multi-Tenancy Design (Firestore):**
