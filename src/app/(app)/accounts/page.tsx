@@ -1,4 +1,4 @@
-import { MoreHorizontal, PlusCircle } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -26,6 +26,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import { accounts } from "@/lib/data"
+import { AddAccountDialog } from "@/components/add-account-dialog"
 
 export default function AccountsPage() {
   return (
@@ -33,12 +34,7 @@ export default function AccountsPage() {
       <div className="flex items-center gap-4">
         <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">Accounts</h1>
         <div className="ml-auto flex items-center gap-2">
-          <Button size="sm" className="h-8 gap-1">
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Add Account
-            </span>
-          </Button>
+          <AddAccountDialog />
         </div>
       </div>
       <Card>

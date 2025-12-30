@@ -23,7 +23,9 @@ export type Contact = {
   accountName: string;
 };
 
-export type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Lost';
+export const leadStatus = ['New', 'Contacted', 'Qualified', 'Lost'] as const;
+export type LeadStatus = (typeof leadStatus)[number];
+
 export type Lead = {
   id: string;
   name: string;
