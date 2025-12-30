@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { BarChart, Users, Star, User, Mail, Ban, Home, Building2 } from "lucide-react"
+import { BarChart, Users, Star, User, Mail, Ban, Home } from "lucide-react"
 
 export function SettingsNav() {
   const pathname = usePathname()
