@@ -15,10 +15,11 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuPortal,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { users } from "@/lib/data"
 import { ThemeSwitcher } from "./theme-switcher"
-import { Monitor, Moon, Sun } from "lucide-react"
+import { Sun } from "lucide-react"
 
 export function UserNav() {
   const user = users[0]; // mock user
