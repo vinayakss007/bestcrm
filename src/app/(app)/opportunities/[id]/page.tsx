@@ -1,0 +1,183 @@
+
+"use client"
+
+import { notFound } from "next/navigation"
+import {
+  Activity,
+  Archive,
+  Briefcase,
+  ChevronDown,
+  ChevronUp,
+  DollarSign,
+  Mail,
+  MessageSquare,
+  Paperclip,
+  Trash2,
+  Calendar,
+} from "lucide-react"
+
+import { opportunities, users, accounts } from "@/lib/data"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import * as React from "react"
+import { Badge } from "@/components/ui/badge"
+import type { OpportunityStage } from "@/lib/types"
+import Link from "next/link"
+
+const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
+    'Prospecting': 'secondary',
+    'Qualification': 'secondary',
+    'Proposal': 'secondary',
+    'Closing': 'secondary',
+    'Won': 'default',
+    'Lost': 'destructive'
+}
+
+export default function OpportunityDetailPage({ params }: { params: { id: string } }) {
+  const opportunity = opportunities.find((o) => o.id === params.id)
+  const [isDetailsOpen, setIsDetailsOpen] = React.useState(true)
+
+  if (!opportunity) {
+    notFound()
+  }
+
+  const account = accounts.find(a => a.id === opportunity.accountId);
+  const administrator = users[0];
+
+  return (
+    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Main Content */}
+      <div className="md:col-span-2 space-y-6">
+        <div className="flex items-center">
+            <h1 className="text-2xl font-bold">Opportunities / {opportunity.name}</h1>
+            <div className="ml-auto flex items-center gap-2">
+                 <Button>Edit</Button>
+            </div>
+        </div>
+
+        <Tabs defaultValue="activity">
+          <TabsList className="mb-4">
+            <TabsTrigger value="activity">
+              <Activity className="mr-2 h-4 w-4" />
+              Activity
+            </TabsTrigger>
+            <TabsTrigger value="emails">
+              <Mail className="mr-2 h-4 w-4" />
+              Emails
+            </TabsTrigger>
+             <TabsTrigger value="notes">
+              <Archive className="mr-2 h-4 w-4" />
+              Notes
+            </TabsTrigger>
+            <TabsTrigger value="attachments">
+              <Paperclip className="mr-2 h-4 w-4" />
+              Attachments
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="activity">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Activity</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="flex items-start gap-4">
+                        <Avatar>
+                            <AvatarImage src={administrator.avatarUrl} />
+                            <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                            <div className="flex justify-between items-center">
+                                <p className="text-sm font-medium">{administrator.name} created this opportunity</p>
+                                <p className="text-xs text-muted-foreground">1 hour ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+             </Card>
+          </TabsContent>
+          <TabsContent value="emails">
+            <p className="text-muted-foreground text-center py-8">No emails yet.</p>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Right Sidebar */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-4">
+               <div className="p-3 bg-muted rounded-md">
+                <Briefcase className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">{opportunity.name}</CardTitle>
+                <Link href={`/accounts/${account?.id}`} className="text-sm text-primary hover:underline">{account?.name}</Link>
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" size="icon">
+                <Mail className="h-4 w-4" />
+              </Button>
+              <Button variant="destructive" size="icon" className="ml-auto">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <Separator />
+          <CardContent className="pt-6">
+            <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">Details</h4>
+                  <Button variant="ghost" size="sm" className="w-9 p-0">
+                    {isDetailsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    <span className="sr-only">Toggle</span>
+                  </Button>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="space-y-3 py-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground flex items-center gap-2"><DollarSign className="h-4 w-4" /> Amount</span>
+                    <span>${opportunity.amount.toLocaleString()}</span>
+                  </div>
+                   <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground flex items-center gap-2"><Briefcase className="h-4 w-4" /> Stage</span>
+                    <Badge variant={stageVariant[opportunity.stage]}>{opportunity.stage}</Badge>
+                  </div>
+                   <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground flex items-center gap-2"><Calendar className="h-4 w-4" /> Close Date</span>
+                    <span>{new Date(opportunity.closeDate).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Opportunity Owner</span>
+                    <div className="flex items-center gap-2">
+                        <Avatar className="h-5 w-5">
+                            <AvatarImage src={opportunity.owner.avatarUrl} />
+                            <AvatarFallback>{opportunity.owner.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span>{opportunity.owner.name}</span>
+                     </div>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

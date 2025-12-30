@@ -1,5 +1,5 @@
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
-
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -116,7 +116,11 @@ export default function TasksPage() {
             <TableBody>
               {tasks.map((task) => (
                 <TableRow key={task.id}>
-                  <TableCell className="font-medium">{task.title}</TableCell>
+                  <TableCell className="font-medium">
+                     <Link href={`/tasks/${task.id}`} className="hover:underline">
+                        {task.title}
+                     </Link>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={statusVariant[task.status]}>{task.status}</Badge>
                   </TableCell>

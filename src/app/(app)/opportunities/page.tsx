@@ -1,5 +1,5 @@
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
-
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -119,7 +119,11 @@ export default function OpportunitiesPage() {
             <TableBody>
               {opportunities.map((opportunity) => (
                 <TableRow key={opportunity.id}>
-                  <TableCell className="font-medium">{opportunity.name}</TableCell>
+                  <TableCell className="font-medium">
+                     <Link href={`/opportunities/${opportunity.id}`} className="hover:underline">
+                        {opportunity.name}
+                     </Link>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={stageVariant[opportunity.stage]}>{opportunity.stage}</Badge>
                   </TableCell>
@@ -130,7 +134,9 @@ export default function OpportunitiesPage() {
                     {new Date(opportunity.closeDate).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {opportunity.accountName}
+                    <Link href={`/accounts/${opportunity.accountId}`} className="hover:underline">
+                        {opportunity.accountName}
+                    </Link>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

@@ -1,5 +1,5 @@
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
-
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -105,13 +105,19 @@ export default function ContactsPage() {
             <TableBody>
               {contacts.map((contact) => (
                 <TableRow key={contact.id}>
-                  <TableCell className="font-medium">{contact.name}</TableCell>
+                  <TableCell className="font-medium">
+                     <Link href={`/contacts/${contact.id}`} className="hover:underline">
+                        {contact.name}
+                     </Link>
+                  </TableCell>
                   <TableCell>{contact.email}</TableCell>
                   <TableCell className="hidden md:table-cell">
                     {contact.phone}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {contact.accountName}
+                     <Link href={`/accounts/${contact.accountId}`} className="hover:underline">
+                        {contact.accountName}
+                     </Link>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

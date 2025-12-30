@@ -1,5 +1,5 @@
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
-
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -110,7 +110,11 @@ export default function AccountsPage() {
             <TableBody>
               {accounts.map((account) => (
                 <TableRow key={account.id}>
-                  <TableCell className="font-medium">{account.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/accounts/${account.id}`} className="hover:underline">
+                      {account.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{account.industry}</TableCell>
                   <TableCell className="hidden md:table-cell">
                     {account.contactsCount}

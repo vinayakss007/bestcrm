@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -13,14 +14,16 @@ import {
   Lightbulb,
   Briefcase,
   CheckSquare,
-  Building2
+  Building2,
+  Bell,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
+import { Notifications } from "./notifications"
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/accounts", icon: Building2, label: "Accounts" },
-  { href: "/contacts", icon: Contact, label: "Contacts" },
+  { href_alt: "/contacts", icon: Contact, label: "Contacts" },
   { href: "/leads", icon: Lightbulb, label: "Leads" },
   { href: "/opportunities", icon: Briefcase, label: "Opportunities" },
   { href: "/tasks", icon: CheckSquare, label: "Tasks" },
@@ -32,16 +35,22 @@ export function Nav() {
 
   return (
     <SidebarGroup>
+      <div className="group-data-[collapsible=icon]:hidden pb-2">
+        {/* Placeholder for future top items */}
+      </div>
       <SidebarMenu>
+         <SidebarMenuItem>
+           <Notifications isIconButton={true} />
+         </SidebarMenuItem>
         {navItems.map((item) => (
-          <SidebarMenuItem key={item.href}>
+          <SidebarMenuItem key={item.label}>
             <SidebarMenuButton
               size="lg"
               asChild
-              isActive={pathname.startsWith(item.href)}
+              isActive={pathname.startsWith(item.href || item.href_alt || '')}
               tooltip={item.label}
             >
-              <a href={item.href}>
+              <a href={item.href || item.href_alt}>
                 <item.icon />
                 <span>{item.label}</span>
               </a>

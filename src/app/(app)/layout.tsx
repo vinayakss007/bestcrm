@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
 import { Nav } from "@/components/nav"
 import { Bot, Settings } from "lucide-react"
+import { Notifications } from "@/components/notifications"
 
 export default function AppLayout({
   children,
@@ -21,18 +22,23 @@ export default function AppLayout({
     <SidebarProvider>
       <Sidebar side="left" variant="sidebar" collapsible="icon">
         <SidebarHeader>
-          <Button
-            variant="ghost"
-            className="h-10 w-full justify-start px-2 text-lg font-bold"
-            asChild
-          >
-            <a href="/dashboard">
-              <Bot className="mr-2 h-6 w-6" />
-              <span className="group-data-[collapsible=icon]:hidden">
-                Zenith CRM
-              </span>
-            </a>
-          </Button>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              className="h-10 w-full justify-start px-2 text-lg font-bold"
+              asChild
+            >
+              <a href="/dashboard">
+                <Bot className="mr-2 h-6 w-6" />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Zenith CRM
+                </span>
+              </a>
+            </Button>
+            <div className="group-data-[collapsible=icon]:hidden">
+              <Notifications />
+            </div>
+          </div>
         </SidebarHeader>
         <SidebarContent>
           <Nav />
