@@ -13,16 +13,18 @@ import {
   Lightbulb,
   Briefcase,
   CheckSquare,
+  Building2
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/accounts", icon: Users, label: "Accounts" },
+  { href: "/accounts", icon: Building2, label: "Accounts" },
   { href: "/contacts", icon: Contact, label: "Contacts" },
   { href: "/leads", icon: Lightbulb, label: "Leads" },
   { href: "/opportunities", icon: Briefcase, label: "Opportunities" },
   { href: "/tasks", icon: CheckSquare, label: "Tasks" },
+  { href: "/agents", icon: Users, label: "Agents" },
 ]
 
 export function Nav() {
