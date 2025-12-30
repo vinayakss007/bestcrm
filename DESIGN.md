@@ -52,7 +52,7 @@ The backend will be a standalone, dedicated **NestJS** application written in **
 *   **API:** The NestJS application will expose a comprehensive **RESTful API**. This API will be the single source of truth for all data and business logic, serving the Next.js frontend and any future external clients. All endpoints will be secured and will enforce role-based access control (RBAC).
 
 *   **Multi-Tenancy Design:**
-    *   We will use a **schema-per-tenant** or **discriminator column** strategy. A `companyId` or `orgId` column will be present on all relevant database tables.
+    *   We will use a **discriminator column** strategy. A `companyId` or `orgId` column will be present on all relevant database tables.
     *   All API endpoints and service-layer logic in the backend will be scoped to the currently authenticated user's organization, ensuring strict data isolation at the application level. Database policies can be used for an additional layer of security.
 
 *   **Automation & Background Workers:**
