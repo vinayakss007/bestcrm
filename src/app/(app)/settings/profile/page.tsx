@@ -24,18 +24,20 @@ export default function ProfileSettingsPage() {
           This is how you'll appear to others on the platform.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" defaultValue={user.name} className="max-w-sm" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" defaultValue={user.email} className="max-w-sm" />
+      <CardContent>
+        <div className="grid gap-6">
+          <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" defaultValue={user.name} className="max-w-sm" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" defaultValue={user.email} className="max-w-sm" />
+          </div>
         </div>
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button>Save Changes</Button>
+        <Button>Save</Button>
       </CardFooter>
     </Card>
   )
