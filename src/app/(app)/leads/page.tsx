@@ -1,4 +1,5 @@
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
+import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -118,7 +119,11 @@ export default function LeadsPage() {
             <TableBody>
               {leads.map((lead) => (
                 <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/leads/${lead.id}`} className="hover:underline">
+                      {lead.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={statusVariant[lead.status]}>{lead.status}</Badge>
                   </TableCell>
