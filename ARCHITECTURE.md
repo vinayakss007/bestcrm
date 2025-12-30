@@ -46,9 +46,10 @@ The backend will be a separate monorepo or subdirectory (`/backend`) with a modu
 
 ## 4. API Design (RESTful)
 
+- **API Specification:** The API is formally defined in the **OpenAPI specification** located at `/docs/openapi.yaml`. This document is the single source of truth for all endpoints, request payloads, and response structures. All development MUST adhere to this contract.
 - **Versioning:** The API will be versioned (e.g., `/api/v1/...`).
 - **Authentication:** All endpoints will be protected by a JWT-based authentication guard (`AuthGuard`). The JWT will be passed in the `Authorization` header (`Bearer <token>`). The token payload will include `userId` and `orgId` to scope all database queries.
-- **Data Transfer Objects (DTOs):** All incoming request bodies will be validated against DTOs using NestJS's built-in `ValidationPipe`. This ensures data is in the correct format before it reaches the service layer.
+- **Data Transfer Objects (DTOs):** All incoming request bodies will be validated against DTOs using NestJS's built-in `ValidationPipe`. These DTOs are defined in the OpenAPI specification.
 - **Responses:**
     - `200 OK`: Successful `GET`, `PUT`, `PATCH`.
     - `201 Created`: Successful `POST`.

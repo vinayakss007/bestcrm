@@ -1,0 +1,171 @@
+
+openapi: 3.0.3
+info:
+  title: Zenith CRM API
+  description: The official REST API for the Zenith CRM platform.
+  version: 1.0.0
+servers:
+  - url: https://api.zenith-crm.com/v1
+    description: Production Server
+  - url: http://localhost:3000/api/v1
+    description: Local Development Server
+tags:
+  - name: Accounts
+    description: Operations related to customer accounts.
+  - name: Contacts
+    description: Operations related to contacts within accounts.
+  - name: Leads
+    description: Operations related to sales leads.
+  - name: Opportunities
+    description: Operations related to sales opportunities.
+
+paths:
+  /accounts:
+    get:
+      tags:
+        - Accounts
+      summary: List all accounts
+      description: Retrieves a paginated list of accounts.
+      operationId: getAccounts
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination.
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page.
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: A list of accounts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+    post:
+      tags:
+        - Accounts
+      summary: Create a new account
+      description: Adds a new customer account to the CRM.
+      operationId: createAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountDto'
+      responses:
+        '201':
+          description: Account created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: Invalid input data.
+
+  /accounts/{accountId}:
+    get:
+      tags:
+        - Accounts
+      summary: Get an account by ID
+      description: Retrieves a single account by its unique ID.
+      operationId: getAccountById
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: The ID of the account to retrieve.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Account not found.
+
+components:
+  schemas:
+    CrmUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: 'Alex Doe'
+        avatarUrl:
+          type: string
+          format: uri
+          example: 'https://picsum.photos/seed/alex/100/100'
+
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 1
+        name:
+          type: string
+          example: 'Innovate Inc.'
+        industry:
+          type: string
+          example: 'Technology'
+        owner:
+          $ref: '#/components/schemas/CrmUser'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        customFields:
+          type: object
+          additionalProperties: true
+          description: "Flexible key-value store for custom data."
+          example:
+            { "sla_level": "Gold", "renewal_date": "2025-12-31" }
+
+    CreateAccountDto:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 2
+          example: 'New Horizon Corp'
+        industry:
+          type: string
+          example: 'Renewable Energy'
+        ownerId:
+          type: integer
+          description: "ID of the user who owns this account."
+          example: 1
+        customFields:
+          type: object
+          additionalProperties: true
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
