@@ -10,6 +10,7 @@ import {
   boolean,
   date,
   pgEnum,
+  jsonb,
 } from "drizzle-orm/pg-core"
 import type { AdapterAccount } from "@auth/core/adapters"
 
@@ -78,6 +79,7 @@ export const crmAccounts = pgTable("crm_accounts", {
   name: varchar("name", { length: 255 }).notNull(),
   industry: varchar("industry", { length: 255 }),
   ownerId: integer("owner_id").references(() => crmUsers.id),
+  customFields: jsonb("custom_fields"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -87,6 +89,7 @@ export const crmContacts = pgTable("crm_contacts", {
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }),
   accountId: integer("account_id").references(() => crmAccounts.id, { onDelete: 'cascade' }),
+  customFields: jsonb("custom_fields"),
 });
 
 export const leadStatusEnum = pgEnum('lead_status', ['New', 'Contacted', 'Qualified', 'Lost']);
@@ -98,6 +101,7 @@ export const crmLeads = pgTable("crm_leads", {
   source: varchar("source", { length: 100 }),
   status: leadStatusEnum("status").default("New"),
   ownerId: integer("owner_id").references(() => crmUsers.id),
+  customFields: jsonb("custom_fields"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -111,6 +115,7 @@ export const crmOpportunities = pgTable("crm_opportunities", {
   amount: integer("amount"),
   closeDate: date("close_date"),
   ownerId: integer("owner_id").references(() => crmUsers.id),
+  customFields: jsonb("custom_fields"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
