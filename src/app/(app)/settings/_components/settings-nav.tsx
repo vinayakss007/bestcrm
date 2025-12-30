@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { BarChart, Users, Star, User, Mail, Ban, Home } from "lucide-react"
+import { BarChart, Users, Star, User, Mail, Ban, Home, Blocks } from "lucide-react"
 
 export function SettingsNav() {
   const pathname = usePathname()
@@ -26,6 +26,7 @@ export function SettingsNav() {
     {
       title: "CRM",
       links: [
+        { title: "Custom Fields", href: "/settings/custom-fields", icon: Blocks },
         { title: "Forecasting", href: "/settings/forecasting", icon: BarChart },
         { title: "Home Actions", href: "/settings/home-actions", icon: Home },
         { title: "Assignment Rules", href: "/settings/assignment-rules", icon: Ban },
