@@ -10,7 +10,7 @@ This document outlines the system architecture for the Zenith CRM platform, an e
 *   **Maintainability:** A clean, well-documented, and modular codebase is essential for long-term development and support.
 *   **Developer Experience:** The system should be easy to set up, test, and deploy, enabling rapid feature development.
 *   **API-First:** All core functionality should be exposed through a secure, well-documented API to enable integrations and an ecosystem.
-*   **Reliability & Redundancy:** Leverage cloud-native, managed services to ensure high availability and automatic backups.
+*   **Reliability & Redundancy:** Leverage cloud-native patterns and managed services to ensure high availability and automatic backups.
 
 ---
 
@@ -31,69 +31,63 @@ The application currently exists as a **frontend-only Next.js application**.
 
 ## 3. Target Architecture (To-Be)
 
-The target is a modern, cloud-native, multi-tenant architecture leveraging serverless technologies for scalability and cost-efficiency. Firebase will serve as the core of our backend.
+The target is a modern, cloud-native, multi-tenant architecture featuring a dedicated server backend for maximum control and performance, connected to a data-driven Next.js frontend.
 
 ### 3.1. Frontend Architecture
 
-The frontend will remain a Next.js application but will evolve to be data-driven and stateful.
+The frontend will remain a Next.js application but will evolve to communicate with our dedicated backend API.
 
-*   **Data Fetching:** All mock data will be removed. Components will fetch data directly from the Firebase backend using custom hooks (`useDoc`, `useCollection`) that wrap Firebase's real-time SDK.
-*   **State Management:** Client-side state will be managed primarily by React's built-in hooks (`useState`, `useReducer`). For complex cross-component state, we will rely on React Context.
-*   **Authentication:** User authentication will be handled client-side using the Firebase Authentication SDK. A `useUser` hook will provide the current user's state throughout the app. The UI will dynamically render based on authentication status (e.g., redirecting to a login page if not authenticated).
+*   **Data Fetching:** All mock data will be removed. Components will fetch data from our backend REST API using a library like `SWR` or `React Query` for efficient caching, revalidation, and state management.
+*   **State Management:** Client-side state will be managed primarily by React's built-in hooks (`useState`, `useReducer`). For complex cross-component state and data caching, we will rely on React Context in conjunction with `SWR` or `React Query`.
+*   **Authentication:** User authentication will be handled via the backend API using JWT (JSON Web Tokens). A custom `useUser` hook will manage the user's session state and provide user information throughout the app. The UI will dynamically render based on authentication status.
 *   **Component Model:** We will continue to build isolated, reusable components. Pages will be composed of Server Components for static content and Client Components for interactive elements that require state or data fetching.
 
 ### 3.2. Backend Architecture
 
-The backend will be built entirely on Google Cloud and Firebase services. Our backend logic will be written in **TypeScript** and deployed as **Cloud Functions for Firebase** to maintain a consistent, full-stack TypeScript ecosystem.
+The backend will be a standalone, dedicated **NestJS** application written in **TypeScript**. This provides a scalable, modular, and maintainable server architecture.
 
-*   **Core Services:**
-    *   **Firebase Authentication:** To manage user identity, supporting providers like Google, email/password, and SAML for enterprise clients. Custom claims will be used to manage user roles (`super_admin`, `company_admin`, `user`).
-    *   **Firestore:** Our primary database. It will be structured for multi-tenancy and its security will be paramount.
-    *   **Cloud Functions for Firebase:** For all backend business logic, background workers, and API endpoints.
+*   **Framework:** **NestJS**. Its modular structure, dependency injection, and use of TypeScript make it ideal for a large-scale enterprise application.
+*   **Primary Database:** **PostgreSQL**. A robust, open-source relational database that provides strong data consistency, transactional integrity, and powerful querying capabilities, all of which are essential for a CRM.
+*   **Authentication:** **Passport.js** will be used as middleware within NestJS to handle authentication strategies. We will implement a JWT-based strategy for stateless, secure API authentication. User roles and permissions will be managed within our own database.
+*   **API:** The NestJS application will expose a comprehensive **RESTful API**. This API will be the single source of truth for all data and business logic, serving the Next.js frontend and any future external clients. All endpoints will be secured and will enforce role-based access control (RBAC).
 
-*   **Multi-Tenancy Design (Firestore):**
-    *   We will use a **document-based tenancy model**. Every root-level collection will represent a tenant (or "organization").
-    *   **Example Structure:** `/organizations/{orgId}/accounts/{accountId}`.
-    *   **Security Rules:** Firestore Security Rules will be the cornerstone of data isolation. Rules will ensure that a user can only access data within their own organization (`orgId`). `allow read, write: if request.auth.token.org_id == resource.data.orgId;`
+*   **Multi-Tenancy Design:**
+    *   We will use a **schema-per-tenant** or **discriminator column** strategy. A `companyId` or `orgId` column will be present on all relevant database tables.
+    *   All API endpoints and service-layer logic in the backend will be scoped to the currently authenticated user's organization, ensuring strict data isolation at the application level. Database policies can be used for an additional layer of security.
 
 *   **Automation & Background Workers:**
-    *   **Cloud Functions** will be used for all asynchronous tasks.
-        *   **Event-driven functions:** Triggered by events in Firestore (e.g., `onDocumentCreate`) or Auth (e.g., `onUserCreate`). Use cases: sending welcome emails, creating default records for a new organization.
-        *   **Scheduled functions (Pub/Sub):** For recurring tasks like generating weekly reports or cleaning up old data.
-        *   **HTTP-triggered functions:** To serve as our secure API endpoints.
+    *   We will use a dedicated job queue system like **BullMQ**, backed by **Redis**, for all asynchronous tasks.
+    *   **Use Cases:** Sending welcome emails, processing large data imports/exports, generating reports, or any long-running task that should not block the main API response.
+    *   These workers will run as separate processes, ensuring the API remains responsive.
 
-*   **APIs, Webhooks, and SDKs:**
-    *   **Internal API:** All communication between the frontend and backend will happen via the Firebase SDK (for data) and secure HTTP Cloud Functions (for business logic).
-    *   **External API:** We will expose a RESTful API for customer integrations using **API Gateway** fronting HTTP Cloud Functions. API keys and OAuth2 will be used for authentication.
-    *   **Webhooks:** We will provide an outbound webhook system. Admins can register URLs to receive notifications on key events (e.g., "opportunity won"). A `webhooks` collection in Firestore will store these configurations, and a Cloud Function will handle the dispatching.
+*   **External APIs, Webhooks, and SDKs:**
+    *   **External API:** We will expose a subset of our internal REST API for customer integrations. We will use a tool like **Google Cloud API Gateway** or an equivalent to manage API keys, rate limiting, and public documentation.
+    *   **Webhooks:** An outbound webhook system will be built. Admins can register URLs to receive notifications on key events (e.g., "opportunity won"). A dedicated module in our NestJS app will handle the logic for dispatching these events securely and reliably.
     *   **SDK:** A lightweight JavaScript/TypeScript SDK will be published to NPM to simplify integration with our external API.
 
 ### 3.3. DevOps & Infrastructure
 
-*   **Infrastructure as Code (IaC):**
-    *   While tools like Ansible are powerful for VM-based infrastructure, our serverless-first approach is better suited for **Terraform** or **Firebase's own configuration files**.
-    *   We will use `firebase.json` to define Firestore indexes, Cloud Functions, and Hosting rules.
-    *   Terraform can be used to manage Google Cloud projects, API Gateway configurations, and other non-Firebase resources.
-
+*   **Containerization:** The entire NestJS backend application (including background workers) will be containerized using **Docker**. This ensures consistency across all environments, from local development to production.
+*   **Infrastructure as Code (IaC):** We will use **Terraform** to define and manage all our cloud infrastructure, including our PostgreSQL database instance (e.g., Google Cloud SQL), Redis instance, Kubernetes cluster, and networking rules. This makes our infrastructure version-controlled, repeatable, and easy to manage.
 *   **CI/CD (Continuous Integration/Continuous Deployment):**
     *   We will use **GitHub Actions**.
     *   **Workflow:**
         1.  `on: push` to `main` branch.
-        2.  **Lint & Test:** Run ESLint, Prettier, and Jest/Vitest unit tests.
-        3.  **Build:** Build the Next.js application (`next build`).
+        2.  **Lint & Test:** Run ESLint, Prettier, and Jest/Vitest unit and integration tests for both the frontend and backend.
+        3.  **Build:**
+            *   Build the Next.js application (`next build`).
+            *   Build the Docker image for the NestJS backend.
         4.  **Deploy:**
-            *   Deploy the frontend to **Firebase Hosting**.
-            *   Deploy Cloud Functions, Security Rules, and Firestore indexes using the Firebase CLI.
+            *   Deploy the Next.js frontend to **Firebase Hosting** or **Vercel**.
+            *   Push the backend Docker image to a container registry (e.g., Google Artifact Registry).
+            *   Trigger a rolling update of our backend service (e.g., on Google Cloud Run or Kubernetes).
 
 *   **Monitoring & Testing:**
-    *   **Monitoring:**
-        *   **Google Cloud's operations suite (formerly Stackdriver):** Provides logging, monitoring, and alerting for all Cloud Functions and Firebase services out of the box.
-        *   We will create custom dashboards to monitor key metrics like function execution time, error rates, and Firestore read/write operations.
-        *   Alerts will be configured to notify the development team of anomalies (e.g., a spike in 5xx errors).
+    *   **Monitoring:** We will integrate a comprehensive monitoring solution like **Datadog** or use Google Cloud's built-in **Operations Suite**. We will create dashboards to monitor API latency, error rates (4xx/5xx), database query performance, and background job throughput. Alerts will be configured to notify the development team of anomalies.
     *   **Testing:**
-        *   **Unit Tests (Vitest/Jest):** For individual functions and React components.
-        *   **Emulator Suite:** Firebase provides a local emulator suite for Auth, Firestore, and Functions. This is critical for testing security rules and function triggers locally without affecting production data.
-        *   **End-to-End Tests (Cypress/Playwright):** To simulate user flows in a real browser environment.
+        *   **Unit Tests (Jest):** For individual functions, components, and NestJS services/controllers.
+        *   **Integration Tests:** To test the interaction between different modules of our NestJS application.
+        *   **End-to-End Tests (Cypress/Playwright):** To simulate complete user flows in a real browser, from the frontend UI to the backend API and database. We will use a dedicated test database for these tests.
 
 ---
 
@@ -101,17 +95,17 @@ The backend will be built entirely on Google Cloud and Firebase services. Our ba
 
 1.  **Phase 1: Backend Foundation (Current Focus)**
     *   **[DONE]** Design system architecture.
-    *   **[NEXT]** Integrate Firebase SDK into the frontend.
-    *   **[NEXT]** Implement Authentication (Login, Signup, Logout) and basic RBAC using custom claims.
-    *   **[NEXT]** Migrate all mock data to Firestore and refactor components to use live data.
+    *   **[NEXT]** Set up the NestJS project structure with modules for users, authentication, and core CRM objects.
+    *   **[NEXT]** Implement JWT-based authentication (Login, Signup, Logout) and basic RBAC.
+    *   **[NEXT]** Integrate the Next.js frontend with the new backend API for authentication and data fetching, removing all mock data.
 
 2.  **Phase 2: Core CRM Functionality**
-    *   Implement full CRUD (Create, Read, Update, Delete) operations for all CRM objects.
-    *   Build out background workers for email notifications.
-    *   Refine and deploy robust Firestore Security Rules.
+    *   Implement full CRUD (Create, Read, Update, Delete) API endpoints for all CRM objects.
+    *   Build out the background worker system for email notifications and other async tasks.
+    *   Refine and deploy robust database schemas and application-level security policies.
 
 3.  **Phase 3: Enterprise Features**
-    *   Build the External API and Webhook system.
+    *   Build and document the External API and Webhook system.
     *   Develop and publish the client SDK.
     *   Implement advanced "super admin" features like the Object Manager for custom fields.
 
