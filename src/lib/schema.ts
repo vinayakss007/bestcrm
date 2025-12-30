@@ -1,4 +1,3 @@
-
 import {
   timestamp,
   pgTable,
@@ -14,6 +13,8 @@ import {
 } from "drizzle-orm/pg-core"
 import type { AdapterAccount } from "@auth/core/adapters"
 
+// This section defines tables for NextAuth.js if you integrate it directly.
+// These are standard and should not be modified unless you are customizing Auth.js behavior.
 export const users = pgTable("user", {
   id: text("id").notNull().primaryKey(),
   name: text("name"),
@@ -64,8 +65,12 @@ export const verificationTokens = pgTable(
   })
 );
 
-// Zenith CRM Schemas
 
+// =================================================================//
+// =================== ZENITH CRM DATABASE SCHEMA ===================//
+// =================================================================//
+
+// Users within the CRM system.
 export const crmUsers = pgTable("crm_users", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -74,26 +79,35 @@ export const crmUsers = pgTable("crm_users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Accounts represent customer companies or organizations.
 export const crmAccounts = pgTable("crm_accounts", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   industry: varchar("industry", { length: 255 }),
   ownerId: integer("owner_id").references(() => crmUsers.id),
+  // For storing dynamic, user-defined fields.
   customFields: jsonb("custom_fields"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Contacts are individuals associated with an Account.
 export const crmContacts = pgTable("crm_contacts", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }),
+  // Each contact is linked to one account.
   accountId: integer("account_id").references(() => crmAccounts.id, { onDelete: 'cascade' }),
   customFields: jsonb("custom_fields"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Enums provide a fixed set of values for specific fields, ensuring data integrity.
 export const leadStatusEnum = pgEnum('lead_status', ['New', 'Contacted', 'Qualified', 'Lost']);
 
+// Leads are potential customers that are not yet qualified.
 export const crmLeads = pgTable("crm_leads", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -103,32 +117,39 @@ export const crmLeads = pgTable("crm_leads", {
   ownerId: integer("owner_id").references(() => crmUsers.id),
   customFields: jsonb("custom_fields"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const opportunityStageEnum = pgEnum('opportunity_stage', ['Prospecting', 'Qualification', 'Proposal', 'Closing', 'Won', 'Lost']);
 
+// Opportunities are qualified leads that represent potential sales deals.
 export const crmOpportunities = pgTable("crm_opportunities", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  accountId: integer("account_id").references(() => crmAccounts.id),
+  // Each opportunity must be linked to an account.
+  accountId: integer("account_id").notNull().references(() => crmAccounts.id, { onDelete: 'cascade' }),
   stage: opportunityStageEnum("stage").default("Prospecting"),
   amount: integer("amount"),
   closeDate: date("close_date"),
   ownerId: integer("owner_id").references(() => crmUsers.id),
   customFields: jsonb("custom_fields"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const taskStatusEnum = pgEnum('task_status', ['Pending', 'Completed']);
 export const relatedToTypeEnum = pgEnum('related_to_type', ['Account', 'Contact', 'Opportunity', 'Lead']);
 
+// Tasks are actions that need to be completed, related to other CRM objects.
 export const crmTasks = pgTable("crm_tasks", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   dueDate: date("due_date"),
   status: taskStatusEnum("status").default("Pending"),
   assignedToId: integer("assigned_to_id").references(() => crmUsers.id),
+  // Polymorphic relationship: A task can be related to different types of objects.
   relatedToType: relatedToTypeEnum("related_to_type"),
-  relatedToId: integer("related_to_id"), // This would need a more complex setup in a real scenario
+  relatedToId: integer("related_to_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
