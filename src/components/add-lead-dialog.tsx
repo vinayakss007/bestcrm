@@ -32,14 +32,29 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { users } from "@/lib/data"
-import { LeadStatus } from "@/lib/types"
+import { leadStatus } from "@/lib/types"
+import { Textarea } from "./ui/textarea"
 
-const leadStatus: LeadStatus[] = ['New', 'Contacted', 'Qualified', 'Lost']
+const salutations = ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof."];
+const genders = ["Male", "Female", "Other"];
+const employeeCounts = ["1-10", "11-50", "51-200", "201-500", "500+"];
+const industries = ["Technology", "Consulting", "Finance", "Healthcare", "Manufacturing", "Retail"];
+const territories = ["North", "South", "East", "West"];
+
 
 const leadSchema = z.object({
-  name: z.string().min(2, { message: "Lead name must be at least 2 characters." }),
+  salutation: z.string().optional(),
+  firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
+  lastName: z.string().optional(),
   email: z.string().email({ message: "Please enter a valid email." }),
-  source: z.string().min(2, { message: "Source must be at least 2 characters." }),
+  mobile: z.string().optional(),
+  gender: z.string().optional(),
+  organization: z.string().optional(),
+  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  employees: z.string().optional(),
+  territory: z.string().optional(),
+  revenue: z.string().optional(),
+  industry: z.string().optional(),
   status: z.enum(leadStatus, { required_error: "Please select a status." }),
   ownerId: z.string({ required_error: "Please select an owner." }),
 })
@@ -51,9 +66,8 @@ export function AddLeadDialog() {
   const form = useForm<LeadFormValues>({
     resolver: zodResolver(leadSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
       email: "",
-      source: "",
       status: "New",
     },
   })
@@ -75,23 +89,60 @@ export function AddLeadDialog() {
           </span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Add New Lead</DialogTitle>
+          <DialogTitle>Create Lead</DialogTitle>
           <DialogDescription>
             Fill in the details below to create a new sales lead.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
-              name="name"
+              name="salutation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Lead Name</FormLabel>
+                  <FormLabel>Salutation</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Salutation" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {salutations.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="John" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doe" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,13 +163,148 @@ export function AddLeadDialog() {
             />
             <FormField
               control={form.control}
-              name="source"
+              name="mobile"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Source</FormLabel>
+                  <FormLabel>Mobile No</FormLabel>
                   <FormControl>
-                    <Input placeholder="Website" {...field} />
+                    <Input placeholder="123-456-7890" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gender</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Gender" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {genders.map((g) => (
+                        <SelectItem key={g} value={g}>
+                          {g}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Organization</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Acme Inc." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="website"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Website</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://acme.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="employees"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>No. of Employees</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="1-10" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {employeeCounts.map((count) => (
+                        <SelectItem key={count} value={count}>
+                          {count}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="territory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Territory</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Territory" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {territories.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="revenue"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Annual Revenue</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="500000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="industry"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Industry</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Industry" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {industries.map((i) => (
+                        <SelectItem key={i} value={i}>
+                          {i}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -128,7 +314,7 @@ export function AddLeadDialog() {
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Status</FormLabel>
+                  <FormLabel>Status *</FormLabel>
                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -171,7 +357,9 @@ export function AddLeadDialog() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Create Lead</Button>
+            <div className="md:col-span-3">
+              <Button type="submit">Create Lead</Button>
+            </div>
           </form>
         </Form>
       </DialogContent>

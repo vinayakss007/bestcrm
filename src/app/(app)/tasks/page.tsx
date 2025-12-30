@@ -1,4 +1,4 @@
-import { MoreHorizontal, PlusCircle } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import { tasks } from "@/lib/data"
 import { TaskStatus } from "@/lib/types"
+import { AddTaskDialog } from "@/components/add-task-dialog"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
@@ -40,12 +41,7 @@ export default function TasksPage() {
       <div className="flex items-center gap-4">
         <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">Tasks</h1>
         <div className="ml-auto flex items-center gap-2">
-          <Button size="sm" className="h-8 gap-1">
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Add Task
-            </span>
-          </Button>
+          <AddTaskDialog />
         </div>
       </div>
       <Card>
