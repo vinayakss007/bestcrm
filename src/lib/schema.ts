@@ -67,7 +67,7 @@ export const verificationTokens = pgTable(
 
 
 // =================================================================//
-// =================== ZENITH CRM DATABASE SCHEMA ===================//
+// =================== ABETWORKS CRM DATABASE SCHEMA ===================//
 // =================================================================//
 
 // Users within the CRM system.

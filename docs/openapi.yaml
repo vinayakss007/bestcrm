@@ -1,11 +1,11 @@
 
 openapi: 3.0.3
 info:
-  title: Zenith CRM API
-  description: The official REST API for the Zenith CRM platform.
+  title: abetworks crm API
+  description: The official REST API for the abetworks crm platform.
   version: 1.0.0
 servers:
-  - url: https://api.zenith-crm.com/v1
+  - url: https://api.abetworks-crm.com/v1
     description: Production Server
   - url: http://localhost:3000/api/v1
     description: Local Development Server

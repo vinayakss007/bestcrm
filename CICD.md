@@ -1,7 +1,7 @@
 
-# CI/CD Pipeline: Zenith CRM
+# CI/CD Pipeline: abetworks crm
 
-This document outlines the Continuous Integration and Continuous Deployment (CI/CD) strategy for the Zenith CRM application. The pipeline is managed using **GitHub Actions**.
+This document outlines the Continuous Integration and Continuous Deployment (CI/CD) strategy for the abetworks crm application. The pipeline is managed using **GitHub Actions**.
 
 ## 1. Guiding Principles
 
@@ -105,8 +105,8 @@ This document outlines the Continuous Integration and Continuous Deployment (CI/
     - name: Build and Push Docker Image
       if: success() # Only run if all tests pass
       run: |-
-        docker build --tag="gcr.io/PROJECT_ID/zenith-crm-backend:$GITHUB_SHA" ./backend
-        docker push "gcr.io/PROJECT_ID/zenith-crm-backend:$GITHUB_SHA"
+        docker build --tag="gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA" ./backend
+        docker push "gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA"
     ```
 
 6.  **Deploy to Cloud Run:**
@@ -115,8 +115,8 @@ This document outlines the Continuous Integration and Continuous Deployment (CI/
       if: success()
       uses: 'google-github-actions/deploy-cloudrun@v2'
       with:
-        service: 'zenith-crm-backend'
+        service: 'abetworks-crm-backend'
         region: 'us-central1'
-        image: 'gcr.io/PROJECT_ID/zenith-crm-backend:$GITHUB_SHA'
+        image: 'gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA'
         # ... other settings like environment variables from secrets
     ```

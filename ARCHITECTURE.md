@@ -1,7 +1,7 @@
 
-# Technical Architecture Document: Zenith CRM
+# Technical Architecture Document: abetworks crm
 
-This document provides a detailed technical blueprint for developers working on the Zenith CRM backend. It complements the high-level `DESIGN.md` with implementation specifics.
+This document provides a detailed technical blueprint for developers working on the abetworks crm backend. It complements the high-level `DESIGN.md` with implementation specifics.
 
 ## 1. Core Technology Stack
 

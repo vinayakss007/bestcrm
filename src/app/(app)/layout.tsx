@@ -31,7 +31,7 @@ export default function AppLayout({
               <a href="/dashboard">
                 <Bot className="mr-2 h-6 w-6" />
                 <span className="group-data-[collapsible=icon]:hidden">
-                  Zenith CRM
+                  abetworks crm
                 </span>
               </a>
             </Button>

@@ -1,7 +1,7 @@
 
-# Zenith CRM Client SDK
+# abetworks crm Client SDK
 
-This document outlines the process for generating and using a client-side SDK for the Zenith CRM API.
+This document outlines the process for generating and using a client-side SDK for the abetworks crm API.
 
 ## 1. Overview
 

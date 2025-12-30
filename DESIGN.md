@@ -1,7 +1,7 @@
 
-# System Design Document: Zenith CRM
+# System Design Document: abetworks crm
 
-This document provides a high-level overview of the system architecture for the Zenith CRM platform. For detailed technical specifications, please refer to the following documents:
+This document provides a high-level overview of the system architecture for the abetworks crm platform. For detailed technical specifications, please refer to the following documents:
 
 - **[Technical Architecture (`ARCHITECTURE.md`)](./ARCHITECTURE.md):** For developers. Details the backend stack, project structure, data models, and local setup.
 - **[CI/CD Pipeline (`CICD.md`)](./CICD.md):** For DevOps. Outlines the automated build, test, and deployment pipelines for frontend and backend.
