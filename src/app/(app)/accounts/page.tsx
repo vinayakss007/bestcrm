@@ -1,3 +1,4 @@
+
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -25,11 +26,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-import { accounts } from "@/lib/data"
 import { AddAccountDialog } from "@/components/add-account-dialog"
+import { getAccounts } from "@/lib/actions"
 
-export default function AccountsPage() {
+export default async function AccountsPage() {
+  const accounts = await getAccounts();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
