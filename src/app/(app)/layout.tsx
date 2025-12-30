@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
 import { Nav } from "@/components/nav"
-import { Bot, Settings2 } from "lucide-react"
+import { Bot, Settings } from "lucide-react"
 
 export default function AppLayout({
   children,
@@ -39,9 +39,11 @@ export default function AppLayout({
         </SidebarContent>
         <SidebarFooter>
           <Separator className="my-2" />
-          <Button variant="ghost" className="w-full justify-start gap-2 px-2">
-            <Settings2 />
-            <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+           <Button variant="ghost" className="w-full justify-start gap-2 px-2" asChild>
+            <a href="/settings">
+                <Settings />
+                <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+            </a>
           </Button>
         </SidebarFooter>
       </Sidebar>
