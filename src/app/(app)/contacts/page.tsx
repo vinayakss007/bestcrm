@@ -24,10 +24,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { contacts } from "@/lib/data"
+import { getContacts } from "@/lib/actions"
 import { AddContactDialog } from "@/components/add-contact-dialog"
 
-export default function ContactsPage() {
+export default async function ContactsPage() {
+  const contacts = await getContacts();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">

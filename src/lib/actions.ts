@@ -1,7 +1,7 @@
 
 'use server'
 
-import { accounts, contacts, leads, opportunities, tasks, users } from '@/lib/data'
+import { accounts, contacts, leads, opportunities, recentActivities, tasks, users } from '@/lib/data'
 
 // For now, these actions will return mock data.
 // In the future, they will interact with the PostgreSQL database.
@@ -34,4 +34,8 @@ export async function getTasks() {
 export async function getUsers() {
     // Replace with DB query
     return users;
+}
+
+export async function getRecentActivities() {
+    return recentActivities;
 }

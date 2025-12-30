@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-import { tasks } from "@/lib/data"
+import { getTasks } from "@/lib/actions"
 import { TaskStatus } from "@/lib/types"
 import { AddTaskDialog } from "@/components/add-task-dialog"
 
@@ -35,7 +35,9 @@ const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Pending': 'secondary'
 }
 
-export default function TasksPage() {
+export default async function TasksPage() {
+  const tasks = await getTasks();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">

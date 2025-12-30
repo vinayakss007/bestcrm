@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-import { leads } from "@/lib/data"
+import { getLeads } from "@/lib/actions"
 import type { LeadStatus } from "@/lib/types"
 import { AddLeadDialog } from "@/components/add-lead-dialog"
 
@@ -38,7 +38,9 @@ const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" 
     'Lost': 'destructive'
 }
 
-export default function LeadsPage() {
+export default async function LeadsPage() {
+  const leads = await getLeads();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">

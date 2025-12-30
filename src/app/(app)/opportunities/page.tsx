@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { opportunities } from "@/lib/data"
+import { getOpportunities } from "@/lib/actions"
 import type { OpportunityStage } from "@/lib/types"
 import { AddOpportunityDialog } from "@/components/add-opportunity-dialog"
 
@@ -38,7 +38,9 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
     'Lost': 'destructive'
 }
 
-export default function OpportunitiesPage() {
+export default async function OpportunitiesPage() {
+  const opportunities = await getOpportunities();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
