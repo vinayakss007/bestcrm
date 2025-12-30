@@ -8,9 +8,9 @@ export default function SettingsLayout({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center gap-4">
-        <h1 className="text-3xl font-semibold">Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
       </div>
-      <div className="grid w-full items-start gap-6 md:grid-cols-[180px_1fr] lg:grid-cols-[250px_1fr]">
+      <div className="grid w-full flex-1 gap-12 md:grid-cols-[200px_1fr]">
         <SettingsNav />
         <div className="grid gap-6">
           {children}

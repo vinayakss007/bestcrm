@@ -17,48 +17,59 @@ export default function BrandSettingsPage() {
       <CardHeader>
         <CardTitle>Brand settings</CardTitle>
         <CardDescription>
-          Configure your brand name, logo, and favicon.
+          Configure your brand name, logo, and favicon for a cohesive identity.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8">
         <div className="space-y-2">
           <Label htmlFor="brand-name">Brand name</Label>
-          <Input id="brand-name" placeholder="Enter brand name" />
+          <Input id="brand-name" placeholder="Enter brand name" className="max-w-sm" />
+          <p className="text-xs text-muted-foreground">
+            This name will be displayed throughout the application.
+          </p>
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-4">
             <Label>Brand logo</Label>
-            <div className="flex items-center gap-4">
-                <div className="flex h-24 w-24 items-center justify-center rounded-lg border border-dashed">
+            <div className="flex items-start gap-4">
+                <div className="flex h-20 w-20 items-center justify-center rounded-lg border-2 border-dashed">
                     <div className="text-center">
-                        <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
+                        <Upload className="mx-auto h-6 w-6 text-muted-foreground" />
                     </div>
                 </div>
-                <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Appears in the left sidebar. Recommended size is 32x32 px in PNG or SVG</p>
+                <div className="space-y-2">
                     <Button variant="outline" size="sm">Upload</Button>
+                    <p className="text-xs text-muted-foreground">
+                        Appears in the left sidebar.
+                        <br />
+                        Recommended size: 32x32 px, PNG or SVG.
+                    </p>
                 </div>
             </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
             <Label>Favicon</Label>
-            <div className="flex items-center gap-4">
-                <div className="flex h-24 w-24 items-center justify-center rounded-lg border border-dashed">
+            <div className="flex items-start gap-4">
+                <div className="flex h-20 w-20 items-center justify-center rounded-lg border-2 border-dashed">
                     <div className="text-center">
-                        <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
+                        <Upload className="mx-auto h-6 w-6 text-muted-foreground" />
                     </div>
                 </div>
-                 <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Appears next to the title in your browser tab. Recommended size is 32x32 px in PNG or ICO</p>
+                 <div className="space-y-2">
                     <Button variant="outline" size="sm">Upload</Button>
+                    <p className="text-xs text-muted-foreground">
+                        Appears in your browser tab.
+                        <br />
+                        Recommended size: 32x32 px, PNG or ICO.
+                    </p>
                 </div>
             </div>
         </div>
 
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button>Update</Button>
+        <Button>Save Changes</Button>
       </CardFooter>
     </Card>
   )

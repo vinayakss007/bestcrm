@@ -11,9 +11,14 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import { users } from "@/lib/data"
+import { ThemeSwitcher } from "./theme-switcher"
+import { Monitor, Moon, Sun } from "lucide-react"
 
 export function UserNav() {
   const user = users[0]; // mock user
@@ -46,6 +51,18 @@ export function UserNav() {
             Settings
           </DropdownMenuItem>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+                <Sun className="h-4 w-4 mr-2" />
+                <span>Theme</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                    <ThemeSwitcher />
+                </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+        </DropdownMenuSub>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           Log out

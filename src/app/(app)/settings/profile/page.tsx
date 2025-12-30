@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -20,20 +21,22 @@ export default function ProfileSettingsPage() {
       <CardHeader>
         <CardTitle>Profile</CardTitle>
         <CardDescription>
-          Update your personal information. This is how you'll appear to others on the platform.
+          This is how you'll appear to others on the platform.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
-          <Input id="name" defaultValue={user.name} />
+          <Input id="name" defaultValue={user.name} className="max-w-sm" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" defaultValue={user.email} />
+          <Input id="email" type="email" defaultValue={user.email} className="max-w-sm" />
         </div>
-        <Button>Save Changes</Button>
       </CardContent>
+      <CardFooter className="border-t px-6 py-4">
+        <Button>Save Changes</Button>
+      </CardFooter>
     </Card>
   )
 }
