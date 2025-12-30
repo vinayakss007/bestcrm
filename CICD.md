@@ -39,12 +39,13 @@ This document outlines the Continuous Integration and Continuous Deployment (CI/
       run: npm ci
     ```
 
-4.  **Lint & Type Check:**
+4.  **Lint, Test, and Type Check:**
     ```yaml
-    - name: Run Linter and Type Checker
+    - name: Run Linter, Tests, and Type Checker
       run: |
         npm run lint
         npm run typecheck
+        # Add 'npm run test' here when frontend tests are implemented
     ```
 
 5.  **Build Application:**
@@ -86,7 +87,7 @@ This document outlines the Continuous Integration and Continuous Deployment (CI/
         service_account: '...'
     ```
 
-4.  **Lint & Test:**
+4.  **Lint & Test (Multi-Layer Strategy):**
     ```yaml
     - name: Install Backend Dependencies
       run: cd backend && npm ci
@@ -94,13 +95,15 @@ This document outlines the Continuous Integration and Continuous Deployment (CI/
       run: |
         cd backend
         npm run lint
-        npm run test:unit
-        npm run test:e2e
+        npm run test:unit  # Jest unit tests
+        npm run test:integration # Integration tests
+        npm run test:e2e     # End-to-end tests (against a live test DB)
     ```
 
 5.  **Build and Push Docker Image:**
     ```yaml
     - name: Build and Push Docker Image
+      if: success() # Only run if all tests pass
       run: |-
         docker build --tag="gcr.io/PROJECT_ID/zenith-crm-backend:$GITHUB_SHA" ./backend
         docker push "gcr.io/PROJECT_ID/zenith-crm-backend:$GITHUB_SHA"
@@ -109,6 +112,7 @@ This document outlines the Continuous Integration and Continuous Deployment (CI/
 6.  **Deploy to Cloud Run:**
     ```yaml
     - name: Deploy to Cloud Run
+      if: success()
       uses: 'google-github-actions/deploy-cloudrun@v2'
       with:
         service: 'zenith-crm-backend'

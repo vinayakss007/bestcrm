@@ -11,7 +11,7 @@ This document provides a high-level overview of the system architecture for the 
 *   **Scalability & Performance:** The architecture must support a growing number of tenants and users without degradation in performance.
 *   **Security:** Multi-tenancy requires strict data isolation and role-based access control (RBAC) at every layer.
 *   **Maintainability:** A clean, well-documented, and modular codebase is essential for long-term development and support.
-*   **API-First:** All core functionality is exposed through a secure, versioned REST API.
+*   **API-First:** All core functionality is exposed through a secure, versioned REST API, defined in `docs/openapi.yaml`.
 *   **Reliability & Redundancy:** Leverage cloud-native patterns and managed services to ensure high availability.
 
 ---
@@ -44,23 +44,25 @@ The backend is a dedicated, standalone server responsible for all business logic
 
 ---
 
-## 3. Next Steps & Implementation Plan
+## 3. Implementation Plan
 
-With the foundational architecture and documentation in place, the immediate next step is to **build the backend**.
+With the foundational architecture and documentation in place, the project is ready for implementation.
 
-1.  **Phase 1: Backend Foundation (Current Focus)**
+1.  **Phase 1: Backend Foundation (Next Steps)**
     *   **[DONE]** Design system architecture and create documentation.
     *   **[DONE]** Define the complete PostgreSQL database schema (`src/lib/schema.ts`).
-    *   **[NEXT]** Initialize the NestJS backend project.
+    *   **[DONE]** Define the v1 API contract (`docs/openapi.yaml`).
+    *   **[NEXT]** Initialize the NestJS backend project based on `ARCHITECTURE.md`.
     *   **[NEXT]** Implement the Authentication module (user registration, login) to issue JWTs.
-    *   **[NEXT]** Begin implementing the `Accounts` CRUD module in the backend.
-    *   **[NEXT]** Connect the Next.js frontend's "Add Account" feature to the new live backend API endpoint.
+    *   **[NEXT]** Begin implementing the `Accounts` CRUD module in the backend, following the API contract.
 
-2.  **Phase 2: Core CRM Functionality**
+2.  **Phase 2: Frontend Integration**
+    *   Generate a TypeScript SDK for the frontend from `docs/openapi.yaml`.
+    *   Replace all mock data in `src/lib/actions.ts` with live API calls using the generated SDK.
+    *   Wire up the frontend UI (forms, dialogs) to the live data, making the application fully functional.
+
+3.  **Phase 3: Core CRM & Enterprise Features**
     *   Implement full CRUD API endpoints for all remaining CRM objects (Leads, Contacts, etc.).
-    *   Wire up the corresponding frontend pages to use the live backend APIs, completely removing all mock data.
+    *   Connect the corresponding frontend pages to the live APIs.
     *   Build out the background worker system for email notifications.
-
-3.  **Phase 3: Enterprise Features**
-    *   Build and document the External API and Webhook system.
     *   Implement "super admin" features for managing custom fields.

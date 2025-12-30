@@ -10,7 +10,7 @@ This document provides a detailed technical blueprint for developers working on 
 - **Language:** TypeScript
 - **Database:** **PostgreSQL** (v15 or later)
 - **ORM:** **Drizzle ORM** - A modern, lightweight TypeScript ORM for type-safe database queries.
-- **Caching / Job Queue:** **Redis** (v7 or later)
+- **Caching / Job Queue:** **Redis** (v7 or later) - Used for performance caching and managing background jobs with a library like BullMQ.
 - **Containerization:** **Docker**
 
 ## 2. Project Structure (NestJS Backend)
@@ -48,7 +48,7 @@ The backend will be a separate monorepo or subdirectory (`/backend`) with a modu
 
 - **API Specification:** The API is formally defined in the **OpenAPI specification** located at `/docs/openapi.yaml`. This document is the single source of truth for all endpoints, request payloads, and response structures. All development MUST adhere to this contract.
 - **Versioning:** The API will be versioned (e.g., `/api/v1/...`).
-- **Authentication:** All endpoints will be protected by a JWT-based authentication guard (`AuthGuard`). The JWT will be passed in the `Authorization` header (`Bearer <token>`). The token payload will include `userId` and `orgId` to scope all database queries.
+- **Authentication:** All endpoints will be protected by a JWT-based authentication guard (`AuthGuard`). The JWT will be passed in the `Authorization` header (`Bearer <token>`). The token payload will include `userId` to scope all database queries.
 - **Data Transfer Objects (DTOs):** All incoming request bodies will be validated against DTOs using NestJS's built-in `ValidationPipe`. These DTOs are defined in the OpenAPI specification.
 - **Responses:**
     - `200 OK`: Successful `GET`, `PUT`, `PATCH`.
@@ -60,7 +60,19 @@ The backend will be a separate monorepo or subdirectory (`/backend`) with a modu
     - `404 Not Found`: Resource not found.
     - `500 Internal Server Error`: Server-side error.
 
-## 5. Local Development Setup
+## 5. Monitoring & Observability
+
+A production application cannot run "blind." A robust monitoring strategy is essential for maintaining system health, diagnosing issues, and ensuring performance.
+- **Logging:** All NestJS application logs will be structured as JSON and sent to a centralized logging service (e.g., Google Cloud Logging, Datadog). This allows for powerful searching and filtering of log data across all services.
+- **Metrics (Prometheus / Grafana):** The backend application will expose a `/metrics` endpoint compatible with Prometheus. We will track key application metrics, including:
+    - `http_requests_total`: Total number of API requests.
+    - `http_requests_duration_seconds`: Latency of API requests.
+    - `http_requests_errors_total`: Count of 5xx and 4xx errors.
+    - `db_query_duration_seconds`: Performance of database queries.
+- **Alerting:** Grafana or Alertmanager will be configured to send alerts to a team chat channel (e.g., Slack) if key metrics cross predefined thresholds (e.g., "API p95 latency is over 500ms for 5 minutes").
+- **Health Checks:** A dedicated `/healthz` endpoint will be implemented to report the status of the service and its dependencies (e.g., database connection).
+
+## 6. Local Development Setup
 
 1.  **Prerequisites:** Docker and Docker Compose must be installed.
 2.  **Configuration:** Create a `.env` file in the `/backend` directory with connection strings for PostgreSQL and Redis.
@@ -70,9 +82,8 @@ The backend will be a separate monorepo or subdirectory (`/backend`) with a modu
     *   A Redis instance.
 4.  **Database Migration:** Run `npm run db:migrate` to apply the latest database schema.
 
-## 6. Next Steps: Building the Backend
+## 7. Next Steps: Connecting Frontend to Backend
 
-1.  **Initialize NestJS Project:** Set up the NestJS project with the structure defined above.
-2.  **Implement Auth Module:** Build the authentication module with Passport.js to handle user registration and login, issuing JWTs upon success.
-3.  **Implement Accounts Module:** Create the `AccountsController`, `AccountsService`, and `AccountsModule`. Implement full CRUD (Create, Read, Update, Delete) functionality, using Drizzle ORM for database queries. Ensure all service methods are scoped by the user's organization ID from the JWT.
-4.  **Repeat for Other Modules:** Continue implementing the remaining CRM modules (Contacts, Leads, etc.) following the same pattern.
+1.  **Build the Backend:** A development team will use the `openapi.yaml` and `src/lib/schema.ts` as a guide to build the NestJS backend, implementing the user authentication and CRUD API endpoints.
+2.  **Generate a Client SDK:** The frontend team will use the OpenAPI specification at `/docs/openapi.yaml` to auto-generate a type-safe TypeScript client for the API.
+3.  **Replace Mock Data:** Systematically replace all mock data calls in `src/lib/actions.ts` with calls to the newly generated SDK, wiring up the UI to the live backend API. This will make all UI components (forms, charts, tables) fully functional.
