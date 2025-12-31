@@ -15,7 +15,6 @@ import {
   Phone,
   Plus,
   Trash2,
-  Upload,
   User,
 } from "lucide-react"
 
@@ -25,7 +24,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -48,7 +46,6 @@ import * as React from "react"
 export default function LeadDetailPage({ params }: { params: { id: string } }) {
   const lead = leads.find((l) => l.id === params.id)
   const [isDetailsOpen, setIsDetailsOpen] = React.useState(true)
-  const [isPersonOpen, setIsPersonOpen] = React.useState(true)
 
   if (!lead) {
     notFound()
@@ -131,10 +128,6 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
                             </div>
                         </div>
                     </div>
-                    <div className="flex gap-2 pt-4 border-t">
-                        <Button variant="outline" size="sm">Reply</Button>
-                        <Button variant="outline" size="sm">Comment</Button>
-                    </div>
                 </CardContent>
              </Card>
           </TabsContent>
@@ -160,7 +153,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
               </Avatar>
               <div>
                 <CardTitle className="text-xl">{lead.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">CRM-LEAD-2025-00001</p>
+                <p className="text-sm text-muted-foreground">{lead.email}</p>
               </div>
             </div>
             <div className="flex gap-2 pt-4">
@@ -169,9 +162,6 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
               </Button>
               <Button variant="outline" size="icon">
                 <Phone className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon">
-                <Paperclip className="h-4 w-4" />
               </Button>
               <Button variant="destructive" size="icon" className="ml-auto">
                 <Trash2 className="h-4 w-4" />
@@ -192,26 +182,6 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="space-y-3 py-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Organization</span>
-                    <span>gvgf</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Website</span>
-                    <Button variant="link" className="p-0 h-auto">Add Website...</Button>
-                  </div>
-                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Territory</span>
-                    <span>mumbai</span>
-                  </div>
-                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Industry</span>
-                    <Button variant="link" className="p-0 h-auto">Add Industry...</Button>
-                  </div>
-                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Job Title</span>
-                    <Button variant="link" className="p-0 h-auto">Add Job Title...</Button>
-                  </div>
                    <div className="flex justify-between">
                     <span className="text-muted-foreground">Source</span>
                     <span>{lead.source}</span>
@@ -229,37 +199,6 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
                 </div>
               </CollapsibleContent>
             </Collapsible>
-
-            <Separator className="my-4" />
-
-            <Collapsible open={isPersonOpen} onOpenChange={setIsPersonOpen}>
-              <CollapsibleTrigger className="w-full">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-semibold">Person</h4>
-                    <Button variant="ghost" size="sm" className="w-9 p-0">
-                        {isPersonOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        <span className="sr-only">Toggle</span>
-                    </Button>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                 <div className="space-y-3 py-2 text-sm">
-                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Salutation</span>
-                    <span>Miss</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">First Name</span>
-                    <span>bh g</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Last Name</span>
-                    <span></span>
-                  </div>
-                 </div>
-              </CollapsibleContent>
-            </Collapsible>
-
           </CardContent>
         </Card>
       </div>
