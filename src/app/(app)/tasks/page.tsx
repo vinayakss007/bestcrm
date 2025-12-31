@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Filter, Upload, RefreshCw, Search, CalendarIcon } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Filter, Upload, RefreshCw, Search, CalendarIcon, Ellipsis } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,11 +37,7 @@ import { AddTaskDialog } from "@/components/add-task-dialog"
 import { Pagination } from "@/components/pagination"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
@@ -58,15 +54,17 @@ export default function TasksPage() {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
 
   React.useEffect(() => {
-    // Set the initial date on the client to avoid hydration mismatch
-    if (typeof window !== 'undefined') {
-      setSelectedDate(new Date());
-    }
-    
     getTasks().then((tasks) => {
       setAllTasks(tasks);
     });
   }, []);
+
+  React.useEffect(() => {
+    // Set the initial date on the client to avoid hydration mismatch
+    if (typeof window !== 'undefined' && !selectedDate) {
+      setSelectedDate(new Date());
+    }
+  }, [selectedDate]);
 
   React.useEffect(() => {
     let tasks = allTasks;
@@ -102,25 +100,25 @@ export default function TasksPage() {
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
             </Button>
-            <Collapsible className="relative">
-                <CollapsibleTrigger asChild>
+            <Popover>
+                <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
                         <CalendarIcon className="h-3.5 w-3.5" />
                         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                             {selectedDate ? format(selectedDate, "PPP") : "Filter by date"}
                         </span>
                     </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="absolute z-10 mt-2 right-0">
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
                     <Calendar
                         mode="single"
                         selected={selectedDate}
                         onSelect={setSelectedDate}
-                        className="rounded-md border bg-background shadow-md"
                         captionLayout="dropdown-nav"
+                        initialFocus
                     />
-                </CollapsibleContent>
-            </Collapsible>
+                </PopoverContent>
+            </Popover>
             <Button variant="outline" size="sm" className="h-8 gap-1">
                 <Filter className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -136,7 +134,7 @@ export default function TasksPage() {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-3.5 w-3.5" />
+                        <Ellipsis className="h-3.5 w-3.5" />
                         <span className="sr-only">More</span>
                     </Button>
                 </DropdownMenuTrigger>
