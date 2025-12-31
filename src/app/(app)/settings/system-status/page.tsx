@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -11,7 +12,7 @@ const systemServices = [
   {
     name: "Database Connection",
     status: "Operational",
-    description: "Primary Firestore database.",
+    description: "Primary PostgreSQL database.",
     icon: Database,
   },
   {
@@ -29,7 +30,7 @@ const systemServices = [
   {
     name: "Authentication Service",
     status: "Operational",
-    description: "Firebase Authentication.",
+    description: "Backend JWT Authentication.",
     icon: CheckCircle2,
   },
 ];
