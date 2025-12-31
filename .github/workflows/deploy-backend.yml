@@ -1,0 +1,73 @@
+
+# CI/CD Pipeline for the abetworks crm Backend (NestJS)
+# This workflow is triggered on pushes to the main branch that affect the /backend directory.
+
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # In a real-world scenario, you would replace these placeholders with your actual
+      # project ID, service account, and workload identity provider from your cloud provider.
+      # - name: Authenticate to Google Cloud
+      #   id: 'auth'
+      #   uses: 'google-github-actions/auth@v2'
+      #   with:
+      #     workload_identity_provider: 'projects/YOUR_PROJECT_ID/locations/global/workloadIdentityPools/YOUR_POOL/providers/YOUR_PROVIDER'
+      #     service_account: 'your-service-account@your-project-id.iam.gserviceaccount.com'
+
+      - name: Install Backend Dependencies
+        run: |
+          # This step assumes the backend directory exists.
+          # For now, we'll create a placeholder to ensure the workflow can run.
+          mkdir -p backend
+          echo '{"name": "backend", "version": "1.0.0"}' > backend/package.json
+          cd backend
+          # In a real project, this would be 'npm ci'
+          npm install
+
+      - name: Run Backend Linter and Tests
+        run: |
+          # These scripts would be defined in backend/package.json
+          echo "Skipping tests for now..."
+          # cd backend
+          # npm run lint
+          # npm run test:unit
+          # npm run test:integration
+          # npm run test:e2e
+
+      - name: Build and Push Docker Image
+        if: success()
+        run: |
+          echo "Skipping Docker build and push for now..."
+          # docker build --tag="gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA" ./backend
+          # docker push "gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA"
+      
+      - name: Deploy to Cloud Run
+        if: success()
+        run: |
+          echo "Skipping deployment to Cloud Run for now..."
+          # uses: 'google-github-actions/deploy-cloudrun@v2'
+          # with:
+          #   service: 'abetworks-crm-backend'
+          #   region: 'us-central1'
+          #   image: 'gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA'
+
