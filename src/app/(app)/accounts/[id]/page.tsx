@@ -1,6 +1,7 @@
 
 "use client"
 
+import Link from "next/link"
 import { notFound } from "next/navigation"
 import {
   Activity,
@@ -15,6 +16,7 @@ import {
   Trash2,
   Users,
   Plus,
+  ChevronLeft,
 } from "lucide-react"
 
 import { accounts, contacts, opportunities, users } from "@/lib/data"
@@ -77,7 +79,13 @@ export default function AccountDetailPage({ params }: { params: { id: string } }
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Main Content */}
       <div className="md:col-span-2 space-y-6">
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
+            <Link href="/accounts">
+                <Button variant="outline" size="icon" className="h-8 w-8">
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Back</span>
+                </Button>
+            </Link>
             <h1 className="text-2xl font-bold">Accounts / {account.name}</h1>
             <div className="ml-auto flex items-center gap-2">
                 <DropdownMenu>

@@ -7,6 +7,7 @@ import {
   Archive,
   Briefcase,
   ChevronDown,
+  ChevronLeft,
   ChevronUp,
   DollarSign,
   Mail,
@@ -68,7 +69,13 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Main Content */}
       <div className="md:col-span-2 space-y-6">
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
+             <Link href="/opportunities">
+                <Button variant="outline" size="icon" className="h-8 w-8">
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Back</span>
+                </Button>
+            </Link>
             <h1 className="text-2xl font-bold">Opportunities / {opportunity.name}</h1>
             <div className="ml-auto flex items-center gap-2">
                 <DropdownMenu>
