@@ -1,4 +1,3 @@
-import { opportunityStageEnum } from "@/backend/src/db/schema";
 
 export type User = {
   id: string;
@@ -37,7 +36,9 @@ export type Lead = {
   owner: User;
 };
 
-export type OpportunityStage = typeof opportunityStageEnum.enumValues[number];
+export const opportunityStages = ['Prospecting', 'Qualification', 'Proposal', 'Closing', 'Won', 'Lost'] as const;
+export type OpportunityStage = (typeof opportunityStages)[number];
+
 export type Opportunity = {
   id: string;
   name: string;
@@ -80,5 +81,3 @@ export type RecentActivity = {
   target: string;
   timestamp: string;
 };
-
-    

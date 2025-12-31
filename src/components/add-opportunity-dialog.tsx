@@ -41,12 +41,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { accounts, users } from "@/lib/data"
-import { opportunityStageEnum } from "@/backend/src/db/schema"
+import { opportunityStages } from "@/lib/types"
 
 const opportunitySchema = z.object({
   name: z.string().min(2, { message: "Opportunity name must be at least 2 characters." }),
   accountId: z.string({ required_error: "Please select an account." }),
-  stage: z.enum(opportunityStageEnum.enumValues, { required_error: "Please select a stage." }),
+  stage: z.enum(opportunityStages, { required_error: "Please select a stage." }),
   amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
   closeDate: z.date({ required_error: "A close date is required." }),
   ownerId: z.string({ required_error: "Please select an owner." }),
@@ -140,7 +140,7 @@ export function AddOpportunityDialog() {
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                        {opportunityStageEnum.enumValues.map((stage) => (
+                        {opportunityStages.map((stage) => (
                             <SelectItem key={stage} value={stage}>
                             {stage}
                             </SelectItem>
@@ -237,5 +237,3 @@ export function AddOpportunityDialog() {
     </Dialog>
   )
 }
-
-    

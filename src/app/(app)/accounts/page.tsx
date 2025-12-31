@@ -64,7 +64,7 @@ export default function AccountsPage() {
             />
         </div>
         <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="outline" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
             </Button>

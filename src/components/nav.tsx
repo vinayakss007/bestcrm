@@ -16,6 +16,7 @@ import {
   SquareCheckBig,
   Building2,
   FileText,
+  Bot,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { Notifications } from "./notifications"
@@ -28,7 +29,7 @@ const navItems = [
   { href: "/opportunities", icon: Briefcase, label: "Opportunities" },
   { href: "/tasks", icon: SquareCheckBig, label: "Tasks" },
   { href: "/invoices", icon: FileText, label: "Invoices" },
-  { href: "/agents", icon: Users, label: "Agents" },
+  { href: "/agents", icon: Bot, label: "Agents" },
 ]
 
 export function Nav() {
@@ -40,9 +41,7 @@ export function Nav() {
         {/* Placeholder for future top items */}
       </div>
       <SidebarMenu>
-         <SidebarMenuItem>
-           <Notifications isIconButton={true} />
-         </SidebarMenuItem>
+        <Notifications />
         {navItems.map((item) => (
           <SidebarMenuItem key={item.label}>
             <SidebarMenuButton

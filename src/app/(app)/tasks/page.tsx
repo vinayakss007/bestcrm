@@ -30,16 +30,18 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
+import { format } from "date-fns"
 import { getTasks } from "@/lib/actions"
 import { Task, TaskStatus } from "@/lib/types"
 import { AddTaskDialog } from "@/components/add-task-dialog"
 import { Pagination } from "@/components/pagination"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
@@ -96,56 +98,56 @@ export default function TasksPage() {
               />
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="outline" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
             </Button>
-            <Collapsible>
+            <Collapsible className="relative">
                 <CollapsibleTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
                         <CalendarIcon className="h-3.5 w-3.5" />
                         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Filter by date
+                            {selectedDate ? format(selectedDate, "PPP") : "Filter by date"}
                         </span>
                     </Button>
                 </CollapsibleTrigger>
-                <Button variant="outline" size="sm" className="h-8 gap-1">
-                    <Filter className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Filter
-                    </span>
-                </Button>
-                <Button variant="outline" size="sm" className="h-8 gap-1">
-                    <ArrowUpDown className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Sort
-                    </span>
-                </Button>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-3.5 w-3.5" />
-                            <span className="sr-only">More</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                            <Upload className="mr-2 h-4 w-4" />
-                            Export
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                <AddTaskDialog />
-
-                <CollapsibleContent className="absolute z-10 mt-2">
+                <CollapsibleContent className="absolute z-10 mt-2 right-0">
                     <Calendar
                         mode="single"
                         selected={selectedDate}
                         onSelect={setSelectedDate}
                         className="rounded-md border bg-background shadow-md"
+                        captionLayout="dropdown-nav"
                     />
                 </CollapsibleContent>
             </Collapsible>
+            <Button variant="outline" size="sm" className="h-8 gap-1">
+                <Filter className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Filter
+                </span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-8 gap-1">
+                <ArrowUpDown className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Sort
+                </span>
+            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-3.5 w-3.5" />
+                        <span className="sr-only">More</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Export
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <AddTaskDialog />
           </div>
         </div>
         <Card className="flex flex-col flex-1">

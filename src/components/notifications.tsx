@@ -3,7 +3,6 @@
 
 import * as React from "react"
 import { Bell, Clock } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetContent,
@@ -14,37 +13,19 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { recentActivities } from "@/lib/data"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+import { SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar"
 
-export function Notifications({ isIconButton = false }: { isIconButton?: boolean }) {
-  const Trigger = (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={isIconButton ? "group-data-[collapsible=icon]:hidden" : ""}
-      tooltip="Notifications"
-    >
-      <Bell className="h-5 w-5" />
-      <span className="sr-only">Toggle notifications panel</span>
-    </Button>
-  );
-
-  const IconButtonTrigger = (
-     <Button
-        variant="ghost"
-        size="lg"
-        className="group-data-[collapsible=collapsed]:h-10 group-data-[collapsible=collapsed]:w-10 group-data-[collapsible=collapsed]:justify-center group-data-[collapsible=collapsed]:p-2 flex w-full items-center gap-2"
-        tooltip="Notifications"
-      >
-        <Bell />
-        <span>Notifications</span>
-      </Button>
-  )
-
+export function Notifications() {
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        {isIconButton ? IconButtonTrigger : Trigger}
-      </SheetTrigger>
+      <SidebarMenuItem>
+        <SheetTrigger asChild>
+            <SidebarMenuButton size="lg" tooltip="Notifications">
+                <Bell />
+                <span>Notifications</span>
+            </SidebarMenuButton>
+        </SheetTrigger>
+      </SidebarMenuItem>
       <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
           <SheetTitle>Notifications</SheetTitle>
