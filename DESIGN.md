@@ -32,14 +32,13 @@ The frontend is a modern Next.js application responsible for all user interface 
 
 ### 2.2. Backend Architecture
 
-The backend is a dedicated, standalone server responsible for all business logic, data processing, and persistence.
+The backend is a dedicated, standalone server responsible for all business logic, data processing, and persistence. It is designed as a **secure, multi-tenant system**.
 
 *   **Framework:** **NestJS** (TypeScript).
 *   **Database:** **PostgreSQL** for primary data storage.
 *   **ORM:** **Drizzle ORM** for type-safe database interaction.
-*   **Caching & Jobs:** **Redis** for performance caching and managing background job queues with **BullMQ**.
-*   **Authentication:** Manages user identity and issues JWTs using the **Passport.js** library.
-*   **Multi-Tenancy:** Enforced at the application layer. All database queries are scoped to the authenticated user's organization.
+*   **Multi-Tenancy:** The core of the architecture. All data is partitioned by an `organization_id`. All API requests are scoped to the authenticated user's organization, ensuring strict data isolation.
+*   **Authentication:** Manages user identity and issues JWTs using the **Passport.js** library. The JWT payload contains the `organizationId` necessary to enforce data siloing.
 *   **Deployment:** Containerized with **Docker** and deployed to a scalable container platform like Google Cloud Run. See `ARCHITECTURE.md` and `CICD.md` for details.
 
 ---
@@ -50,22 +49,23 @@ With the foundational architecture and documentation in place, the project is re
 
 1.  **Phase 1: Frontend Prototyping & Design**
     *   **[DONE]** Design system architecture and create initial documentation.
-    *   **[DONE]** Define the complete PostgreSQL database schema (`src/lib/schema.ts`).
+    *   **[DONE]** Define the complete PostgreSQL database schema (`backend/src/db/schema.ts`).
     *   **[DONE]** Define the v1 API contract (`docs/openapi.yaml`).
-    *   **[DONE]** Build a complete, responsive frontend UI prototype with mock data and clear navigation.
+    *   **[DONE]** Build a complete, responsive frontend UI prototype with mock data.
+    *   **[DONE]** Refine the architecture for multi-tenancy and user roles.
 
 2.  **Phase 2: Backend Foundation (Next Steps)**
-    *   **[NEXT]** Initialize the NestJS backend project in a `/backend` directory based on `ARCHITECTURE.md`.
-    *   **[NEXT]** Implement the Authentication module (user registration, login) to issue JWTs.
-    *   **[NEXT]** Begin implementing the `Accounts` CRUD module in the backend, following the API contract.
+    *   **[DONE]** Initialize the NestJS backend project in a `/backend` directory.
+    *   **[NEXT]** Implement the Authentication module (user registration, login) to issue JWTs that include `organizationId`.
+    *   **[NEXT]** Implement the `Accounts` CRUD module in the backend, ensuring all queries are scoped by `organizationId`.
 
 3.  **Phase 3: Frontend Integration**
     *   Generate a TypeScript SDK for the frontend from `docs/openapi.yaml`.
     *   Replace all mock data in `src/lib/actions.ts` with live API calls using the generated SDK.
-    *   Wire up the frontend UI (forms, dialogs, search, pagination) to the live data, making the application fully functional.
+    *   Wire up all UI forms, dialogs, and actions to the live data.
 
 4.  **Phase 4: Core CRM & Enterprise Features**
     *   Implement full CRUD API endpoints for all remaining CRM objects (Leads, Contacts, Invoices, etc.).
-    *   Connect the corresponding frontend pages to the live APIs.
+    *   Implement webhook endpoints for external data ingestion (e.g., website forms).
     *   Build out the background worker system for email notifications.
-    *   Implement "super admin" features for managing custom fields and user roles.
+    *   Implement "super admin" and "company admin" features for managing users and roles.
