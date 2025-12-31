@@ -26,6 +26,8 @@ The backend will be a separate monorepo or subdirectory (`/backend`) with a modu
 │   │   ├── accounts/      # CRUD for Accounts
 │   │   ├── contacts/      # CRUD for Contacts
 │   │   ├── leads/         # CRUD for Leads
+│   │   ├── opportunities/ # CRUD for Opportunities
+│   │   ├── invoices/      # CRUD for Invoices
 │   │   └── ... (etc.)
 │   ├── core/            # Core services, guards, interceptors
 │   ├── shared/          # Shared utilities, DTOs, constants

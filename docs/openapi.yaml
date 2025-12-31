@@ -18,6 +18,8 @@ tags:
     description: Operations related to sales leads.
   - name: Opportunities
     description: Operations related to sales opportunities.
+  - name: Invoices
+    description: Operations related to invoices.
 
 paths:
   /accounts:
@@ -94,6 +96,58 @@ paths:
                 $ref: '#/components/schemas/Account'
         '404':
           description: Account not found.
+  
+  /invoices:
+    get:
+      tags:
+        - Invoices
+      summary: List all invoices
+      description: Retrieves a paginated list of invoices.
+      operationId: getInvoices
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination.
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page.
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: A list of invoices.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invoice'
+    post:
+      tags:
+        - Invoices
+      summary: Create a new invoice
+      description: Creates a new invoice for a lead.
+      operationId: createInvoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceDto'
+      responses:
+        '201':
+          description: Invoice created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '400':
+          description: Invalid input data.
+
 
 components:
   schemas:
@@ -160,6 +214,47 @@ components:
         customFields:
           type: object
           additionalProperties: true
+          
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        invoiceNumber:
+          type: string
+        leadId:
+          type: integer
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [Draft, Sent, Paid, Void]
+        dueDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateInvoiceDto:
+      type: object
+      required:
+        - leadId
+        - amount
+        - dueDate
+      properties:
+        leadId:
+          type: integer
+        amount:
+          type: number
+        dueDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [Draft, Sent]
+          default: Draft
 
   securitySchemes:
     bearerAuth:

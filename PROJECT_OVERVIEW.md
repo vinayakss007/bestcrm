@@ -16,7 +16,7 @@ The system is architected as two distinct, independently deployable applications
 
 ## 2. Frontend Architecture & Implementation
 
-The frontend is a modern web application responsible for all user interface rendering and client-side interactivity. It is currently a fully-featured UI prototype with mock data.
+The frontend is a modern web application responsible for all user interface rendering and client-side interactivity. It is currently a fully-featured, responsive UI prototype with mock data.
 
 ### 2.1. Frontend Technology Stack
 - **Framework:** Next.js 14+ (App Router)
@@ -49,7 +49,7 @@ The backend is a standalone server application responsible for all business logi
 
 ### 3.2. Data Model & Database Schema
 The complete database schema is the single source of truth, defined in:
-- **`src/lib/schema.ts`**: Contains all table definitions (`crmUsers`, `crmAccounts`, `crmLeads`, etc.) using Drizzle ORM syntax for PostgreSQL.
+- **`src/lib/schema.ts`**: Contains all table definitions (`crmUsers`, `crmAccounts`, `crmLeads`, `crmInvoices` etc.) using Drizzle ORM syntax for PostgreSQL.
 
 ### 3.3. API Design & Contract
 The REST API is formally defined and serves as the contract between the frontend and backend.
@@ -101,7 +101,7 @@ This is the actionable "to-do list" for the development teams.
     - [ ] Run `drizzle-kit` to apply the schema from `src/lib/schema.ts`.
     - [ ] Build the user authentication module to issue JWTs.
 2.  **Core API Implementation:**
-    - [ ] Build all CRUD endpoints for `Accounts`, `Contacts`, `Leads`, `Opportunities`, and `Tasks` as defined in `docs/openapi.yaml`.
+    - [ ] Build all CRUD endpoints for `Accounts`, `Contacts`, `Leads`, `Opportunities`, `Tasks`, and `Invoices` as defined in `docs/openapi.yaml`.
 3.  **Finalize & Deploy:**
     - [ ] Integrate Redis for caching and BullMQ for background jobs.
     - [ ] Write unit and integration tests for all modules.

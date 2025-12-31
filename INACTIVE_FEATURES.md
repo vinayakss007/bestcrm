@@ -3,20 +3,27 @@
 This document lists all the user interface elements that are currently placeholders and do not perform any action. They require backend API endpoints to be built and integrated to become functional.
 
 ## Global Actions
-- **Header Search Bar**: The main search bar in the header is not functional.
-- **User Profile Menu**: The "Profile", "Settings", and "Log out" options in the user dropdown are not wired up.
+- **User Profile Menu**: The "Log out" option in the user dropdown is not wired up.
 - **Notifications**: The notification bell shows mock data; it is not connected to a live notification system.
+- **Workspace Switcher**: The workspace switcher in the sidebar is a UI placeholder and does not change the user's context.
 
 ## Dashboard (`/dashboard`)
 - **Action Buttons**: The "Add" buttons in the header (if any were configured) are not implemented.
 - **Revenue Forecast Chart**: Displays static mock data. Needs to be connected to a live data source from the backend.
 - **Recent Activity Feed**: Displays static mock data.
 
+## All List Pages (Accounts, Contacts, Leads, Opportunities, Tasks)
+- **Search Bar**: The search bar on each list page is a UI placeholder and does not filter results.
+- **Filtering Dropdown**: The "Filter" button opens a menu, but the options within do not affect the data shown.
+- **Sorting Dropdown**: The "Sort" button opens a menu, but selecting an option does not reorder the data.
+- **Columns Button**: The "Columns" button is a UI placeholder.
+- **Export Action**: The "Export" action in the "More" menu is a placeholder.
+
+## Add/Create Dialogs
+- **All "Add" Dialogs**: The forms for adding new Accounts, Contacts, Leads, Opportunities, and Tasks currently only log data to the console. They do not save data to a database.
+
 ## Accounts (`/accounts`)
-- **Add Account Button**: Opens a dialog, but the "Create Account" button inside only logs data to the console.
 - **Table Actions (Dropdown Menu)**: The "Edit" and "Delete" options for each account are placeholders.
-- **Filtering/Sorting/Columns**: All buttons for filtering, sorting, and managing columns are non-functional UI elements.
-- **Export**: The "Export" action in the "More" menu is a placeholder.
 
 ## Account Detail Page (`/accounts/[id]`)
 - **New Dropdown**: "New Contact", "New Opportunity", "New Task" are placeholders.
@@ -26,9 +33,7 @@ This document lists all the user interface elements that are currently placehold
 - **All Tabs (Activity, Contacts, Opportunities, etc.)**: Display static mock data.
 
 ## Contacts (`/contacts`)
-- **Add Contact Button**: Opens a dialog, but the "Create Contact" button inside only logs data to the console.
 - **Table Actions (Dropdown Menu)**: "Edit" and "Delete" are placeholders.
-- **Filtering/Sorting/Columns**: All buttons are non-functional UI elements.
 
 ## Contact Detail Page (`/contacts/[id]`)
 - **New Dropdown**: "Email", "Call", "Task" are placeholders.
@@ -37,9 +42,7 @@ This document lists all the user interface elements that are currently placehold
 - **Delete Button**: Is not implemented.
 
 ## Leads (`/leads`)
-- **Add Lead Button**: Opens a dialog, but the "Create Lead" button inside only logs data to the console.
 - **Table Actions (Dropdown Menu)**: "Edit", "Convert to Opportunity", and "Delete" are all placeholders.
-- **Filtering/Sorting/Columns**: All buttons are non-functional UI elements.
 
 ## Lead Detail Page (`/leads/[id]`)
 - **Convert to Deal Button**: Is not implemented.
@@ -47,19 +50,18 @@ This document lists all the user interface elements that are currently placehold
 - **Comments Tab**: Adding a comment is not implemented.
 
 ## Opportunities (`/opportunities`)
-- **Add Opportunity Button**: Opens a dialog, but the "Create Opportunity" button inside only logs data to the console.
 - **Table Actions (Dropdown Menu)**: "Edit" and "Delete" are placeholders.
-- **Filtering/Sorting/Columns**: All buttons are non-functional UI elements.
 
 ## Opportunity Detail Page (`/opportunities/[id]`)
 - **All Actions (New Task, Log a Call, Edit, Delete)**: Are placeholders.
 
 ## Tasks (`/tasks`)
-- **Add Task Button**: Opens a dialog, but the "Create Task" button inside only logs data to the console.
 - **Table Actions (Dropdown Menu)**: "Mark as Complete", "Edit", "Delete" are placeholders.
 
 ## Invoices (`/invoices`)
+- **This is a new page and is entirely a placeholder.**
 - **Create Invoice Button**: Is a placeholder.
+- **Table Actions**: All actions are placeholders.
 
 ## Settings
 - All forms in every settings page (`/settings/...`) have "Save" buttons that are not functional. No settings are actually saved.

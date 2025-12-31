@@ -48,21 +48,24 @@ The backend is a dedicated, standalone server responsible for all business logic
 
 With the foundational architecture and documentation in place, the project is ready for implementation.
 
-1.  **Phase 1: Backend Foundation (Next Steps)**
-    *   **[DONE]** Design system architecture and create documentation.
+1.  **Phase 1: Frontend Prototyping & Design**
+    *   **[DONE]** Design system architecture and create initial documentation.
     *   **[DONE]** Define the complete PostgreSQL database schema (`src/lib/schema.ts`).
     *   **[DONE]** Define the v1 API contract (`docs/openapi.yaml`).
-    *   **[NEXT]** Initialize the NestJS backend project based on `ARCHITECTURE.md`.
+    *   **[DONE]** Build a complete, responsive frontend UI prototype with mock data and clear navigation.
+
+2.  **Phase 2: Backend Foundation (Next Steps)**
+    *   **[NEXT]** Initialize the NestJS backend project in a `/backend` directory based on `ARCHITECTURE.md`.
     *   **[NEXT]** Implement the Authentication module (user registration, login) to issue JWTs.
     *   **[NEXT]** Begin implementing the `Accounts` CRUD module in the backend, following the API contract.
 
-2.  **Phase 2: Frontend Integration**
+3.  **Phase 3: Frontend Integration**
     *   Generate a TypeScript SDK for the frontend from `docs/openapi.yaml`.
     *   Replace all mock data in `src/lib/actions.ts` with live API calls using the generated SDK.
-    *   Wire up the frontend UI (forms, dialogs) to the live data, making the application fully functional.
+    *   Wire up the frontend UI (forms, dialogs, search, pagination) to the live data, making the application fully functional.
 
-3.  **Phase 3: Core CRM & Enterprise Features**
-    *   Implement full CRUD API endpoints for all remaining CRM objects (Leads, Contacts, etc.).
+4.  **Phase 4: Core CRM & Enterprise Features**
+    *   Implement full CRUD API endpoints for all remaining CRM objects (Leads, Contacts, Invoices, etc.).
     *   Connect the corresponding frontend pages to the live APIs.
     *   Build out the background worker system for email notifications.
-    *   Implement "super admin" features for managing custom fields.
+    *   Implement "super admin" features for managing custom fields and user roles.
