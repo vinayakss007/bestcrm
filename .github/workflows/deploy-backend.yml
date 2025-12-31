@@ -35,23 +35,21 @@ jobs:
 
       - name: Install Backend Dependencies
         run: |
-          # This step assumes the backend directory exists.
-          # For now, we'll create a placeholder to ensure the workflow can run.
-          mkdir -p backend
-          echo '{"name": "backend", "version": "1.0.0"}' > backend/package.json
           cd backend
-          # In a real project, this would be 'npm ci'
-          npm install
+          npm ci
 
       - name: Run Backend Linter and Tests
         run: |
-          # These scripts would be defined in backend/package.json
-          echo "Skipping tests for now..."
-          # cd backend
-          # npm run lint
+          cd backend
+          npm run lint
           # npm run test:unit
           # npm run test:integration
           # npm run test:e2e
+
+      - name: Build Backend Application
+        run: |
+            cd backend
+            npm run build
 
       - name: Build and Push Docker Image
         if: success()
