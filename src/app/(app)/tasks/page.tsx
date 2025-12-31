@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search, CalendarIcon } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,6 +37,9 @@ import { AddTaskDialog } from "@/components/add-task-dialog"
 import { Pagination } from "@/components/pagination"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
@@ -49,12 +52,14 @@ export default function TasksPage() {
   const [paginatedTasks, setPaginatedTasks] = React.useState<Task[]>([]);
   
   const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(5);
+  const [pageSize, setPageSize] = React.useState(10);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
 
   React.useEffect(() => {
     // Set the initial date on the client to avoid hydration mismatch
-    setSelectedDate(new Date());
+    if (typeof window !== 'undefined') {
+      setSelectedDate(new Date());
+    }
     
     getTasks().then((tasks) => {
       setAllTasks(tasks);
@@ -79,30 +84,6 @@ export default function TasksPage() {
   }, [filteredTasks, page, pageSize]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[280px_1fr] flex-1">
-      {/* Left Column - Calendar */}
-      <div className="flex flex-col gap-6">
-        <Card>
-          <CardContent className="p-0">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="p-0"
-              classNames={{
-                root: "w-full",
-                caption_label: "flex items-center text-sm font-medium",
-                caption_dropdowns: "flex items-center gap-1",
-              }}
-              captionLayout="dropdown-nav"
-              fromYear={new Date().getFullYear() - 5}
-              toYear={new Date().getFullYear() + 5}
-            />
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Right Column - Tasks */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-semibold tracking-tight">Tasks</h1>
@@ -119,6 +100,29 @@ export default function TasksPage() {
                   <RefreshCw className="h-4 w-4" />
                   <span className="sr-only">Refresh</span>
               </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    size="sm"
+                    className={cn(
+                      "h-8 w-[240px] justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <Button variant="outline" size="sm" className="h-8 gap-1">
                   <Filter className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -129,12 +133,6 @@ export default function TasksPage() {
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                   Sort
-                  </span>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                  <Columns3 className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Columns
                   </span>
               </Button>
               <DropdownMenu>
@@ -148,10 +146,6 @@ export default function TasksPage() {
                       <DropdownMenuItem>
                           <Upload className="mr-2 h-4 w-4" />
                           Export
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                          <ListFilter className="mr-2 h-4 w-4" />
-                          Customize quick filters
                       </DropdownMenuItem>
                   </DropdownMenuContent>
               </DropdownMenu>
@@ -257,6 +251,5 @@ export default function TasksPage() {
           )}
         </Card>
       </div>
-    </div>
-  )
-}
+
+    
