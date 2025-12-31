@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search, CalendarIcon } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Filter, Upload, RefreshCw, Search, CalendarIcon } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,9 +37,9 @@ import { AddTaskDialog } from "@/components/add-task-dialog"
 import { Pagination } from "@/components/pagination"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
@@ -96,60 +96,56 @@ export default function TasksPage() {
               />
           </div>
           <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <RefreshCw className="h-4 w-4" />
-                  <span className="sr-only">Refresh</span>
-              </Button>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    size="sm"
-                    className={cn(
-                      "h-8 w-[240px] justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                  <Filter className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Filter
-                  </span>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                  <ArrowUpDown className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Sort
-                  </span>
-              </Button>
-              <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-3.5 w-3.5" />
-                          <span className="sr-only">More</span>
-                      </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                          <Upload className="mr-2 h-4 w-4" />
-                          Export
-                      </DropdownMenuItem>
-                  </DropdownMenuContent>
-              </DropdownMenu>
-            <AddTaskDialog />
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+                <RefreshCw className="h-4 w-4" />
+                <span className="sr-only">Refresh</span>
+            </Button>
+            <Collapsible>
+                <CollapsibleTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 gap-1">
+                        <CalendarIcon className="h-3.5 w-3.5" />
+                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                        Filter by date
+                        </span>
+                    </Button>
+                </CollapsibleTrigger>
+                <Button variant="outline" size="sm" className="h-8 gap-1">
+                    <Filter className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Filter
+                    </span>
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 gap-1">
+                    <ArrowUpDown className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Sort
+                    </span>
+                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-3.5 w-3.5" />
+                            <span className="sr-only">More</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Export
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <AddTaskDialog />
+
+                <CollapsibleContent className="absolute z-10 mt-2">
+                    <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        className="rounded-md border bg-background shadow-md"
+                    />
+                </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
         <Card className="flex flex-col flex-1">
@@ -157,7 +153,7 @@ export default function TasksPage() {
             <CardTitle>My Tasks</CardTitle>
             <CardDescription>
               {selectedDate 
-                ? `Tasks due on ${selectedDate.toLocaleDateString()}` 
+                ? `Tasks due on ${format(selectedDate, "PPP")}` 
                 : "Manage your tasks and activities."
               }
             </CardDescription>
@@ -251,5 +247,5 @@ export default function TasksPage() {
           )}
         </Card>
       </div>
-
-    
+  )
+}
