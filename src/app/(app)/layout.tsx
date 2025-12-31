@@ -1,3 +1,4 @@
+
 import {
   SidebarProvider,
   Sidebar,
@@ -55,7 +56,7 @@ export default function AppLayout({
       </Sidebar>
       <SidebarInset>
         <Header />
-        <main className="flex-1 overflow-auto p-4 sm:px-6 sm:py-4">
+        <main className="flex flex-1 flex-col overflow-y-auto p-4 sm:px-6 sm:py-4">
             {children}
         </main>
       </SidebarInset>

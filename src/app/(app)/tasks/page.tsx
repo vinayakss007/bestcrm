@@ -76,7 +76,7 @@ export default function TasksPage() {
   }, [filteredTasks, page, pageSize]);
 
   return (
-    <div className="grid gap-6 md:grid-cols-[280px_1fr]">
+    <div className="grid gap-6 lg:grid-cols-[280px_1fr] flex-1">
       {/* Left Column - Calendar */}
       <div className="flex flex-col gap-6">
         <Card>
@@ -88,12 +88,12 @@ export default function TasksPage() {
               className="p-0"
               classNames={{
                 root: "w-full",
-                caption: "flex justify-between items-center px-4 pt-3",
-                nav_button: "h-8 w-8",
-                head_row: "grid grid-cols-7 gap-1 px-2",
-                row: "grid grid-cols-7 gap-1 px-2 mt-2",
-                day: "h-auto w-auto aspect-square p-1",
+                caption_label: "flex items-center text-sm font-medium",
+                caption_dropdowns: "flex items-center gap-1",
               }}
+              captionLayout="dropdown-nav"
+              fromYear={new Date().getFullYear() - 5}
+              toYear={new Date().getFullYear() + 5}
             />
           </CardContent>
         </Card>
@@ -155,7 +155,7 @@ export default function TasksPage() {
             <AddTaskDialog />
           </div>
         </div>
-        <Card>
+        <Card className="flex flex-col flex-1">
           <CardHeader>
             <CardTitle>My Tasks</CardTitle>
             <CardDescription>
@@ -165,7 +165,7 @@ export default function TasksPage() {
               }
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             <Table>
               <TableHeader>
                 <TableRow>
