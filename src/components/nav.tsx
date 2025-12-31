@@ -23,7 +23,7 @@ import { Notifications } from "./notifications"
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/accounts", icon: Building2, label: "Accounts" },
-  { href_alt: "/contacts", icon: Contact, label: "Contacts" },
+  { href: "/contacts", icon: Contact, label: "Contacts" },
   { href: "/leads", icon: Lightbulb, label: "Leads" },
   { href: "/opportunities", icon: Briefcase, label: "Opportunities" },
   { href: "/tasks", icon: CheckSquare, label: "Tasks" },
@@ -48,10 +48,10 @@ export function Nav() {
             <SidebarMenuButton
               size="lg"
               asChild
-              isActive={pathname.startsWith(item.href || item.href_alt || '')}
+              isActive={pathname.startsWith(item.href || '')}
               tooltip={item.label}
             >
-              <a href={item.href || item.href_alt}>
+              <a href={item.href}>
                 <item.icon />
                 <span>{item.label}</span>
               </a>
