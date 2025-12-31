@@ -1,3 +1,4 @@
+import { opportunityStageEnum } from "@/backend/src/db/schema";
 
 export type User = {
   id: string;
@@ -36,7 +37,7 @@ export type Lead = {
   owner: User;
 };
 
-export type OpportunityStage = 'Prospecting' | 'Qualification' | 'Proposal' | 'Closing' | 'Won' | 'Lost';
+export type OpportunityStage = typeof opportunityStageEnum.enumValues[number];
 export type Opportunity = {
   id: string;
   name: string;
@@ -79,3 +80,5 @@ export type RecentActivity = {
   target: string;
   timestamp: string;
 };
+
+    

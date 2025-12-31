@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -40,15 +41,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { accounts, users } from "@/lib/data"
-import { OpportunityStage } from "@/lib/types"
-
-const opportunityStages: OpportunityStage[] = ['Prospecting', 'Qualification', 'Proposal', 'Closing', 'Won', 'Lost']
+import { opportunityStageEnum } from "@/backend/src/db/schema"
 
 const opportunitySchema = z.object({
   name: z.string().min(2, { message: "Opportunity name must be at least 2 characters." }),
   accountId: z.string({ required_error: "Please select an account." }),
-  stage: z.enum(opportunityStages, { required_error: "Please select a stage." }),
-  amount: z.coerce.number().min(0, { message: "Amount must be a positive number." }),
+  stage: z.enum(opportunityStageEnum.enumValues, { required_error: "Please select a stage." }),
+  amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
   closeDate: z.date({ required_error: "A close date is required." }),
   ownerId: z.string({ required_error: "Please select an owner." }),
 })
@@ -62,7 +61,6 @@ export function AddOpportunityDialog() {
     defaultValues: {
       name: "",
       stage: "Prospecting",
-      amount: 0,
     },
   })
 
@@ -82,7 +80,7 @@ export function AddOpportunityDialog() {
           </span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Add New Opportunity</DialogTitle>
           <DialogDescription>
@@ -128,43 +126,45 @@ export function AddOpportunityDialog() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="stage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Stage</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                control={form.control}
+                name="stage"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Stage</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a stage" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {opportunityStageEnum.enumValues.map((stage) => (
+                            <SelectItem key={stage} value={stage}>
+                            {stage}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Amount</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a stage" />
-                      </SelectTrigger>
+                        <Input type="number" placeholder="25000" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {opportunityStages.map((stage) => (
-                        <SelectItem key={stage} value={stage}>
-                          {stage}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="25000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </div>
              <FormField
               control={form.control}
               name="closeDate"
@@ -196,7 +196,7 @@ export function AddOpportunityDialog() {
                         selected={field.value}
                         onSelect={field.onChange}
                         disabled={(date) =>
-                          date < new Date()
+                          date < new Date(new Date().setHours(0,0,0,0))
                         }
                         initialFocus
                       />
@@ -237,3 +237,5 @@ export function AddOpportunityDialog() {
     </Dialog>
   )
 }
+
+    
