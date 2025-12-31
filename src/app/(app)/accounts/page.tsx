@@ -52,9 +52,9 @@ export default function AccountsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center">
         <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">Accounts</h1>
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
@@ -119,8 +119,6 @@ export default function AccountsPage() {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
           <AddAccountDialog />
         </div>
       </div>
