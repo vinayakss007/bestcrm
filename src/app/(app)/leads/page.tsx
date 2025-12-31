@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
+import { Ellipsis, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
@@ -119,7 +119,7 @@ export default function LeadsPage() {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-3.5 w-3.5" />
+                        <Ellipsis className="h-3.5 w-3.5" />
                         <span className="sr-only">More</span>
                     </Button>
                 </DropdownMenuTrigger>
@@ -198,7 +198,7 @@ export default function LeadsPage() {
                           size="icon"
                           variant="ghost"
                         >
-                          <MoreHorizontal className="h-4 w-4" />
+                          <Ellipsis className="h-4 w-4" />
                           <span className="sr-only">Toggle menu</span>
                         </Button>
                       </DropdownMenuTrigger>

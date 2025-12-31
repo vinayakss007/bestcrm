@@ -13,7 +13,7 @@ import {
   Contact,
   Lightbulb,
   Briefcase,
-  CheckSquare,
+  SquareCheckBig,
   Building2,
   FileText,
 } from "lucide-react"
@@ -26,7 +26,7 @@ const navItems = [
   { href: "/contacts", icon: Contact, label: "Contacts" },
   { href: "/leads", icon: Lightbulb, label: "Leads" },
   { href: "/opportunities", icon: Briefcase, label: "Opportunities" },
-  { href: "/tasks", icon: CheckSquare, label: "Tasks" },
+  { href: "/tasks", icon: SquareCheckBig, label: "Tasks" },
   { href: "/invoices", icon: FileText, label: "Invoices" },
   { href: "/agents", icon: Users, label: "Agents" },
 ]
