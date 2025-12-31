@@ -50,9 +50,12 @@ export default function TasksPage() {
   
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(5);
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
 
   React.useEffect(() => {
+    // Set the initial date on the client to avoid hydration mismatch
+    setSelectedDate(new Date());
+    
     getTasks().then((tasks) => {
       setAllTasks(tasks);
     });
