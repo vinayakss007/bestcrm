@@ -43,29 +43,44 @@ The backend is a dedicated, standalone server responsible for all business logic
 
 ---
 
-## 3. Implementation Plan
+## 3. Implementation Roadmap
 
-With the foundational architecture and documentation in place, the project is ready for implementation.
+This plan outlines the sequence of development from the current state to a fully functional application.
 
-1.  **Phase 1: Frontend Prototyping & Design**
-    *   **[DONE]** Design system architecture and create initial documentation.
-    *   **[DONE]** Define the complete PostgreSQL database schema (`backend/src/db/schema.ts`).
-    *   **[DONE]** Define the v1 API contract (`docs/openapi.yaml`).
-    *   **[DONE]** Build a complete, responsive frontend UI prototype with mock data.
-    *   **[DONE]** Refine the architecture for multi-tenancy and user roles.
+### Phase 1: Architecture & Prototyping (Complete)
+- **[DONE]** Design system architecture and create initial documentation (`DESIGN.md`, `ARCHITECTURE.md`).
+- **[DONE]** Define the complete multi-tenant PostgreSQL database schema (`backend/src/db/schema.ts`).
+- **[DONE]** Define the v1 API contract with all endpoints (`docs/openapi.yaml`).
+- **[DONE]** Build a complete, responsive frontend UI prototype with mock data.
+- **[DONE]** Refine the architecture for multi-tenancy and user roles.
+- **[DONE]** Initialize the NestJS backend project (`/backend`).
 
-2.  **Phase 2: Backend Foundation (Next Steps)**
-    *   **[DONE]** Initialize the NestJS backend project in a `/backend` directory.
-    *   **[NEXT]** Implement the Authentication module (user registration, login) to issue JWTs that include `organizationId`.
-    *   **[NEXT]** Implement the `Accounts` CRUD module in the backend, ensuring all queries are scoped by `organizationId`.
+### Phase 2: Backend Implementation (Current)
+This phase involves building the core backend logic according to the `openapi.yaml` specification.
 
-3.  **Phase 3: Frontend Integration**
-    *   Generate a TypeScript SDK for the frontend from `docs/openapi.yaml`.
-    *   Replace all mock data in `src/lib/actions.ts` with live API calls using the generated SDK.
-    *   Wire up all UI forms, dialogs, and actions to the live data.
+1.  **User Authentication:** Implement the user registration and login endpoints. This service will issue JWTs that include `userId` and `organizationId`, which is the foundation for all security.
+2.  **Core CRUD APIs:** Implement the API endpoints for each module, ensuring all database queries are strictly scoped by `organizationId`. The order of implementation should be:
+    -   Accounts
+    -   Contacts
+    -   Leads
+    -   Opportunities
+    -   Tasks
+    -   Invoices
+3.  **Advanced Features:**
+    -   Implement webhook endpoints for external data ingestion (e.g., website forms).
+    -   Build out the background worker system for email notifications.
+    -   Implement role-based access control (RBAC) guards in API endpoints.
 
-4.  **Phase 4: Core CRM & Enterprise Features**
-    *   Implement full CRUD API endpoints for all remaining CRM objects (Leads, Contacts, Invoices, etc.).
-    *   Implement webhook endpoints for external data ingestion (e.g., website forms).
-    *   Build out the background worker system for email notifications.
-    *   Implement "super admin" and "company admin" features for managing users and roles.
+### Phase 3: Frontend Integration (Next)
+This phase involves replacing all mock data with live API calls.
+
+1.  **Generate SDK:** Generate a TypeScript client SDK from the live backend's OpenAPI specification.
+2.  **Connect UI to Data:**
+    -   Replace all mock data in `src/lib/actions.ts` and `src/lib/data.ts` with live API calls using the generated SDK.
+    -   Wire up all "Add/Edit" forms and dialogs to make them save data.
+    -   Implement live server-side search, sorting, and filtering on all list pages.
+    -   Make the dashboard charts dynamic.
+
+### Phase 4: Final Polish & Deployment
+1.  **Testing:** Write comprehensive unit, integration, and end-to-end tests for both the frontend and backend.
+2.  **Deployment:** Configure and activate the CI/CD pipelines in `.github/workflows/` to deploy the applications to production hosting.

@@ -12,6 +12,7 @@ The system is architected as two distinct, independently deployable applications
 - **`DESIGN.md`**: Contains the high-level strategic overview.
 - **`ARCHITECTURE.md`**: Contains detailed backend technical specifications, including the multi-tenant data model.
 - **`CICD.md`**: Outlines the automated deployment pipelines.
+- **`INACTIVE_FEATURES.md`**: Lists all UI elements that are currently placeholders and require backend integration.
 
 ---
 
@@ -29,7 +30,7 @@ The frontend is a modern web application responsible for all user interface rend
 ### 2.2. Frontend Project Structure
 - **`/src/app/(app)`**: Main application routes (Dashboard, Accounts, etc.).
 - **`/src/components`**: Reusable React components.
-- **`/src/lib/actions.ts`**: Contains placeholder functions that will be replaced with live API calls.
+- **`/src/lib/actions.ts` and `/src/lib/data.ts`**: Contain placeholder data and functions that will be replaced with live API calls.
 
 ---
 
@@ -69,9 +70,9 @@ The project uses GitHub Actions for automated, independent deployments of the fr
 
 ## 5. Complete Implementation Roadmap
 
-This is the actionable "to-do list" for the development teams.
+This is the actionable "to-do list" for the development teams, moving from prototype to a fully functional application.
 
-### 5.1. Backend Roadmap
+### Phase 1: Backend API Implementation (Current Focus)
 1.  **Setup & Auth:**
     - [x] Initialize NestJS project and database schema for multi-tenancy.
     - [ ] Implement the user authentication module to issue JWTs containing `userId` and `organizationId`.
@@ -79,13 +80,10 @@ This is the actionable "to-do list" for the development teams.
     - [ ] Build all CRUD endpoints for `Accounts`, `Contacts`, `Leads`, etc., as defined in `docs/openapi.yaml`. **Crucially, all database queries must be scoped to the `organization_id`.**
 3.  **Advanced Features:**
     - [ ] Implement webhook endpoints for ingesting data from external forms.
-    - [ ] Build a background job system (BullMQ) for tasks like sending emails.
+    - [ ] Build a background job system (e.g., BullMQ) for tasks like sending emails.
     - [ ] Implement role-based access control (RBAC) in API endpoints.
-4.  **Finalize & Deploy:**
-    - [ ] Write unit and integration tests for all modules.
-    - [ ] Configure and activate the deployment pipeline in `deploy-backend.yml`.
 
-### 5.2. Frontend Roadmap
+### Phase 2: Frontend Integration
 1.  **API Integration:**
     - [ ] Generate the client SDK from the live backend's OpenAPI spec.
     - [ ] Implement the login UI and JWT session management.
@@ -95,4 +93,4 @@ This is the actionable "to-do list" for the development teams.
     - [ ] Implement live search, sort, and filter functionality.
 3.  **Finalize & Deploy:**
     - [ ] Write E2E tests (e.g., using Playwright) to simulate user flows.
-    - [ ] Configure and activate the frontend deployment pipeline.
+    - [ ] Configure and activate the frontend and backend deployment pipelines.
