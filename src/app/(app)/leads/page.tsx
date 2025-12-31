@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Ellipsis, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
+import { Ellipsis, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search, CirclePlus } from "lucide-react"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
