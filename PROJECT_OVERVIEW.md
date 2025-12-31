@@ -44,7 +44,7 @@ The backend is a standalone server application responsible for all business logi
 - **Language:** TypeScript
 - **Database:** PostgreSQL (v15+)
 - **ORM:** Drizzle ORM for type-safe database queries.
-- **Caching / Job Queue:** Redis (v7+)
+- **Caching & Job Queue:** Redis (v7+) with **BullMQ** for background jobs.
 - **Containerization:** Docker
 
 ### 3.2. Data Model & Database Schema

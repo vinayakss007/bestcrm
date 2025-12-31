@@ -10,7 +10,7 @@ This document provides a detailed technical blueprint for developers working on 
 - **Language:** TypeScript
 - **Database:** **PostgreSQL** (v15 or later)
 - **ORM:** **Drizzle ORM** - A modern, lightweight TypeScript ORM for type-safe database queries.
-- **Caching / Job Queue:** **Redis** (v7 or later) - Used for performance caching and managing background jobs with a library like BullMQ.
+- **Caching / Job Queue:** **Redis** (v7 or later) - Used for performance caching and managing background jobs with **BullMQ**.
 - **Containerization:** **Docker**
 
 ## 2. Project Structure (NestJS Backend)
