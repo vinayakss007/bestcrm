@@ -15,7 +15,6 @@ import {
   Briefcase,
   CheckSquare,
   Building2,
-  Bell,
   FileText,
 } from "lucide-react"
 import { usePathname } from "next/navigation"

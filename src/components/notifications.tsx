@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Bell, User, Clock } from "lucide-react"
+import { Bell, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -20,7 +20,7 @@ export function Notifications({ isIconButton = false }: { isIconButton?: boolean
     <Button
       variant="ghost"
       size="icon"
-      className={isIconButton ? "group-data-[collapsible=collapsed]:hidden" : ""}
+      className={isIconButton ? "group-data-[collapsible=icon]:hidden" : ""}
       tooltip="Notifications"
     >
       <Bell className="h-5 w-5" />
@@ -54,7 +54,7 @@ export function Notifications({ isIconButton = false }: { isIconButton?: boolean
           {recentActivities.map((activity) => (
             <div key={activity.id} className="flex items-start gap-4">
               <Avatar className="h-10 w-10 border">
-                <AvatarImage src={activity.user.avatarUrl} />
+                <AvatarImage src={activity.user.avatarUrl} data-ai-hint="person face" />
                 <AvatarFallback>{activity.user.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="space-y-1">
