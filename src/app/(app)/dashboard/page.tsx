@@ -1,4 +1,6 @@
 
+"use client"
+
 import {
   Card,
   CardContent,
@@ -14,6 +16,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Briefcase, DollarSign, Lightbulb, Users, Activity } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getAccounts, getLeads, getOpportunities, getRecentActivities } from "@/lib/actions"
+import * as React from "react"
 
 const chartData = [
   { month: "January", revenue: 18600 },
@@ -31,13 +34,30 @@ const chartConfig = {
   },
 }
 
-export default async function Dashboard() {
-    const [leads, opportunities, accounts, recentActivities] = await Promise.all([
-        getLeads(),
-        getOpportunities(),
-        getAccounts(),
-        getRecentActivities()
-    ]);
+export default function Dashboard() {
+    const [data, setData] = React.useState<{
+        leads: Awaited<ReturnType<typeof getLeads>>;
+        opportunities: Awaited<ReturnType<typeof getOpportunities>>;
+        accounts: Awaited<ReturnType<typeof getAccounts>>;
+        recentActivities: Awaited<ReturnType<typeof getRecentActivities>>;
+    } | null>(null);
+
+    React.useEffect(() => {
+        Promise.all([
+            getLeads(),
+            getOpportunities(),
+            getAccounts(),
+            getRecentActivities()
+        ]).then(([leads, opportunities, accounts, recentActivities]) => {
+            setData({ leads, opportunities, accounts, recentActivities });
+        });
+    }, []);
+
+  if (!data) {
+    return <div>Loading...</div>
+  }
+
+  const { leads, opportunities, accounts, recentActivities } = data;
 
   const totalRevenue = opportunities
     .filter((opp) => opp.stage === 'Won')
