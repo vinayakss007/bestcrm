@@ -16,6 +16,7 @@ import {
   CheckSquare,
   Building2,
   Bell,
+  FileText,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { Notifications } from "./notifications"
@@ -27,6 +28,7 @@ const navItems = [
   { href: "/leads", icon: Lightbulb, label: "Leads" },
   { href: "/opportunities", icon: Briefcase, label: "Opportunities" },
   { href: "/tasks", icon: CheckSquare, label: "Tasks" },
+  { href: "/invoices", icon: FileText, label: "Invoices" },
   { href: "/agents", icon: Users, label: "Agents" },
 ]
 

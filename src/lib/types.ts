@@ -1,3 +1,4 @@
+
 export type User = {
   id: string;
   name: string;
@@ -59,6 +60,17 @@ export type Task = {
     name: string;
   };
 };
+
+export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Void';
+export type Invoice = {
+    id: string;
+    invoiceNumber: string;
+    leadId: string;
+    leadName: string;
+    amount: number;
+    dueDate: string;
+    status: InvoiceStatus;
+}
 
 export type RecentActivity = {
   id: string;

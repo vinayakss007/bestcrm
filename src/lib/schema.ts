@@ -1,3 +1,4 @@
+
 import {
   timestamp,
   pgTable,
@@ -152,4 +153,18 @@ export const crmTasks = pgTable("crm_tasks", {
   relatedToId: integer("related_to_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const invoiceStatusEnum = pgEnum('invoice_status', ['Draft', 'Sent', 'Paid', 'Void']);
+
+// Invoices are created for leads.
+export const crmInvoices = pgTable("crm_invoices", {
+    id: serial("id").primaryKey(),
+    invoiceNumber: varchar("invoice_number", { length: 50 }).notNull().unique(),
+    leadId: integer("lead_id").references(() => crmLeads.id),
+    amount: integer("amount").notNull(),
+    status: invoiceStatusEnum("status").default("Draft"),
+    dueDate: date("due_date"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
