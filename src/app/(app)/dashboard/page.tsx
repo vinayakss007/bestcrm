@@ -1,6 +1,4 @@
 
-"use client"
-
 import {
   Card,
   CardContent,
@@ -8,24 +6,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Briefcase, DollarSign, Lightbulb, Users, Activity } from "lucide-react"
-import { leads, opportunities, recentActivities, accounts, contacts } from "@/lib/data"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import * as React from "react"
-import type { Lead, Opportunity, Account, RecentActivity } from "@/lib/types"
 import { getAccounts, getLeads, getOpportunities, getRecentActivities } from "@/lib/actions"
 
 const chartData = [
@@ -44,40 +31,21 @@ const chartConfig = {
   },
 }
 
-export default function Dashboard() {
-    const [data, setData] = React.useState<{
-        leads: Lead[],
-        opportunities: Opportunity[],
-        accounts: Account[],
-        recentActivities: RecentActivity[]
-    } | null>(null);
+export default async function Dashboard() {
+    const [leads, opportunities, accounts, recentActivities] = await Promise.all([
+        getLeads(),
+        getOpportunities(),
+        getAccounts(),
+        getRecentActivities()
+    ]);
 
-    React.useEffect(() => {
-        async function fetchData() {
-            const [leads, opportunities, accounts, recentActivities] = await Promise.all([
-                getLeads(),
-                getOpportunities(),
-                getAccounts(),
-                getRecentActivities()
-            ]);
-            setData({ leads, opportunities, accounts, recentActivities });
-        }
-        fetchData();
-    }, []);
-
-
-  const totalRevenue = data?.opportunities
+  const totalRevenue = opportunities
     .filter((opp) => opp.stage === 'Won')
-    .reduce((sum, opp) => sum + opp.amount, 0) ?? 0
+    .reduce((sum, opp) => sum + opp.amount, 0)
   
-  const totalLeads = data?.leads.length ?? 0
-  const totalOpportunities = data?.opportunities.length ?? 0
-  const totalAccounts = data?.accounts.length ?? 0
-
-  if (!data) {
-    // TODO: Add a proper loading skeleton here
-    return <div>Loading...</div>
-  }
+  const totalLeads = leads.length
+  const totalOpportunities = opportunities.length
+  const totalAccounts = accounts.length
 
   return (
     <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
@@ -106,7 +74,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{totalLeads}</div>
             <p className="text-xs text-muted-foreground">
-              + {data.leads.filter(l => l.status === 'New').length} new this month
+              + {leads.filter(l => l.status === 'New').length} new this month
             </p>
           </CardContent>
         </Card>
@@ -118,7 +86,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{totalOpportunities}</div>
             <p className="text-xs text-muted-foreground">
-              {data.opportunities.filter(o => o.stage === 'Proposal' || o.stage === 'Closing').length} in pipeline
+              {opportunities.filter(o => o.stage === 'Proposal' || o.stage === 'Closing').length} in pipeline
             </p>
           </CardContent>
         </Card>
@@ -178,7 +146,7 @@ export default function Dashboard() {
               <Activity className="ml-auto h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent className="grid gap-8">
-             {data.recentActivities.map((activity) => (
+             {recentActivities.map((activity) => (
                 <div key={activity.id} className="flex items-center gap-4">
                     <Avatar className="hidden h-9 w-9 sm:flex">
                         <AvatarImage src={activity.user.avatarUrl} alt="Avatar" data-ai-hint="person face" />
