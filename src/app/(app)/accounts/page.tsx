@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,6 +35,7 @@ import { AddAccountDialog } from "@/components/add-account-dialog"
 import { getAccounts } from "@/lib/actions"
 import { Pagination } from "@/components/pagination"
 import type { Account } from "@/lib/types"
+import { Input } from "@/components/ui/input"
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = React.useState<Account[]>([]);
@@ -52,9 +53,17 @@ export default function AccountsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center">
-        <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">Accounts</h1>
-        <div className="ml-auto flex items-center gap-2">
+      <div className="flex items-center gap-4">
+        <h1 className="text-xl font-semibold tracking-tight">Accounts</h1>
+         <div className="relative ml-auto flex-1 md:grow-0">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+            />
+        </div>
+        <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
