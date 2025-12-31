@@ -54,7 +54,11 @@ export default function Dashboard() {
     }, []);
 
   if (!data) {
-    return <div>Loading...</div>
+    return (
+        <div className="flex items-center justify-center h-full">
+            <div className="text-muted-foreground">Loading dashboard...</div>
+        </div>
+    )
   }
 
   const { leads, opportunities, accounts, recentActivities } = data;

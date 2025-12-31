@@ -1,3 +1,7 @@
+
+"use client"
+
+import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 
@@ -7,6 +11,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -30,8 +35,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import { getLeads } from "@/lib/actions"
-import type { LeadStatus } from "@/lib/types"
+import type { Lead, LeadStatus } from "@/lib/types"
 import { AddLeadDialog } from "@/components/add-lead-dialog"
+import { Pagination } from "@/components/pagination"
 
 const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" | "outline"> = {
     'New': 'default',
@@ -40,8 +46,19 @@ const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" 
     'Lost': 'destructive'
 }
 
-export default async function LeadsPage() {
-  const leads = await getLeads();
+export default function LeadsPage() {
+  const [leads, setLeads] = React.useState<Lead[]>([]);
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(5);
+  const [total, setTotal] = React.useState(0);
+
+  React.useEffect(() => {
+    getLeads().then((allLeads) => {
+      setTotal(allLeads.length);
+      const paginatedLeads = allLeads.slice((page - 1) * pageSize, page * pageSize);
+      setLeads(paginatedLeads);
+    });
+  }, [page, pageSize]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -191,6 +208,15 @@ export default async function LeadsPage() {
             </TableBody>
           </Table>
         </CardContent>
+         <CardFooter>
+            <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+            />
+        </CardFooter>
       </Card>
     </div>
   )

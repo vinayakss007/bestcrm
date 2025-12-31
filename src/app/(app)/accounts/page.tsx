@@ -1,4 +1,7 @@
 
+"use client"
+
+import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -6,6 +9,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -29,9 +33,22 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AddAccountDialog } from "@/components/add-account-dialog"
 import { getAccounts } from "@/lib/actions"
+import { Pagination } from "@/components/pagination"
+import type { Account } from "@/lib/types"
 
-export default async function AccountsPage() {
-  const accounts = await getAccounts();
+export default function AccountsPage() {
+  const [accounts, setAccounts] = React.useState<Account[]>([]);
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(5);
+  const [total, setTotal] = React.useState(0);
+
+  React.useEffect(() => {
+    getAccounts().then((allAccounts) => {
+      setTotal(allAccounts.length);
+      const paginatedAccounts = allAccounts.slice((page - 1) * pageSize, page * pageSize);
+      setAccounts(paginatedAccounts);
+    });
+  }, [page, pageSize]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -182,6 +199,15 @@ export default async function AccountsPage() {
             </TableBody>
           </Table>
         </CardContent>
+        <CardFooter>
+            <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+            />
+        </CardFooter>
       </Card>
     </div>
   )

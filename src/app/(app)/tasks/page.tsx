@@ -1,3 +1,7 @@
+
+"use client"
+
+import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -6,6 +10,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -27,16 +32,28 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import { getTasks } from "@/lib/actions"
-import { TaskStatus } from "@/lib/types"
+import { Task, TaskStatus } from "@/lib/types"
 import { AddTaskDialog } from "@/components/add-task-dialog"
+import { Pagination } from "@/components/pagination"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
     'Pending': 'secondary'
 }
 
-export default async function TasksPage() {
-  const tasks = await getTasks();
+export default function TasksPage() {
+  const [tasks, setTasks] = React.useState<Task[]>([]);
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(5);
+  const [total, setTotal] = React.useState(0);
+
+  React.useEffect(() => {
+    getTasks().then((allTasks) => {
+      setTotal(allTasks.length);
+      const paginatedTasks = allTasks.slice((page - 1) * pageSize, page * pageSize);
+      setTasks(paginatedTasks);
+    });
+  }, [page, pageSize]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -166,6 +183,15 @@ export default async function TasksPage() {
             </TableBody>
           </Table>
         </CardContent>
+        <CardFooter>
+            <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+            />
+        </CardFooter>
       </Card>
     </div>
   )

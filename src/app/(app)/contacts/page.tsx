@@ -1,3 +1,7 @@
+
+"use client"
+
+import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -5,6 +9,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -26,9 +31,23 @@ import {
 
 import { getContacts } from "@/lib/actions"
 import { AddContactDialog } from "@/components/add-contact-dialog"
+import { Pagination } from "@/components/pagination"
+import type { Contact } from "@/lib/types"
 
-export default async function ContactsPage() {
-  const contacts = await getContacts();
+export default function ContactsPage() {
+  const [contacts, setContacts] = React.useState<Contact[]>([]);
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(5);
+  const [total, setTotal] = React.useState(0);
+
+  React.useEffect(() => {
+    getContacts().then((allContacts) => {
+      setTotal(allContacts.length);
+      const paginatedContacts = allContacts.slice((page - 1) * pageSize, page * pageSize);
+      setContacts(paginatedContacts);
+    });
+  }, [page, pageSize]);
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -145,6 +164,15 @@ export default async function ContactsPage() {
             </TableBody>
           </Table>
         </CardContent>
+        <CardFooter>
+            <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+            />
+        </CardFooter>
       </Card>
     </div>
   )

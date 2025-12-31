@@ -1,3 +1,7 @@
+
+"use client"
+
+import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -6,6 +10,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -28,8 +33,9 @@ import {
 } from "@/components/ui/table"
 
 import { getOpportunities } from "@/lib/actions"
-import type { OpportunityStage } from "@/lib/types"
+import type { Opportunity, OpportunityStage } from "@/lib/types"
 import { AddOpportunityDialog } from "@/components/add-opportunity-dialog"
+import { Pagination } from "@/components/pagination"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -40,8 +46,20 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
     'Lost': 'destructive'
 }
 
-export default async function OpportunitiesPage() {
-  const opportunities = await getOpportunities();
+export default function OpportunitiesPage() {
+  const [opportunities, setOpportunities] = React.useState<Opportunity[]>([]);
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(5);
+  const [total, setTotal] = React.useState(0);
+
+  React.useEffect(() => {
+    getOpportunities().then((allOpportunities) => {
+      setTotal(allOpportunities.length);
+      const paginatedOpportunities = allOpportunities.slice((page - 1) * pageSize, page * pageSize);
+      setOpportunities(paginatedOpportunities);
+    });
+  }, [page, pageSize]);
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -187,6 +205,15 @@ export default async function OpportunitiesPage() {
             </TableBody>
           </Table>
         </CardContent>
+         <CardFooter>
+            <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+            />
+        </CardFooter>
       </Card>
     </div>
   )
