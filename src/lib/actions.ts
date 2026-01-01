@@ -54,6 +54,16 @@ export async function login(
   redirect('/dashboard')
 }
 
+export async function loginAsSuperAdmin(
+  prevState: { error: string } | undefined,
+) {
+    const formData = new FormData();
+    // These are the hardcoded credentials for the default super admin
+    formData.append('email', 'super@admin.com');
+    formData.append('password', 'password123');
+    return login(prevState, formData);
+}
+
 export async function register(
   prevState: { error?: string, message?: string } | undefined,
   formData: FormData

@@ -94,8 +94,7 @@ export class UsersService {
         }
         
         const saltRounds = 10;
-        const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
-
+        
         // Check if it's the very first user in the system
         const anyOrg = await tx.query.organizations.findFirst();
         
@@ -108,9 +107,12 @@ export class UsersService {
             const organizationId = newOrg[0].id;
             const userRole: 'super-admin' = 'super-admin';
             
+            // For the first user (super-admin), use a known password for dev login purposes.
+            const passwordHash = await bcrypt.hash('password123', saltRounds);
+
             const newUsers = await tx.insert(schema.crmUsers).values({
-                email: registerDto.email,
-                name: registerDto.name,
+                email: 'super@admin.com', // Use a known email for dev login
+                name: 'Super Admin',
                 passwordHash,
                 organizationId,
                 role: userRole,
@@ -118,6 +120,7 @@ export class UsersService {
             return newUsers[0];
         } else {
             // For a new self-service sign-up, always create a new organization.
+            const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
             const newOrg = await tx
                 .insert(schema.organizations)
                 .values({ name: `${registerDto.name}'s Organization` })

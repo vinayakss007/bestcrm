@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { useFormState, useFormStatus } from "react-dom"
-import { login } from "@/lib/actions"
+import { login, loginAsSuperAdmin } from "@/lib/actions"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -17,14 +17,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
 
 function SubmitButton() {
     const { pending } = useFormStatus()
     return <Button className="w-full" type="submit" disabled={pending}>{pending ? "Signing in..." : "Sign In"}</Button>
 }
 
+function SuperAdminLoginButton() {
+    const { pending } = useFormStatus()
+    return <Button variant="secondary" className="w-full" type="submit" disabled={pending}>{pending ? "Signing in..." : "Login as Super Admin (Dev)"}</Button>
+}
+
 export default function LoginPage() {
   const [state, formAction] = useFormState(login, undefined)
+  const [superAdminState, superAdminFormAction] = useFormState(loginAsSuperAdmin, undefined);
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -60,6 +67,19 @@ export default function LoginPage() {
             </Alert>
           )}
           <SubmitButton />
+        </form>
+        <Separator className="my-4" />
+        <form action={superAdminFormAction} className="grid gap-4">
+             {superAdminState?.error && (
+                <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                        {superAdminState.error}
+                    </AlertDescription>
+                </Alert>
+             )}
+            <SuperAdminLoginButton />
         </form>
       </CardContent>
       <CardFooter className="text-sm">
