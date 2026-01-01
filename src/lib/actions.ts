@@ -1,5 +1,4 @@
 
-
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -716,3 +715,5 @@ export async function getActivitiesForAccount(accountId: number) {
     }
     return response.json();
 }
+
+    

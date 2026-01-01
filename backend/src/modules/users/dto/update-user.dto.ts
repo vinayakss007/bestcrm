@@ -8,3 +8,5 @@ export class UpdateUserDto {
 
   // We could add email, password, etc. here in the future
 }
+
+    
