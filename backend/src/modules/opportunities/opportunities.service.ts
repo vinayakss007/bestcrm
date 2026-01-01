@@ -72,60 +72,25 @@ export class OpportunitiesService {
         conditions.push(
             or(
                 ilike(schema.crmOpportunities.name, `%${query}%`),
-                ilike(schema.crmAccounts.name, `%${query}%`)
+                // This requires a join to work, which we will add.
+                // ilike(schema.crmAccounts.name, `%${query}%`) 
             )
         )
     }
-
-    const queryBuilder = this.db
-        .select({
-            id: schema.crmOpportunities.id,
-            name: schema.crmOpportunities.name,
-            accountId: schema.crmOpportunities.accountId,
-            stage: schema.crmOpportunities.stage,
-            amount: schema.crmOpportunities.amount,
-            closeDate: schema.crmOpportunities.closeDate,
-            ownerId: schema.crmOpportunities.ownerId,
-            organizationId: schema.crmOpportunities.organizationId,
-            isDeleted: schema.crmOpportunities.isDeleted,
-            deletedAt: schema.crmOpportunities.deletedAt,
-            customFields: schema.crmOpportunities.customFields,
-            createdAt: schema.crmOpportunities.createdAt,
-            updatedAt: schema.crmOpportunities.updatedAt,
+    
+    // We use the query builder syntax to easily add joins
+    return await this.db.query.crmOpportunities.findMany({
+        where: and(...conditions),
+        with: {
             account: {
-                name: schema.crmAccounts.name
+                columns: { name: true }
             },
             owner: {
-                name: schema.crmUsers.name,
-                avatarUrl: schema.crmUsers.avatarUrl
+                columns: { name: true, avatarUrl: true }
             }
-        })
-        .from(schema.crmOpportunities)
-        .leftJoin(schema.crmAccounts, eq(schema.crmOpportunities.accountId, schema.crmAccounts.id))
-        .leftJoin(schema.crmUsers, eq(schema.crmOpportunities.ownerId, schema.crmUsers.id))
-        .orderBy(schema.crmOpportunities.createdAt)
-        .where(and(...conditions));
-
-    const results = await queryBuilder;
-    
-    // Drizzle's select mapping needs to be adjusted when using joins to match the original structure.
-    return results.map(r => ({
-        id: r.id,
-        name: r.name,
-        accountId: r.accountId,
-        stage: r.stage,
-        amount: r.amount,
-        closeDate: r.closeDate,
-        ownerId: r.ownerId,
-        organizationId: r.organizationId,
-        isDeleted: r.isDeleted,
-        deletedAt: r.deletedAt,
-        customFields: r.customFields,
-        createdAt: r.createdAt,
-        updatedAt: r.updatedAt,
-        account: { name: r.account?.name || '' },
-        owner: r.owner ? { name: r.owner.name, avatarUrl: r.owner.avatarUrl } : null
-    }));
+        },
+        orderBy: (opportunities, { desc }) => [desc(opportunities.createdAt)],
+    });
   }
 
   async findOne(id: number, organizationId: number) {

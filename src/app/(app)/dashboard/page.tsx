@@ -23,16 +23,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Lead, Opportunity, Account } from "@/lib/types"
+import type { Lead, Opportunity, Account, OpportunityStage } from "@/lib/types"
+import { format, getMonth, parseISO } from "date-fns"
 
-const chartData = [
-  { month: "January", revenue: 18600 },
-  { month: "February", revenue: 30500 },
-  { month: "March", revenue: 23700 },
-  { month: "April", revenue: 7300 },
-  { month: "May", revenue: 20900 },
-  { month: "June", revenue: 21400 },
-]
 
 const chartConfig = {
   revenue: {
@@ -40,6 +33,8 @@ const chartConfig = {
     color: "hsl(var(--chart-2))",
   },
 }
+
+const openStages: OpportunityStage[] = ['Prospecting', 'Qualification', 'Proposal', 'Closing'];
 
 export default async function Dashboard() {
     const [leads, opportunities, accounts]: [Lead[], Opportunity[], Account[]] = await Promise.all([
@@ -56,6 +51,20 @@ export default async function Dashboard() {
   const totalOpportunities = opportunities.length
   const totalAccounts = accounts.length
 
+  const forecastData = opportunities
+    .filter(opp => opp.stage && openStages.includes(opp.stage) && opp.closeDate && opp.amount)
+    .reduce((acc, opp) => {
+        const month = getMonth(parseISO(opp.closeDate!));
+        acc[month] = (acc[month] || 0) + opp.amount!;
+        return acc;
+    }, {} as Record<number, number>);
+
+  const chartData = Array.from({ length: 12 }, (_, i) => ({
+    month: format(new Date(0, i), 'MMM'),
+    revenue: forecastData[i] || 0,
+  }));
+
+
   return (
     <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
@@ -65,11 +74,10 @@ export default async function Dashboard() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="h-8 gap-1">
                             <CalendarDays className="h-3.5 w-3.5" />
-                            <span>Last 30 Days</span>
+                            <span>This Year</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Last 7 Days</DropdownMenuItem>
                         <DropdownMenuItem>Last 30 Days</DropdownMenuItem>
                         <DropdownMenuItem>This Quarter</DropdownMenuItem>
                         <DropdownMenuItem>This Year</DropdownMenuItem>
@@ -154,7 +162,6 @@ export default async function Dashboard() {
                         tickLine={false}
                         tickMargin={10}
                         axisLine={false}
-                        tickFormatter={(value) => value.slice(0, 3)}
                         />
                         <YAxis
                             tickLine={false}
