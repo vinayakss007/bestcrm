@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { LeadsModule } from './modules/leads/leads.module';
+import { OpportunitiesModule } from './modules/opportunities/opportunities.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { LeadsModule } from './modules/leads/leads.module';
     AccountsModule,
     ContactsModule,
     LeadsModule,
+    OpportunitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
