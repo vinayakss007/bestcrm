@@ -41,6 +41,7 @@ import {
 import type { Contact, User, Account } from "@/lib/types"
 import { EditContactDialog } from "@/components/edit-contact-dialog"
 import { DeleteContactDialog } from "@/components/delete-contact-dialog"
+import { AddTaskDialog } from "@/components/add-task-dialog"
 
 export default async function ContactDetailPage({ params }: { params: { id: string } }) {
   const [contact, users, accounts] = await Promise.all([
@@ -79,7 +80,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                     <DropdownMenuContent>
                         <DropdownMenuItem>Email</DropdownMenuItem>
                         <DropdownMenuItem>Call</DropdownMenuItem>
-                        <DropdownMenuItem>Task</DropdownMenuItem>
+                        <AddTaskDialog as="menuitem" relatedToType="Contact" relatedToId={contact.id} />
                     </DropdownMenuContent>
                 </DropdownMenu>
                  <EditContactDialog contact={contact} accounts={accounts} as="button" />
