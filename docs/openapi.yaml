@@ -734,6 +734,26 @@ paths:
         '400':
           description: Invalid input data.
 
+  /invoices/{invoiceId}:
+    delete:
+      tags:
+        - Invoices
+      summary: Delete an invoice
+      operationId: deleteInvoice
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Invoice deleted successfully.
+        '404':
+          description: Invoice not found.
+
   /tasks:
     get:
       tags:
