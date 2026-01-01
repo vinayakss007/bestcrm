@@ -395,9 +395,13 @@ export async function deleteLead(id: number) {
 }
 
 
-export async function getOpportunities() {
+export async function getOpportunities(query?: string) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/opportunities`, { headers, cache: 'no-store' });
+    const url = new URL(`${API_URL}/opportunities`);
+    if (query) {
+      url.searchParams.append('query', query);
+    }
+    const response = await fetch(url.toString(), { headers, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
             redirect('/login');
