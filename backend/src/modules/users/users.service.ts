@@ -39,7 +39,7 @@ export class UsersService {
     // like checking if any other organization exists.
     const allOrgs = await this.db.select().from(schema.organizations).limit(1);
     let organizationId: number;
-    let userRole: 'company-admin' | 'user' = 'user';
+    let userRole: 'company-admin' | 'user' | 'super-admin' = 'user';
 
     if (allOrgs.length === 0) {
       // First user ever, create a new organization and make them the admin.

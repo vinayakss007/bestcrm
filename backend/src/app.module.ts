@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { DrizzleModule } from './modules/drizzle/drizzle.module';
 import { ConfigModule } from '@nestjs/config';
+import { AccountsModule } from './modules/accounts/accounts.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ConfigModule } from '@nestjs/config';
     DrizzleModule,
     AuthModule,
     UsersModule,
+    AccountsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
