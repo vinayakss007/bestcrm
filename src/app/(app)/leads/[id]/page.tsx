@@ -42,6 +42,7 @@ import type { Lead, User as TUser } from "@/lib/types"
 import { ConvertLeadDialog } from "@/components/convert-lead-dialog"
 import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
 import { EditLeadDialog } from "@/components/edit-lead-dialog"
+import { AddTaskDialog } from "@/components/add-task-dialog"
 
 export default async function LeadDetailPage({ params }: { params: { id: string } }) {
   const [lead, users] = await Promise.all([
@@ -79,7 +80,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                     <DropdownMenuContent>
                         <DropdownMenuItem>Email</DropdownMenuItem>
                         <DropdownMenuItem>Call</DropdownMenuItem>
-                        <DropdownMenuItem>Task</DropdownMenuItem>
+                        <AddTaskDialog as="menuitem" relatedToType="Lead" relatedToId={lead.id} />
                     </DropdownMenuContent>
                 </DropdownMenu>
                 <EditLeadDialog lead={lead} users={users} as="button" />
