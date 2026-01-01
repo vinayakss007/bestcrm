@@ -1,4 +1,3 @@
-
 # CRM Build Checklist
 
 This checklist tracks the implementation progress based on the `docs/CRM_SYSTEM_GUIDE.md`.
@@ -32,7 +31,7 @@ This checklist tracks the implementation progress based on the `docs/CRM_SYSTEM_
 ## Critical Components Checklist
 
 ### Core Functionality
-- [ ] **User Onboarding & Tenant Provisioning**: Self-service and manual signup flows.
+- [x] **User Onboarding & Tenant Provisioning**: Self-service and manual signup flows.
 - [x] **Authentication & Identity Management**: Secure login, password reset, 2FA. (Login/JWT is done)
 - [ ] **Email & Notification Engine**: Transactional emails and real-time in-app notifications.
 - [ ] **File & Document Management**: Secure file uploads on records.
