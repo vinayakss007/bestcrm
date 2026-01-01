@@ -85,6 +85,7 @@ export const crmUsers = pgTable("crm_users", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
   avatarUrl: text("avatar_url"),
   // Every user belongs to one organization.
   organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
