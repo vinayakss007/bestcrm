@@ -175,7 +175,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: { quer
                      {owner ? (
                         <div className="flex items-center gap-2">
                             <Avatar className="h-6 w-6">
-                                <AvatarImage src={owner.avatarUrl} alt={owner.name} data-ai-hint="person face" />
+                                <AvatarImage src={owner.avatarUrl || ''} alt={owner.name} data-ai-hint="person face" />
                                 <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <span>{owner.name}</span>
