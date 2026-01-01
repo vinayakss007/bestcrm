@@ -540,6 +540,26 @@ export async function createInvoice(invoiceData: CreateInvoiceDto) {
     }
 }
 
+export async function deleteInvoice(id: number) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/invoices/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+
+        if (response.status !== 204) {
+            const errorData = await response.text();
+            throw new Error(errorData || 'Failed to delete invoice');
+        }
+
+        revalidatePath('/invoices');
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while deleting the invoice.');
+    }
+}
+
 export async function getTasks() {
   const headers = await getAuthHeaders();
   const response = await fetch(`${API_URL}/tasks`, { headers, cache: 'no-store' });

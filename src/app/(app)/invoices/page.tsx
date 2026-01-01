@@ -28,6 +28,7 @@ import {
 import { getInvoices, getLeads } from "@/lib/actions"
 import type { Invoice, InvoiceStatus } from "@/lib/types"
 import { AddInvoiceDialog } from "@/components/add-invoice-dialog"
+import { DeleteInvoiceDialog } from "@/components/delete-invoice-dialog"
 
 const statusVariant: Record<InvoiceStatus, "default" | "secondary" | "destructive" | "outline"> = {
     'Draft': 'secondary',
@@ -103,7 +104,7 @@ export default async function InvoicesPage() {
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem>View Details</DropdownMenuItem>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DeleteInvoiceDialog invoiceId={invoice.id} />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
