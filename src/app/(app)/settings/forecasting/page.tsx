@@ -1,3 +1,7 @@
+
+"use client"
+
+import * as React from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -10,8 +14,21 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ForecastingSettingsPage() {
+  const { toast } = useToast()
+  const [isForecastingEnabled, setIsForecastingEnabled] = React.useState(true)
+  const [forecastPeriod, setForecastPeriod] = React.useState<"monthly" | "quarterly">("quarterly")
+  const [confidenceThreshold, setConfidenceThreshold] = React.useState("70")
+
+  const handleSaveChanges = () => {
+    toast({
+      title: "Settings Saved",
+      description: "Your forecasting settings have been updated.",
+    })
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -30,7 +47,11 @@ export default function ForecastingSettingsPage() {
               Turn sales forecasting on or off for your entire organization.
             </p>
           </div>
-          <Switch id="enable-forecasting" defaultChecked />
+          <Switch 
+            id="enable-forecasting" 
+            checked={isForecastingEnabled}
+            onCheckedChange={setIsForecastingEnabled}
+          />
         </div>
 
         <div className="space-y-2">
@@ -39,8 +60,18 @@ export default function ForecastingSettingsPage() {
                 Set the default time frame for forecast reporting.
             </p>
             <div className="flex items-center gap-4">
-                <Button variant="outline">Monthly</Button>
-                <Button variant="default">Quarterly</Button>
+                <Button 
+                    variant={forecastPeriod === 'monthly' ? 'default' : 'outline'}
+                    onClick={() => setForecastPeriod('monthly')}
+                >
+                    Monthly
+                </Button>
+                <Button 
+                    variant={forecastPeriod === 'quarterly' ? 'default' : 'outline'}
+                    onClick={() => setForecastPeriod('quarterly')}
+                >
+                    Quarterly
+                </Button>
             </div>
         </div>
         
@@ -49,12 +80,18 @@ export default function ForecastingSettingsPage() {
              <p className="text-xs text-muted-foreground pb-2">
                 Only include opportunities with a confidence level above this threshold in forecasts.
             </p>
-            <Input id="confidence-threshold" type="number" defaultValue="70" className="max-w-xs" />
+            <Input 
+                id="confidence-threshold" 
+                type="number" 
+                value={confidenceThreshold}
+                onChange={(e) => setConfidenceThreshold(e.target.value)}
+                className="max-w-xs" 
+            />
         </div>
 
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button>Save Changes</Button>
+        <Button onClick={handleSaveChanges}>Save Changes</Button>
       </CardFooter>
     </Card>
   )

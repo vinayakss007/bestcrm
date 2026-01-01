@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { BarChart, Users, Star, User, Mail, Ban, Home, Blocks, ShieldCheck, Activity } from "lucide-react"
+import { BarChart, Users, Star, User, Ban, Home, Blocks, ShieldCheck, Activity } from "lucide-react"
 
 export function SettingsNav() {
   const pathname = usePathname()
@@ -30,13 +30,6 @@ export function SettingsNav() {
         { title: "Forecasting", href: "/settings/forecasting", icon: BarChart },
         { title: "Home Actions", href: "/settings/home-actions", icon: Home },
         { title: "Assignment Rules", href: "/settings/assignment-rules", icon: Ban },
-      ],
-    },
-    {
-      title: "Email",
-      links: [
-        { title: "Email Accounts", href: "/settings/email-accounts", icon: Mail },
-        { title: "Email Templates", href: "/settings/email-templates", icon: Mail },
       ],
     },
     {
