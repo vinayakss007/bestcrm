@@ -20,7 +20,7 @@ import {
   Briefcase
 } from "lucide-react"
 
-import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount } from "@/lib/actions"
+import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -55,6 +55,7 @@ import {
 import type { Account, Contact, Opportunity, User, Activity } from "@/lib/types"
 import { EditAccountDialog } from "@/components/edit-account-dialog"
 import { DeleteAccountDialog } from "@/components/delete-account-dialog"
+import { AddContactDialog } from "@/components/add-contact-dialog"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -91,12 +92,13 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     notFound();
   }
 
-  const [account, accountContacts, accountOpportunities, users, activities] = await Promise.all([
+  const [account, accountContacts, accountOpportunities, users, activities, allAccounts] = await Promise.all([
     getAccountById(accountId) as Promise<Account>,
     getContactsByAccountId(accountId) as Promise<Contact[]>,
     getOpportunitiesByAccountId(accountId) as Promise<Opportunity[]>,
     getUsers() as Promise<User[]>,
     getActivitiesForAccount(accountId) as Promise<Activity[]>,
+    getAccounts() as Promise<Account[]>,
   ]);
 
   if (!account) {
@@ -132,7 +134,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem>New Contact</DropdownMenuItem>
+                        <AddContactDialog accounts={allAccounts} accountId={account.id} as="menuitem" />
                         <DropdownMenuItem>New Opportunity</DropdownMenuItem>
                         <DropdownMenuItem>New Task</DropdownMenuItem>
                     </DropdownMenuContent>
