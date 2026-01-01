@@ -1,5 +1,5 @@
 
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
@@ -35,9 +35,9 @@ import { getLeads, getUsers } from "@/lib/actions"
 import type { Lead, LeadStatus, User } from "@/lib/types"
 import { AddLeadDialog } from "@/components/add-lead-dialog"
 // import { Pagination } from "@/components/pagination"
-import { Input } from "@/components/ui/input"
 import { EditLeadDialog } from "@/components/edit-lead-dialog"
 import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
+import { SearchInput } from "@/components/search-input"
 
 const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" | "outline"> = {
     'New': 'default',
@@ -46,8 +46,9 @@ const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" 
     'Lost': 'destructive'
 }
 
-export default async function LeadsPage() {
-  const leads: Lead[] = await getLeads();
+export default async function LeadsPage({ searchParams }: { searchParams: { query?: string } }) {
+  const query = searchParams.query || '';
+  const leads: Lead[] = await getLeads(query);
   const users: User[] = await getUsers();
 
   const getOwnerById = (id: number | null) => {
@@ -59,15 +60,8 @@ export default async function LeadsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
         <h1 className="text-xl font-semibold tracking-tight">Leads</h1>
-        <div className="relative ml-auto flex-1 md:grow-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-            />
-        </div>
-        <div className="flex items-center gap-2">
+        <SearchInput placeholder="Search leads..." />
+        <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
