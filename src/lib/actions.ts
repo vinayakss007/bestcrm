@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto } from "@/lib/types"
+import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -398,6 +398,54 @@ export async function createOpportunity(opportunityData: CreateOpportunityDto) {
     } catch (error) {
         console.error(error);
         throw new Error('An unexpected error occurred while creating the opportunity.');
+    }
+}
+
+export async function updateOpportunity(id: number, opportunityData: UpdateOpportunityDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/opportunities/${id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(opportunityData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update opportunity');
+        }
+
+        revalidatePath('/opportunities');
+        revalidatePath(`/opportunities/${id}`);
+        revalidatePath('/dashboard');
+        if (opportunityData.accountId) {
+            revalidatePath(`/accounts/${opportunityData.accountId}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while updating the opportunity.');
+    }
+}
+
+export async function deleteOpportunity(id: number) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/opportunities/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete opportunity');
+        }
+
+        revalidatePath('/opportunities');
+        revalidatePath('/dashboard');
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while deleting the opportunity.');
     }
 }
 

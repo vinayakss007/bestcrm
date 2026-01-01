@@ -140,6 +140,16 @@ export type CreateOpportunityDto = {
   ownerId?: number;
 };
 
+export type UpdateOpportunityDto = {
+  name?: string;
+  accountId?: number;
+  stage?: OpportunityStage;
+  amount?: number;
+  closeDate?: string;
+  ownerId?: number;
+};
+
+
 export const invoiceStatuses = ['Draft', 'Sent', 'Paid', 'Void'] as const;
 export type InvoiceStatus = (typeof invoiceStatuses)[number];
 

@@ -33,6 +33,8 @@ import { getAccounts, getOpportunities, getUsers } from "@/lib/actions"
 import type { Opportunity, OpportunityStage, Account, User } from "@/lib/types"
 import { AddOpportunityDialog } from "@/components/add-opportunity-dialog"
 import { Input } from "@/components/ui/input"
+import { EditOpportunityDialog } from "@/components/edit-opportunity-dialog"
+import { DeleteOpportunityDialog } from "@/components/delete-opportunity-dialog"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -189,8 +191,8 @@ export default async function OpportunitiesPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <EditOpportunityDialog opportunity={opportunity} accounts={accounts} users={users} />
+                        <DeleteOpportunityDialog opportunityId={opportunity.id} />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
