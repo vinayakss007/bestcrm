@@ -45,6 +45,12 @@ export async function login(
   redirect('/dashboard')
 }
 
+export async function logout() {
+  cookies().delete('token');
+  redirect('/login');
+}
+
+
 async function getAuthHeaders() {
   const token = cookies().get('token')?.value
   if (!token) {
@@ -565,14 +571,13 @@ export async function deleteTask(id: number) {
 
 export async function getUsers() {
   const headers = await getAuthHeaders()
-  // In a real app, this would be a proper API endpoint
-  // For now, we simulate fetching users based on the organization of the logged-in user
-  // This is a placeholder and should be replaced with a real API call
-  // that respects multi-tenancy.
   const response = await fetch(`${API_URL}/users`, { headers, cache: 'no-store' });
   if (!response.ok) {
     if (response.status === 401) {
-      redirect('/login');
+      // This can happen if the token is expired/invalid.
+      // Don't redirect here, as this function is called on client components too.
+      // The redirect will be handled by the page/layout's loader.
+      console.error("Auth error fetching users");
     }
     throw new Error('Failed to fetch users');
   }

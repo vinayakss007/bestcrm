@@ -1,5 +1,4 @@
-
-"use server"
+"use client"
 
 import Link from "next/link"
 import {
@@ -21,25 +20,50 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getUsers } from "@/lib/actions"
+import { logout, getUsers } from "@/lib/actions"
 import { ThemeSwitcher } from "./theme-switcher"
 import { Sun } from "lucide-react"
 import type { User } from "@/lib/types"
+import { useEffect, useState } from "react"
 
-export async function UserNav() {
-  const users: User[] = await getUsers();
-  const user = users[0]; // mock logged in user
-  
+export function UserNav() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const users = await getUsers();
+        if (users && users.length > 0) {
+          setUser(users[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+        // Handle error appropriately, maybe redirect to login
+      }
+    }
+    fetchUser();
+  }, []);
+
   if (!user) {
-    return null;
+    return (
+       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-9 w-9">
+            <AvatarFallback></AvatarFallback>
+          </Avatar>
+        </Button>
+    );
   }
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="person face" />
+            <AvatarImage src={user.avatarUrl || undefined} alt={user.name} data-ai-hint="person face" />
             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
         </Button>
@@ -75,7 +99,7 @@ export async function UserNav() {
             </DropdownMenuPortal>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onSelect={handleLogout}>
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
