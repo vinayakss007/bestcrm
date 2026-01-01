@@ -15,6 +15,10 @@ export type RegisterDto = {
   password?: string;
 };
 
+export type UpdateUserDto = {
+    name?: string;
+};
+
 // This type is based on the Drizzle schema `crmAccounts`
 export type Account = {
   id: number;
@@ -232,3 +236,5 @@ export type RecentActivity = {
   target: string;
   timestamp: string;
 };
+
+    
