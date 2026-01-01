@@ -51,9 +51,10 @@ type LeadFormValues = z.infer<typeof leadSchema>
 interface EditLeadDialogProps {
     lead: Lead;
     users: User[];
+    as?: "button" | "menuitem";
 }
 
-export function EditLeadDialog({ lead, users }: EditLeadDialogProps) {
+export function EditLeadDialog({ lead, users, as = "menuitem" }: EditLeadDialogProps) {
   const [open, setOpen] = React.useState(false)
   const { toast } = useToast()
 
@@ -90,13 +91,15 @@ export function EditLeadDialog({ lead, users }: EditLeadDialogProps) {
         })
     }
   }
+  
+  const Trigger = as === "button" ? Button : DropdownMenuItem;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <Trigger onSelect={as === "menuitem" ? (e) => e.preventDefault() : undefined}>
           Edit
-        </DropdownMenuItem>
+        </Trigger>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <Form {...form}>

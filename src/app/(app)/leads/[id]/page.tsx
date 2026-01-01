@@ -41,6 +41,7 @@ import { Textarea } from "@/components/ui/textarea"
 import type { Lead, User as TUser } from "@/lib/types"
 import { ConvertLeadDialog } from "@/components/convert-lead-dialog"
 import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
+import { EditLeadDialog } from "@/components/edit-lead-dialog"
 
 export default async function LeadDetailPage({ params }: { params: { id: string } }) {
   const [lead, users] = await Promise.all([
@@ -81,7 +82,8 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                         <DropdownMenuItem>Task</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                 <ConvertLeadDialog lead={lead} />
+                <EditLeadDialog lead={lead} users={users} as="button" />
+                <ConvertLeadDialog lead={lead} />
             </div>
         </div>
 
