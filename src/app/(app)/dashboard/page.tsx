@@ -1,6 +1,4 @@
 
-"use client"
-
 import {
   Card,
   CardContent,
@@ -15,7 +13,7 @@ import {
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Briefcase, DollarSign, Lightbulb, Users, Activity, Plus, Edit, CalendarDays } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getAccounts, getLeads, getOpportunities, getRecentActivities } from "@/lib/actions"
+import { getAccounts, getLeads, getOpportunities } from "@/lib/actions"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import type { Lead, Opportunity, Account, RecentActivity } from "@/lib/types"
 
 const chartData = [
   { month: "January", revenue: 18600 },
@@ -41,38 +40,16 @@ const chartConfig = {
   },
 }
 
-export default function Dashboard() {
-    const [data, setData] = React.useState<{
-        leads: Awaited<ReturnType<typeof getLeads>>;
-        opportunities: Awaited<ReturnType<typeof getOpportunities>>;
-        accounts: Awaited<ReturnType<typeof getAccounts>>;
-        recentActivities: Awaited<ReturnType<typeof getRecentActivities>>;
-    } | null>(null);
-
-    React.useEffect(() => {
-        Promise.all([
-            getLeads(),
-            getOpportunities(),
-            getAccounts(),
-            getRecentActivities()
-        ]).then(([leads, opportunities, accounts, recentActivities]) => {
-            setData({ leads, opportunities, accounts, recentActivities });
-        });
-    }, []);
-
-  if (!data) {
-    return (
-        <div className="flex items-center justify-center h-full">
-            <div className="text-muted-foreground">Loading dashboard...</div>
-        </div>
-    )
-  }
-
-  const { leads, opportunities, accounts, recentActivities } = data;
+export default async function Dashboard() {
+    const [leads, opportunities, accounts] = await Promise.all([
+      getLeads(),
+      getOpportunities(),
+      getAccounts(),
+    ]);
 
   const totalRevenue = opportunities
-    .filter((opp) => opp.stage === 'Won')
-    .reduce((sum, opp) => sum + opp.amount, 0)
+    .filter((opp: Opportunity) => opp.stage === 'Won')
+    .reduce((sum: number, opp: Opportunity) => sum + (opp.amount || 0), 0)
   
   const totalLeads = leads.length
   const totalOpportunities = opportunities.length
@@ -133,7 +110,7 @@ export default function Dashboard() {
                 <CardContent>
                     <div className="text-2xl font-bold">{totalLeads}</div>
                     <p className="text-xs text-muted-foreground">
-                    + {leads.filter(l => l.status === 'New').length} new this month
+                    + {leads.filter((l: Lead) => l.status === 'New').length} new this month
                     </p>
                 </CardContent>
                 </Card>
@@ -145,7 +122,7 @@ export default function Dashboard() {
                 <CardContent>
                     <div className="text-2xl font-bold">{totalOpportunities}</div>
                     <p className="text-xs text-muted-foreground">
-                    {opportunities.filter(o => o.stage === 'Proposal' || o.stage === 'Closing').length} in pipeline
+                    {opportunities.filter((o: Opportunity) => o.stage === 'Proposal' || o.stage === 'Closing').length} in pipeline
                     </p>
                 </CardContent>
                 </Card>
@@ -205,20 +182,9 @@ export default function Dashboard() {
                     <Activity className="ml-auto h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent className="grid gap-8">
-                    {recentActivities.map((activity) => (
-                        <div key={activity.id} className="flex items-center gap-4">
-                            <Avatar className="hidden h-9 w-9 sm:flex">
-                                <AvatarImage src={activity.user.avatarUrl} alt="Avatar" data-ai-hint="person face" />
-                                <AvatarFallback>{activity.user.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div className="grid gap-1">
-                                <p className="text-sm font-medium leading-none">
-                                {activity.user.name} <span className="font-normal text-muted-foreground">{activity.action}</span> {activity.target}
-                                </p>
-                                <p className="text-sm text-muted-foreground">{activity.timestamp}</p>
-                            </div>
-                        </div>
-                    ))}
+                   <div className="text-center text-muted-foreground py-10">
+                        Activity feed coming soon.
+                    </div>
                 </CardContent>
                 </Card>
             </div>

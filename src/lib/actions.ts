@@ -5,7 +5,6 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
-  recentActivities,
   users,
 } from "@/lib/data"
 import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto } from "@/lib/types"
@@ -88,6 +87,7 @@ export async function createAccount(accountData: CreateAccountDto) {
     }
 
     revalidatePath('/accounts') // Re-fetches the accounts list on the page
+    revalidatePath('/dashboard')
     return await response.json()
   } catch (error) {
     console.error(error)
@@ -157,6 +157,7 @@ export async function createLead(leadData: CreateLeadDto) {
         }
 
         revalidatePath('/leads');
+        revalidatePath('/dashboard');
         return await response.json();
 
     } catch (error) {
@@ -192,6 +193,7 @@ export async function createOpportunity(opportunityData: CreateOpportunityDto) {
         }
 
         revalidatePath('/opportunities');
+        revalidatePath('/dashboard');
         return await response.json();
 
     } catch (error) {
@@ -273,8 +275,4 @@ export async function createTask(taskData: CreateTaskDto) {
 
 export async function getUsers() {
   return users
-}
-
-export async function getRecentActivities() {
-  return recentActivities
 }
