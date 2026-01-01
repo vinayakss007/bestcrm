@@ -1,5 +1,5 @@
 
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Columns3, Filter, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,6 +35,7 @@ import type { Account, User } from "@/lib/types"
 import { EditAccountDialog } from "@/components/edit-account-dialog"
 import { DeleteAccountDialog } from "@/components/delete-account-dialog"
 import { SearchInput } from "@/components/search-input"
+import { ExportAccountsButton } from "@/components/export-accounts-button"
 
 export default async function AccountsPage({ searchParams }: { searchParams: { query?: string } }) {
   const query = searchParams.query || '';
@@ -110,10 +111,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: { q
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                        <Upload className="mr-2 h-4 w-4" />
-                        Export
-                    </DropdownMenuItem>
+                    <ExportAccountsButton />
                     <DropdownMenuItem>
                         <ListFilter className="mr-2 h-4 w-4" />
                         Customize quick filters

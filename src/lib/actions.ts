@@ -190,6 +190,15 @@ export async function deleteAccount(id: number) {
     }
 }
 
+export async function exportAccountsToCsv(): Promise<string> {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/accounts/export`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        throw new Error('Failed to export accounts');
+    }
+    return response.text();
+}
+
 
 export async function getContacts(query?: string) {
     const headers = await getAuthHeaders();

@@ -223,6 +223,22 @@ paths:
         '401':
           description: Unauthorized
 
+  /accounts/export:
+    get:
+      tags:
+        - Accounts
+      summary: Export accounts to CSV
+      operationId: exportAccounts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A CSV file of accounts.
+          content:
+            text/csv:
+              schema:
+                type: string
+
   /accounts/{accountId}:
     get:
       tags:
@@ -1650,5 +1666,3 @@ components:
 
 security:
   - bearerAuth: []
-
-    

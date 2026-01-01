@@ -2,6 +2,7 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, and, or, ilike } from 'drizzle-orm';
+import { stringify } from 'csv-stringify/sync';
 
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import * as schema from '@/db/schema';
@@ -113,5 +114,33 @@ export class AccountsService {
       .where(eq(schema.crmAccounts.id, id));
 
     return; // Return nothing on successful delete
+  }
+
+  async export(organizationId: number): Promise<string> {
+    const accounts = await this.db.query.crmAccounts.findMany({
+        where: and(
+            eq(schema.crmAccounts.organizationId, organizationId),
+            eq(schema.crmAccounts.isDeleted, false),
+        ),
+        with: {
+            owner: {
+                columns: {
+                    name: true,
+                }
+            }
+        },
+        orderBy: (accounts, { asc }) => [asc(accounts.name)],
+    });
+
+    const data = accounts.map(acc => ({
+        id: acc.id,
+        name: acc.name,
+        industry: acc.industry,
+        owner: (acc as any).owner?.name || 'Unassigned',
+        createdAt: acc.createdAt.toISOString(),
+        updatedAt: acc.updatedAt.toISOString(),
+    }));
+
+    return stringify(data, { header: true });
   }
 }

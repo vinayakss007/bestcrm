@@ -13,6 +13,8 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  Res,
+  Header,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -30,6 +32,12 @@ export class AccountsController {
   create(@Body() createAccountDto: CreateAccountDto, @GetUser() user: User) {
     // Pass organizationId and userId from the authenticated user to the service
     return this.accountsService.create(createAccountDto, user.organizationId, user.userId);
+  }
+
+  @Get('export')
+  @Header('Content-Type', 'text/csv')
+  export(@GetUser() user: User) {
+    return this.accountsService.export(user.organizationId);
   }
 
   @Get()
