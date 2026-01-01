@@ -7,6 +7,7 @@ import {
   Param,
   UseGuards,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -32,8 +33,8 @@ export class AccountsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @GetUser() user: User) {
+  findOne(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
     // Pass organizationId to scope the query
-    return this.accountsService.findOne(+id, user.organizationId);
+    return this.accountsService.findOne(id, user.organizationId);
   }
 }

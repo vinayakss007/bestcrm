@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { OpportunitiesService } from './opportunities.service';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
@@ -20,11 +21,11 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/users.service';
 
 @UseGuards(JwtAuthGuard)
-@Controller('opportunities')
+@Controller()
 export class OpportunitiesController {
   constructor(private readonly opportunitiesService: OpportunitiesService) {}
 
-  @Post()
+  @Post('opportunities')
   create(
     @Body() createOpportunityDto: CreateOpportunityDto,
     @GetUser() user: User,
@@ -35,17 +36,25 @@ export class OpportunitiesController {
     );
   }
 
-  @Get()
+  @Get('opportunities')
   findAll(@GetUser() user: User) {
     return this.opportunitiesService.findAll(user.organizationId);
   }
 
-  @Get(':id')
+  @Get('accounts/:accountId/opportunities')
+  findAllForAccount(
+      @Param('accountId', ParseIntPipe) accountId: number,
+      @GetUser() user: User
+  ) {
+      return this.opportunitiesService.findAll(user.organizationId, accountId);
+  }
+
+  @Get('opportunities/:id')
   findOne(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
     return this.opportunitiesService.findOne(id, user.organizationId);
   }
 
-  @Patch(':id')
+  @Patch('opportunities/:id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOpportunityDto: UpdateOpportunityDto,
@@ -58,7 +67,7 @@ export class OpportunitiesController {
     );
   }
 
-  @Delete(':id')
+  @Delete('opportunities/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
     return this.opportunitiesService.remove(id, user.organizationId);

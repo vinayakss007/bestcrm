@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -20,21 +21,32 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/users.service';
 
 @UseGuards(JwtAuthGuard)
-@Controller('contacts')
+@Controller()
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 
-  @Post()
+  @Post('contacts')
   create(@Body() createContactDto: CreateContactDto, @GetUser() user: User) {
     return this.contactsService.create(createContactDto, user.organizationId);
   }
 
-  @Get()
-  findAll(@GetUser() user: User) {
-    return this.contactsService.findAll(user.organizationId);
+  @Get('contacts')
+  findAll(
+    @GetUser() user: User,
+    @Query('accountId', new ParseIntPipe({ optional: true })) accountId?: number,
+    ) {
+    return this.contactsService.findAll(user.organizationId, accountId);
   }
 
-  @Get(':id')
+  @Get('accounts/:accountId/contacts')
+  findAllForAccount(
+      @Param('accountId', ParseIntPipe) accountId: number,
+      @GetUser() user: User
+  ) {
+      return this.contactsService.findAll(user.organizationId, accountId);
+  }
+
+  @Get('contacts/:id')
   findOne(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: User,
@@ -42,7 +54,7 @@ export class ContactsController {
     return this.contactsService.findOne(id, user.organizationId);
   }
 
-  @Patch(':id')
+  @Patch('contacts/:id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateContactDto: UpdateContactDto,
@@ -51,7 +63,7 @@ export class ContactsController {
     return this.contactsService.update(id, updateContactDto, user.organizationId);
   }
 
-  @Delete(':id')
+  @Delete('contacts/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
     @Param('id', ParseIntPipe) id: number,

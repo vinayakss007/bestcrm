@@ -1,5 +1,5 @@
 
-"use client"
+"use server"
 
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -19,7 +19,7 @@ import {
   ChevronLeft,
 } from "lucide-react"
 
-import { mockAccounts, contacts, opportunities, users } from "@/lib/data"
+import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import * as React from "react"
 import {
   Table,
   TableBody,
@@ -52,6 +51,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import type { Account, Contact, Opportunity, User } from "@/lib/types"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -62,26 +62,24 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
     'Lost': 'destructive'
 }
 
-export default function AccountDetailPage({ params }: { params: { id: string } }) {
-  // NOTE: This still uses mock data until the `getAccountById` API is connected.
-  const account = mockAccounts.find((a) => String(a.ownerId) === params.id) // This is incorrect, but will be fixed
-  const [isDetailsOpen, setIsDetailsOpen] = React.useState(true)
+export default async function AccountDetailPage({ params }: { params: { id: string } }) {
+  const [account, accountContacts, accountOpportunities, users] = await Promise.all([
+    getAccountById(params.id) as Promise<Account>,
+    getContactsByAccountId(params.id) as Promise<Contact[]>,
+    getOpportunitiesByAccountId(params.id) as Promise<Opportunity[]>,
+    getUsers() as Promise<User[]>,
+  ]);
 
   if (!account) {
-    // For now, let's just grab the first account for demo purposes if not found
-    const firstAccount = mockAccounts[0];
-     return (
-    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <h1 className="text-2xl font-bold">Account not found (ID: {params.id})</h1>
-    </div>
-     )
-    
+    notFound()
   }
 
-  const accountContacts = contacts.filter(c => c.accountId === `acc-${account.ownerId}`)
-  const accountOpportunities = opportunities.filter(o => o.accountId === `acc-${account.ownerId}`)
-  const administrator = users[0];
+  const getOwnerById = (id: number | null) => {
+      // The user ID from the backend is a number, but the mock user ID is a string.
+      return users.find(user => id !== null && parseInt(user.id) === id);
+  }
 
+  const owner = getOwnerById(account.ownerId);
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -142,17 +140,8 @@ export default function AccountDetailPage({ params }: { params: { id: string } }
                     <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                     <div className="flex items-start gap-4">
-                        <Avatar>
-                            <AvatarImage src={administrator.avatarUrl} />
-                            <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                            <div className="flex justify-between items-center">
-                                <p className="text-sm font-medium">{administrator.name} created this account</p>
-                                <p className="text-xs text-muted-foreground">2 days ago</p>
-                            </div>
-                        </div>
+                     <div className="text-center text-muted-foreground py-10">
+                        Activity feed coming soon.
                     </div>
                 </CardContent>
              </Card>
@@ -199,9 +188,9 @@ export default function AccountDetailPage({ params }: { params: { id: string } }
                             {accountOpportunities.map(opp => (
                                 <TableRow key={opp.id}>
                                     <TableCell>{opp.name}</TableCell>
-                                    <TableCell><Badge variant={stageVariant[opp.stage]}>{opp.stage}</Badge></TableCell>
-                                    <TableCell>${opp.amount.toLocaleString()}</TableCell>
-                                    <TableCell>{opp.closeDate}</TableCell>
+                                    <TableCell><Badge variant={opp.stage ? stageVariant[opp.stage] : 'secondary'}>{opp.stage}</Badge></TableCell>
+                                    <TableCell>${opp.amount?.toLocaleString()}</TableCell>
+                                    <TableCell>{opp.closeDate ? new Date(opp.closeDate).toLocaleDateString() : 'N/A'}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -238,14 +227,10 @@ export default function AccountDetailPage({ params }: { params: { id: string } }
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
-            <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+            <Collapsible open={true}>
               <CollapsibleTrigger className="w-full">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold">Details</h4>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    {isDetailsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    <span className="sr-only">Toggle</span>
-                  </Button>
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -256,7 +241,7 @@ export default function AccountDetailPage({ params }: { params: { id: string } }
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Contacts</span>
-                    <span>{account.contactsCount}</span>
+                    <span>{accountContacts.length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Created At</span>
@@ -264,13 +249,17 @@ export default function AccountDetailPage({ params }: { params: { id: string } }
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Account Owner</span>
-                    <div className="flex items-center gap-2">
-                        <Avatar className="h-5 w-5">
-                            <AvatarImage src={account.owner.avatarUrl} />
-                            <AvatarFallback>{account.owner.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span>{account.owner.name}</span>
-                     </div>
+                    {owner ? (
+                        <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                                <AvatarImage src={owner.avatarUrl} />
+                                <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{owner.name}</span>
+                        </div>
+                    ) : (
+                        <span className="text-muted-foreground">Unassigned</span>
+                    )}
                   </div>
                 </div>
               </CollapsibleContent>

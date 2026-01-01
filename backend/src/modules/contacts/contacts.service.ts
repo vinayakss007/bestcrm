@@ -45,12 +45,28 @@ export class ContactsService {
     return newContact[0];
   }
 
-  async findAll(organizationId: number) {
-    return await this.db.query.crmContacts.findMany({
-      where: and(
+  async findAll(organizationId: number, accountId?: number) {
+    const conditions = [
         eq(schema.crmContacts.organizationId, organizationId),
         eq(schema.crmContacts.isDeleted, false),
-      ),
+    ];
+
+    if (accountId) {
+        // First, verify the requesting user has access to this account.
+        const account = await this.db.query.crmAccounts.findFirst({
+            where: and(
+                eq(schema.crmAccounts.id, accountId),
+                eq(schema.crmAccounts.organizationId, organizationId)
+            )
+        });
+        if (!account) {
+            throw new ForbiddenException("Access to this account's contacts is denied.");
+        }
+        conditions.push(eq(schema.crmContacts.accountId, accountId));
+    }
+
+    return await this.db.query.crmContacts.findMany({
+      where: and(...conditions),
     });
   }
 
@@ -75,7 +91,7 @@ export class ContactsService {
     organizationId: number,
   ) {
     // First, verify the contact exists and belongs to the user's organization
-    const existingContact = await this.findOne(id, organizationId);
+    await this.findOne(id, organizationId);
 
     if (updateContactDto.accountId) {
         // If accountId is being changed, verify the new account also belongs to the organization

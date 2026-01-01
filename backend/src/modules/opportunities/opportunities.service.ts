@@ -48,12 +48,29 @@ export class OpportunitiesService {
     return newOpportunity[0];
   }
 
-  async findAll(organizationId: number) {
-    return await this.db.query.crmOpportunities.findMany({
-      where: and(
+  async findAll(organizationId: number, accountId?: number) {
+     const conditions = [
         eq(schema.crmOpportunities.organizationId, organizationId),
         eq(schema.crmOpportunities.isDeleted, false),
-      ),
+    ];
+
+    if (accountId) {
+        // First, verify the requesting user has access to this account.
+        const account = await this.db.query.crmAccounts.findFirst({
+            where: and(
+                eq(schema.crmAccounts.id, accountId),
+                eq(schema.crmAccounts.organizationId, organizationId)
+            )
+        });
+        if (!account) {
+            throw new ForbiddenException("Access to this account's opportunities is denied.");
+        }
+        conditions.push(eq(schema.crmOpportunities.accountId, accountId));
+    }
+
+
+    return await this.db.query.crmOpportunities.findMany({
+      where: and(...conditions),
       with: {
         account: {
           columns: {
@@ -78,6 +95,19 @@ export class OpportunitiesService {
         eq(schema.crmOpportunities.organizationId, organizationId),
         eq(schema.crmOpportunities.isDeleted, false),
       ),
+      with: {
+        account: {
+          columns: {
+            name: true,
+          },
+        },
+        owner: {
+            columns: {
+                name: true,
+                avatarUrl: true
+            }
+        }
+      }
     });
 
     if (!opportunity) {

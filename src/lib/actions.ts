@@ -72,6 +72,17 @@ export async function getAccounts() {
   return response.json()
 }
 
+export async function getAccountById(id: string) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/accounts/${id}`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        if (response.status === 404) return null;
+        throw new Error('Failed to fetch account');
+    }
+    return response.json();
+}
+
 export async function createAccount(accountData: CreateAccountDto) {
   const headers = await getAuthHeaders()
   try {
@@ -107,6 +118,17 @@ export async function getContacts() {
     return response.json();
 }
 
+export async function getContactsByAccountId(accountId: string) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/accounts/${accountId}/contacts`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        throw new Error('Failed to fetch contacts for account');
+    }
+    return response.json();
+}
+
+
 export async function createContact(contactData: CreateContactDto) {
     const headers = await getAuthHeaders();
     try {
@@ -122,6 +144,7 @@ export async function createContact(contactData: CreateContactDto) {
         }
 
         revalidatePath('/contacts');
+        revalidatePath(`/accounts/${contactData.accountId}`)
         return await response.json();
 
     } catch (error) {
@@ -178,6 +201,16 @@ export async function getOpportunities() {
     return response.json();
 }
 
+export async function getOpportunitiesByAccountId(accountId: string) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/accounts/${accountId}/opportunities`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        throw new Error('Failed to fetch opportunities for account');
+    }
+    return response.json();
+}
+
 export async function createOpportunity(opportunityData: CreateOpportunityDto) {
     const headers = await getAuthHeaders();
     try {
@@ -194,6 +227,7 @@ export async function createOpportunity(opportunityData: CreateOpportunityDto) {
 
         revalidatePath('/opportunities');
         revalidatePath('/dashboard');
+        revalidatePath(`/accounts/${opportunityData.accountId}`);
         return await response.json();
 
     } catch (error) {
