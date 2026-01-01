@@ -1,9 +1,11 @@
 
 'use server'
 
+import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { setCookie, parseCookies } from 'nookies'
-import { accounts, contacts, leads, opportunities, recentActivities, tasks, users } from '@/lib/data'
+import { contacts, leads, opportunities, recentActivities, tasks, users } from '@/lib/data'
+import { CreateAccountDto } from '@/lib/types'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -25,7 +27,7 @@ export async function login(prevState: { error: string } | undefined, formData: 
     }
     
     // Set cookie
-    setCookie(null, 'token', data.access_token, {
+    cookies().set('token', data.access_token, {
       maxAge: 30 * 24 * 60 * 60,
       path: '/',
       httpOnly: true,
@@ -43,27 +45,53 @@ export async function login(prevState: { error: string } | undefined, formData: 
 }
 
 async function getAuthHeaders() {
-    const cookies = parseCookies();
-    const token = cookies.token;
+    const token = cookies().get('token')?.value;
     if (!token) {
         // In a real app, you'd probably redirect to login
-        throw new Error('Not authenticated');
+        redirect('/login');
     }
     return {
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
     }
 }
 
 
 export async function getAccounts() {
-  // const headers = await getAuthHeaders();
-  // const response = await fetch(`${API_URL}/accounts`, { headers });
-  // if (!response.ok) {
-  //     throw new Error('Failed to fetch accounts');
-  // }
-  // return response.json();
-  return accounts;
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${API_URL}/accounts`, { headers });
+  if (!response.ok) {
+      if (response.status === 401) {
+          redirect('/login');
+      }
+      throw new Error('Failed to fetch accounts');
+  }
+  return response.json();
 }
+
+export async function createAccount(accountData: CreateAccountDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/accounts`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(accountData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to create account');
+        }
+
+        revalidatePath('/accounts'); // Re-fetches the accounts list on the page
+        return await response.json();
+
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while creating the account.');
+    }
+}
+
 
 export async function getContacts() {
   return contacts;

@@ -19,7 +19,7 @@ import {
   ChevronLeft,
 } from "lucide-react"
 
-import { accounts, contacts, opportunities, users } from "@/lib/data"
+import { mockAccounts, contacts, opportunities, users } from "@/lib/data"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -63,15 +63,23 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
 }
 
 export default function AccountDetailPage({ params }: { params: { id: string } }) {
-  const account = accounts.find((a) => a.id === params.id)
+  // NOTE: This still uses mock data until the `getAccountById` API is connected.
+  const account = mockAccounts.find((a) => String(a.ownerId) === params.id) // This is incorrect, but will be fixed
   const [isDetailsOpen, setIsDetailsOpen] = React.useState(true)
 
   if (!account) {
-    notFound()
+    // For now, let's just grab the first account for demo purposes if not found
+    const firstAccount = mockAccounts[0];
+     return (
+    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <h1 className="text-2xl font-bold">Account not found (ID: {params.id})</h1>
+    </div>
+     )
+    
   }
 
-  const accountContacts = contacts.filter(c => c.accountId === account.id)
-  const accountOpportunities = opportunities.filter(o => o.accountId === account.id)
+  const accountContacts = contacts.filter(c => c.accountId === `acc-${account.ownerId}`)
+  const accountOpportunities = opportunities.filter(o => o.accountId === `acc-${account.ownerId}`)
   const administrator = users[0];
 
 

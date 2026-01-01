@@ -6,14 +6,27 @@ export type User = {
   avatarUrl: string;
 };
 
+// This type is based on the Drizzle schema `crmAccounts`
 export type Account = {
-  id: string;
+  id: number;
   name: string;
-  industry: string;
-  owner: User;
-  contactsCount: number;
+  industry: string | null;
+  ownerId: number | null;
+  organizationId: number;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  customFields: any | null; // JSONB can be any object
   createdAt: string;
+  updatedAt: string;
 };
+
+// This DTO type is based on the backend `CreateAccountDto`
+export type CreateAccountDto = {
+    name: string;
+    industry?: string;
+    ownerId?: number;
+};
+
 
 export type Contact = {
   id: string;

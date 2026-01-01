@@ -1,7 +1,4 @@
 
-"use client"
-
-import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -33,23 +30,22 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AddAccountDialog } from "@/components/add-account-dialog"
 import { getAccounts } from "@/lib/actions"
-import { Pagination } from "@/components/pagination"
+// import { Pagination } from "@/components/pagination"
 import type { Account } from "@/lib/types"
 import { Input } from "@/components/ui/input"
+import { users } from "@/lib/data" // We still need this for mock owner data
 
-export default function AccountsPage() {
-  const [accounts, setAccounts] = React.useState<Account[]>([]);
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(5);
-  const [total, setTotal] = React.useState(0);
+export default async function AccountsPage() {
+  const accounts: Account[] = await getAccounts();
+  // const [page, setPage] = React.useState(1);
+  // const [pageSize, setPageSize] = React.useState(5);
+  // const total = accounts.length;
+  // const paginatedAccounts = accounts.slice((page - 1) * pageSize, page * pageSize);
 
-  React.useEffect(() => {
-    getAccounts().then((allAccounts) => {
-      setTotal(allAccounts.length);
-      const paginatedAccounts = allAccounts.slice((page - 1) * pageSize, page * pageSize);
-      setAccounts(paginatedAccounts);
-    });
-  }, [page, pageSize]);
+  const getOwnerById = (id: number | null) => {
+      return users.find(user => user.id === String(id));
+  }
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -145,9 +141,6 @@ export default function AccountsPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Industry</TableHead>
                 <TableHead className="hidden md:table-cell">
-                  Contacts
-                </TableHead>
-                <TableHead className="hidden md:table-cell">
                   Owner
                 </TableHead>
                 <TableHead className="hidden md:table-cell">
@@ -159,61 +152,65 @@ export default function AccountsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {accounts.map((account) => (
-                <TableRow key={account.id}>
-                  <TableCell className="font-medium">
-                    <Link href={`/accounts/${account.id}`} className="hover:underline">
-                      {account.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{account.industry}</TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {account.contactsCount}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                     <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                            <AvatarImage src={account.owner.avatarUrl} alt={account.owner.name} data-ai-hint="person face" />
-                            <AvatarFallback>{account.owner.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span>{account.owner.name}</span>
-                     </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {new Date(account.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {accounts.map((account) => {
+                const owner = getOwnerById(account.ownerId);
+                return (
+                    <TableRow key={account.id}>
+                    <TableCell className="font-medium">
+                        <Link href={`/accounts/${account.id}`} className="hover:underline">
+                        {account.name}
+                        </Link>
+                    </TableCell>
+                    <TableCell>{account.industry}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                        {owner ? (
+                            <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                    <AvatarImage src={owner.avatarUrl} alt={owner.name} data-ai-hint="person face" />
+                                    <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span>{owner.name}</span>
+                            </div>
+                        ) : (
+                            <span className="text-muted-foreground">Unassigned</span>
+                        )}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                        {new Date(account.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                            aria-haspopup="true"
+                            size="icon"
+                            variant="ghost"
+                            >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
+                    </TableCell>
+                    </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </CardContent>
         <CardFooter>
-            <Pagination
+            {/* <Pagination
                 page={page}
                 pageSize={pageSize}
                 total={total}
                 onPageChange={setPage}
                 onPageSizeChange={setPageSize}
-            />
+            /> */}
         </CardFooter>
       </Card>
     </div>

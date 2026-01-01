@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -11,6 +12,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -32,17 +34,21 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { users } from "@/lib/data"
+import { createAccount } from "@/lib/actions"
+import { useToast } from "@/hooks/use-toast"
 
 const accountSchema = z.object({
   name: z.string().min(2, { message: "Account name must be at least 2 characters." }),
-  industry: z.string().min(2, { message: "Industry must be at least 2 characters." }),
-  ownerId: z.string({ required_error: "Please select an owner." }),
+  industry: z.string().optional(),
+  ownerId: z.string().optional(),
 })
 
 type AccountFormValues = z.infer<typeof accountSchema>
 
 export function AddAccountDialog() {
   const [open, setOpen] = React.useState(false)
+  const { toast } = useToast()
+  
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
@@ -51,11 +57,27 @@ export function AddAccountDialog() {
     },
   })
 
-  function onSubmit(data: AccountFormValues) {
-    console.log(data)
-    // Here you would typically handle form submission, e.g., API call
-    form.reset()
-    setOpen(false)
+  async function onSubmit(data: AccountFormValues) {
+    const accountData = {
+        ...data,
+        ownerId: data.ownerId ? parseInt(data.ownerId) : undefined,
+    }
+    
+    try {
+        await createAccount(accountData)
+        toast({
+            title: "Success",
+            description: `Account "${data.name}" has been created.`,
+        })
+        form.reset()
+        setOpen(false)
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to create account. Please try again.",
+        })
+    }
   }
 
   return (
@@ -69,65 +91,72 @@ export function AddAccountDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Add New Account</DialogTitle>
-          <DialogDescription>
-            Fill in the details below to create a new customer account.
-          </DialogDescription>
-        </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Account Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Innovate Inc." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="industry"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Industry</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Technology" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="ownerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Account Owner</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Add New Account</DialogTitle>
+              <DialogDescription>
+                Fill in the details below to create a new customer account.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Name</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an owner" />
-                      </SelectTrigger>
+                      <Input placeholder="Innovate Inc." {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">Create Account</Button>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="industry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Industry</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Technology" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ownerId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Owner</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an owner" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? "Creating..." : "Create Account"}
+                </Button>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>
