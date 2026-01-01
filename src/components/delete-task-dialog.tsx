@@ -67,5 +67,3 @@ export function DeleteTaskDialog({ taskId }: DeleteTaskDialogProps) {
     </AlertDialog>
   )
 }
-
-    
