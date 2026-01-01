@@ -249,5 +249,3 @@ export type Activity = {
   user: { id: number; name: string; avatarUrl: string | null };
   details: any;
 };
-
-    
