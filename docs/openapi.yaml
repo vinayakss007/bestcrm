@@ -26,6 +26,8 @@ tags:
     description: Operations related to invoices.
   - name: Tasks
     description: Operations related to tasks.
+  - name: Activities
+    description: Operations related to activity feeds.
 
 paths:
   /auth/login:
@@ -312,6 +314,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Opportunity'
+
+  /accounts/{accountId}/activities:
+    get:
+      tags:
+        - Activities
+      summary: List activities for an account
+      operationId: getActivitiesForAccount
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A chronological list of activities for the specified account.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Activity'
+
 
   /contacts:
     get:
@@ -1228,6 +1255,31 @@ components:
           enum: [Account, Contact, Opportunity, Lead]
         relatedToId:
           type: integer
+    
+    Activity:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [new_contact, new_opportunity, account_created]
+        timestamp:
+          type: string
+          format: date-time
+        user:
+          type: object
+          properties:
+            id: 
+              type: integer
+            name:
+              type: string
+            avatarUrl:
+              type: string
+              format: uri
+        details:
+          type: object
+          additionalProperties: true
 
 
 components:
