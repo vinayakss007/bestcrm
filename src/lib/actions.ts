@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto } from "@/lib/types"
+import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -519,6 +519,49 @@ export async function createTask(taskData: CreateTaskDto) {
     }
 }
 
+export async function updateTask(id: number, taskData: UpdateTaskDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/tasks/${id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(taskData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update task');
+        }
+
+        revalidatePath('/tasks');
+        revalidatePath(`/tasks/${id}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while updating the task.');
+    }
+}
+
+export async function deleteTask(id: number) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/tasks/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+
+        if (response.status !== 204) {
+            const errorData = await response.text();
+            throw new Error(errorData || 'Failed to delete task');
+        }
+
+        revalidatePath('/tasks');
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while deleting the task.');
+    }
+}
+
 
 export async function getUsers() {
   const headers = await getAuthHeaders()
@@ -535,3 +578,5 @@ export async function getUsers() {
   }
   return response.json();
 }
+
+    

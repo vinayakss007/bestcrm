@@ -1,4 +1,6 @@
 
+"use server"
+
 import { MoreHorizontal, ArrowUpDown, Filter, Upload, RefreshCw, Search, Ellipsis } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -27,10 +29,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getTasks, getUsers } from "@/lib/actions"
+import { getTasks, getUsers, updateTask } from "@/lib/actions"
 import { Task, TaskStatus, User } from "@/lib/types"
 import { AddTaskDialog } from "@/components/add-task-dialog"
 import { Input } from "@/components/ui/input"
+import { EditTaskDialog } from "@/components/edit-task-dialog"
+import { DeleteTaskDialog } from "@/components/delete-task-dialog"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
@@ -38,12 +42,13 @@ const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
 }
 
 export default async function TasksPage() {
-  const tasks: Task[] = await getTasks();
-  const users: User[] = await getUsers();
+  const [tasks, users]: [Task[], User[]] = await Promise.all([getTasks(), getUsers()])
   
   const getOwnerById = (id: number | null) => {
       return users.find(user => id !== null && parseInt(user.id) === id);
   }
+
+  const markAsComplete = updateTask.bind(null, { status: 'Completed' })
 
   return (
       <div className="flex flex-col gap-4">
@@ -118,6 +123,8 @@ export default async function TasksPage() {
               <TableBody>
                 {tasks.map((task) => {
                   const assignedTo = getOwnerById(task.assignedToId);
+                  const markTaskComplete = updateTask.bind(null, task.id, { status: "Completed" });
+
                   return (
                   <TableRow key={task.id}>
                     <TableCell className="font-medium">
@@ -158,9 +165,11 @@ export default async function TasksPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>Mark as Complete</DropdownMenuItem>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>Delete</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={markTaskComplete} disabled={task.status === 'Completed'}>
+                            Mark as Complete
+                          </DropdownMenuItem>
+                          <EditTaskDialog task={task} />
+                          <DeleteTaskDialog taskId={task.id} />
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -185,3 +194,5 @@ export default async function TasksPage() {
       </div>
   )
 }
+
+    

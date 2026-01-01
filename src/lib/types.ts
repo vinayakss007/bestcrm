@@ -207,6 +207,15 @@ export type CreateTaskDto = {
   relatedToId?: number;
 };
 
+export type UpdateTaskDto = {
+  title?: string;
+  dueDate?: string;
+  status?: TaskStatus;
+  assignedToId?: number;
+  relatedToType?: RelatedToType;
+  relatedToId?: number;
+};
+
 export type RecentActivity = {
   id: string;
   user: User;
@@ -214,3 +223,5 @@ export type RecentActivity = {
   target: string;
   timestamp: string;
 };
+
+    
