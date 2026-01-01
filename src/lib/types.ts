@@ -294,3 +294,18 @@ export type Comment = {
 export type CreateCommentDto = {
     content: string;
 }
+
+export type Attachment = {
+  id: number;
+  originalName: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  userId: number;
+  createdAt: string;
+  user: {
+    id: number;
+    name: string;
+    avatarUrl: string | null;
+  }
+}

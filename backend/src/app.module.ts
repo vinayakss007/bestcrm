@@ -15,6 +15,7 @@ import { TasksModule } from './modules/tasks/tasks.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { AttachmentsModule } from './modules/attachments/attachments.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CommentsModule } from './modules/comments/comments.module';
     ActivitiesModule,
     OrganizationsModule,
     CommentsModule,
+    AttachmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

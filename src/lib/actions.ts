@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { jwtDecode } from 'jwt-decode'
-import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto } from "@/lib/types"
+import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto, Attachment } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -100,8 +100,9 @@ async function getAuthHeaders() {
     // In a real app, you'd probably redirect to login
     redirect('/login')
   }
+  // When sending FormData, we don't set Content-Type
+  // The browser does it automatically with the correct boundary
   return {
-    'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
   }
 }
@@ -129,7 +130,7 @@ export async function getAccounts(query?: string) {
   if (query) {
       url.searchParams.append('query', query);
   }
-  const response = await fetch(url.toString(), { headers, cache: 'no-store' })
+  const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' })
   if (!response.ok) {
     if (response.status === 401) {
       redirect('/login')
@@ -141,7 +142,7 @@ export async function getAccounts(query?: string) {
 
 export async function getAccountById(id: number) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/accounts/${id}`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/accounts/${id}`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         if (response.status === 404) return null;
@@ -155,7 +156,7 @@ export async function createAccount(accountData: CreateAccountDto) {
   try {
     const response = await fetch(`${API_URL}/accounts`, {
       method: 'POST',
-      headers,
+      headers: {...headers, 'Content-Type': 'application/json'},
       body: JSON.stringify(accountData),
     })
 
@@ -178,7 +179,7 @@ export async function updateAccount(id: number, accountData: UpdateAccountDto) {
     try {
         const response = await fetch(`${API_URL}/accounts/${id}`, {
             method: 'PATCH',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(accountData),
         });
 
@@ -232,7 +233,7 @@ export async function getContacts(query?: string) {
     if (query) {
         url.searchParams.append('query', query);
     }
-    const response = await fetch(url.toString(), { headers, cache: 'no-store' });
+    const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
             redirect('/login');
@@ -244,7 +245,7 @@ export async function getContacts(query?: string) {
 
 export async function getContactById(id: string) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/contacts/${id}`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/contacts/${id}`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         if (response.status === 404) return null;
@@ -255,7 +256,7 @@ export async function getContactById(id: string) {
 
 export async function getContactsByAccountId(accountId: number) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/accounts/${accountId}/contacts`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/accounts/${accountId}/contacts`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         throw new Error('Failed to fetch contacts for account');
@@ -269,7 +270,7 @@ export async function createContact(contactData: CreateContactDto) {
     try {
         const response = await fetch(`${API_URL}/contacts`, {
             method: 'POST',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(contactData),
         });
 
@@ -293,7 +294,7 @@ export async function updateContact(id: number, contactData: UpdateContactDto) {
     try {
         const response = await fetch(`${API_URL}/contacts/${id}`, {
             method: 'PATCH',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(contactData),
         });
 
@@ -341,7 +342,7 @@ export async function getLeads(query?: string) {
     if (query) {
         url.searchParams.append('query', query);
     }
-    const response = await fetch(url.toString(), { headers, cache: 'no-store' });
+    const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
             redirect('/login');
@@ -353,7 +354,7 @@ export async function getLeads(query?: string) {
 
 export async function getLeadById(id: string) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/leads/${id}`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/leads/${id}`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         if (response.status === 404) return null;
@@ -367,7 +368,7 @@ export async function createLead(leadData: CreateLeadDto) {
     try {
         const response = await fetch(`${API_URL}/leads`, {
             method: 'POST',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(leadData),
         });
 
@@ -391,7 +392,7 @@ export async function updateLead(id: number, leadData: UpdateLeadDto) {
     try {
         const response = await fetch(`${API_URL}/leads/${id}`, {
             method: 'PATCH',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(leadData),
         });
 
@@ -434,7 +435,7 @@ export async function convertLead(leadId: number, convertData: ConvertLeadDto) {
     try {
         const response = await fetch(`${API_URL}/leads/${leadId}/convert`, {
             method: 'POST',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(convertData),
         });
 
@@ -465,7 +466,7 @@ export async function getOpportunities(query?: string) {
     if (query) {
       url.searchParams.append('query', query);
     }
-    const response = await fetch(url.toString(), { headers, cache: 'no-store' });
+    const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
             redirect('/login');
@@ -477,7 +478,7 @@ export async function getOpportunities(query?: string) {
 
 export async function getOpportunityById(id: string) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/opportunities/${id}`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/opportunities/${id}`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         if (response.status === 404) return null;
@@ -488,7 +489,7 @@ export async function getOpportunityById(id: string) {
 
 export async function getOpportunitiesByAccountId(accountId: number) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/accounts/${accountId}/opportunities`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/accounts/${accountId}/opportunities`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         throw new Error('Failed to fetch opportunities for account');
@@ -501,7 +502,7 @@ export async function createOpportunity(opportunityData: CreateOpportunityDto) {
     try {
         const response = await fetch(`${API_URL}/opportunities`, {
             method: 'POST',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(opportunityData),
         });
 
@@ -526,7 +527,7 @@ export async function updateOpportunity(id: number, opportunityData: UpdateOppor
     try {
         const response = await fetch(`${API_URL}/opportunities/${id}`, {
             method: 'PATCH',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(opportunityData),
         });
 
@@ -571,7 +572,7 @@ export async function deleteOpportunity(id: number) {
 
 export async function getOpportunityForecast() {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/opportunities/forecast`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/opportunities/forecast`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
             redirect('/login');
@@ -583,7 +584,7 @@ export async function getOpportunityForecast() {
 
 export async function getInvoices() {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/invoices`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/invoices`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
             redirect('/login');
@@ -598,7 +599,7 @@ export async function createInvoice(invoiceData: CreateInvoiceDto) {
     try {
         const response = await fetch(`${API_URL}/invoices`, {
             method: 'POST',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(invoiceData),
         });
 
@@ -638,7 +639,7 @@ export async function deleteInvoice(id: number) {
 
 export async function getTasks() {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_URL}/tasks`, { headers, cache: 'no-store' });
+  const response = await fetch(`${API_URL}/tasks`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
   if (!response.ok) {
     if (response.status === 401) {
       redirect('/login');
@@ -653,7 +654,7 @@ export async function createTask(taskData: CreateTaskDto) {
     try {
         const response = await fetch(`${API_URL}/tasks`, {
             method: 'POST',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(taskData),
         });
 
@@ -676,7 +677,7 @@ export async function updateTask(id: number, taskData: UpdateTaskDto) {
     try {
         const response = await fetch(`${API_URL}/tasks/${id}`, {
             method: 'PATCH',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(taskData),
         });
 
@@ -717,7 +718,7 @@ export async function deleteTask(id: number) {
 
 export async function getUsers() {
   const headers = await getAuthHeaders()
-  const response = await fetch(`${API_URL}/users`, { headers, cache: 'no-store' });
+  const response = await fetch(`${API_URL}/users`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
   if (!response.ok) {
     if (response.status === 401) {
       // This can happen if the token is expired/invalid.
@@ -735,7 +736,7 @@ export async function inviteUser(userData: InviteUserDto) {
     try {
         const response = await fetch(`${API_URL}/users/invite`, {
             method: 'POST',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(userData),
         });
 
@@ -758,7 +759,7 @@ export async function updateUser(id: number, userData: UpdateUserDto) {
     try {
         const response = await fetch(`${API_URL}/users/${id}`, {
             method: 'PATCH',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(userData),
         });
 
@@ -778,7 +779,7 @@ export async function updateUser(id: number, userData: UpdateUserDto) {
 
 export async function getActivities() {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/activities`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/activities`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         throw new Error('Failed to fetch activities');
@@ -789,7 +790,7 @@ export async function getActivities() {
 
 export async function getActivitiesForAccount(accountId: number) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/activities/accounts/${accountId}`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/activities/accounts/${accountId}`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         throw new Error('Failed to fetch activities for account');
@@ -803,7 +804,7 @@ export async function updateOrganization(id: number, orgData: UpdateOrganization
     try {
         const response = await fetch(`${API_URL}/organizations/${id}`, {
             method: 'PATCH',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify(orgData),
         });
 
@@ -823,7 +824,7 @@ export async function updateOrganization(id: number, orgData: UpdateOrganization
 
 async function getCommentsFor(entityType: string, entityId: number) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/${entityType}/${entityId}/comments`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/${entityType}/${entityId}/comments`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         throw new Error(`Failed to fetch comments for ${entityType}`);
@@ -866,7 +867,7 @@ export async function addComment(
     try {
         const response = await fetch(`${API_URL}/${entityPath}/${entityId}/comments`, {
             method: 'POST',
-            headers,
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: JSON.stringify({ content }),
         });
 
@@ -885,4 +886,76 @@ export async function addComment(
 
 export async function addCommentForLead(leadId: number, formData: FormData) {
     return addComment('Lead', leadId, formData);
+}
+
+// Attachment Actions
+const getEntityPath = (entityType: RelatedToType) => {
+    const map = {
+        'Account': 'accounts',
+        'Contact': 'contacts',
+        'Lead': 'leads',
+        'Opportunity': 'opportunities',
+    };
+    return map[entityType];
+}
+
+export async function getAttachments(entityType: RelatedToType, entityId: number): Promise<Attachment[]> {
+    const headers = await getAuthHeaders();
+    const entityPath = getEntityPath(entityType);
+    const response = await fetch(`${API_URL}/${entityPath}/${entityId}/attachments`, {
+        headers: {...headers, 'Content-Type': 'application/json'},
+        cache: 'no-store',
+    });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        throw new Error('Failed to fetch attachments');
+    }
+    return response.json();
+}
+
+export async function uploadAttachment(entityType: RelatedToType, entityId: number, formData: FormData) {
+    const headers = await getAuthHeaders();
+    const entityPath = getEntityPath(entityType);
+
+    try {
+        const response = await fetch(`${API_URL}/${entityPath}/${entityId}/attachments`, {
+            method: 'POST',
+            headers: headers, // No Content-Type, browser will set it for FormData
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to upload file');
+        }
+
+        revalidatePath(`/${entityPath}/${entityId}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while uploading the file.');
+    }
+}
+
+export async function downloadAttachment(attachmentId: number): Promise<{blob: Blob, filename: string}> {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/attachments/${attachmentId}/download`, {
+        headers: headers,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to download attachment');
+    }
+
+    const contentDisposition = response.headers.get('content-disposition');
+    let filename = 'downloaded-file';
+    if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch && filenameMatch.length > 1) {
+            filename = filenameMatch[1];
+        }
+    }
+
+    const blob = await response.blob();
+    return { blob, filename };
 }

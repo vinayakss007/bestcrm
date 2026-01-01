@@ -309,3 +309,23 @@ export const crmActivitiesRelations = relations(crmActivities, ({ one }) => ({
         references: [crmUsers.id],
     }),
 }));
+
+export const crmAttachments = pgTable("crm_attachments", {
+  id: serial("id").primaryKey(),
+  originalName: varchar("original_name", { length: 255 }).notNull(),
+  fileName: varchar("file_name", { length: 255 }).notNull().unique(),
+  fileType: varchar("file_type", { length: 100 }).notNull(),
+  fileSize: integer("file_size").notNull(),
+  userId: integer("user_id").notNull().references(() => crmUsers.id),
+  relatedToType: relatedToTypeEnum("related_to_type").notNull(),
+  relatedToId: integer("related_to_id").notNull(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const crmAttachmentsRelations = relations(crmAttachments, ({ one }) => ({
+  user: one(crmUsers, {
+    fields: [crmAttachments.userId],
+    references: [crmUsers.id],
+  }),
+}));

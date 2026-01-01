@@ -20,7 +20,7 @@ import {
   Lightbulb
 } from "lucide-react"
 
-import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts, getCommentsForAccount, addComment, getCurrentUser } from "@/lib/actions"
+import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts, getCommentsForAccount, addComment, getCurrentUser, getAttachments } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -52,13 +52,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Account, Contact, Opportunity, User, Activity, Comment } from "@/lib/types"
+import type { Account, Contact, Opportunity, User, Activity, Comment, Attachment } from "@/lib/types"
 import { EditAccountDialog } from "@/components/edit-account-dialog"
 import { DeleteAccountDialog } from "@/components/delete-account-dialog"
 import { AddContactDialog } from "@/components/add-contact-dialog"
 import { AddOpportunityDialog } from "@/components/add-opportunity-dialog"
 import { AddTaskDialog } from "@/components/add-task-dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { FileUploader } from "@/components/file-uploader"
+import { AttachmentsList } from "@/components/attachments-list"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -95,7 +97,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     notFound();
   }
 
-  const [account, accountContacts, accountOpportunities, users, activities, allAccounts, comments] = await Promise.all([
+  const [account, accountContacts, accountOpportunities, users, activities, allAccounts, comments, attachments] = await Promise.all([
     getAccountById(accountId) as Promise<Account>,
     getContactsByAccountId(accountId) as Promise<Contact[]>,
     getOpportunitiesByAccountId(accountId) as Promise<Opportunity[]>,
@@ -103,6 +105,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     getActivitiesForAccount(accountId) as Promise<Activity[]>,
     getAccounts() as Promise<Account[]>,
     getCommentsForAccount(accountId) as Promise<Comment[]>,
+    getAttachments('Account', accountId) as Promise<Attachment[]>,
   ]);
 
   if (!account) {
@@ -162,7 +165,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
             </TabsTrigger>
             <TabsTrigger value="attachments">
               <Paperclip className="mr-2 h-4 w-4" />
-              Attachments
+              Attachments ({attachments.length})
             </TabsTrigger>
           </TabsList>
           <TabsContent value="activity">
@@ -274,6 +277,18 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                         ))}
                         {comments.length === 0 && <p className="text-muted-foreground text-center py-4">No comments yet.</p>}
                     </div>
+                </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="attachments">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Attachments</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FileUploader entityType="Account" entityId={accountId} />
+                    <Separator />
+                    <AttachmentsList attachments={attachments} />
                 </CardContent>
             </Card>
           </TabsContent>
