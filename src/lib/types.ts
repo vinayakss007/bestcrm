@@ -1,7 +1,7 @@
 
 
 export type User = {
-  id: string;
+  id: number;
   name: string;
   email: string;
   avatarUrl: string | null;
@@ -47,6 +47,10 @@ export type Account = {
   customFields: any | null; // JSONB can be any object
   createdAt: string;
   updatedAt: string;
+  owner?: {
+    name: string;
+    avatarUrl: string | null;
+  } | null;
 };
 
 // This DTO type is based on the backend `CreateAccountDto`
@@ -268,7 +272,7 @@ export type Activity = {
   relatedToId: number | null;
   createdAt: string;
   user: {
-      id: string;
+      id: number;
       name: string;
       avatarUrl: string | null;
   };
@@ -281,7 +285,7 @@ export type Comment = {
   userId: number;
   createdAt: string;
   user?: {
-    id: string;
+    id: number;
     name: string;
     avatarUrl: string | null;
   }

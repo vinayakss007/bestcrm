@@ -20,7 +20,7 @@ import {
   Lightbulb
 } from "lucide-react"
 
-import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts, getCommentsForAccount, addComment } from "@/lib/actions"
+import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts, getCommentsForAccount, addComment, getCurrentUser } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -109,13 +109,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     notFound()
   }
 
-  const getOwnerById = (id: number | null) => {
-      // The user ID from the backend is a number, but the mock user ID is a string.
-      // This will need to be reconciled once we have a real user API.
-      return users.find(user => id !== null && parseInt(user.id) === id);
-  }
-
-  const owner = getOwnerById(account.ownerId);
+  const owner = account.owner;
   const addCommentAction = addComment.bind(null, 'Account', accountId);
 
   return (

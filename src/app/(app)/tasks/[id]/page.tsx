@@ -63,8 +63,8 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
     allUsers, 
     allAccounts, 
     allContacts, 
-    allOpportunities, 
-    allLeads
+    allLeads, 
+    allOpportunities
   ] = await Promise.all([
     getTasks(),
     getUsers(),

@@ -79,6 +79,11 @@ export const organizations = pgTable("organizations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const organizationsRelations = relations(organizations, ({ many }) => ({
+	users: many(crmUsers),
+}));
+
+
 export const userRoleEnum = pgEnum('user_role', ['user', 'company-admin', 'super-admin']);
 
 // Users within the CRM system, scoped to an organization.
@@ -118,6 +123,16 @@ export const crmAccounts = pgTable("crm_accounts", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmAccountsRelations = relations(crmAccounts, ({ one, many }) => ({
+  owner: one(crmUsers, {
+    fields: [crmAccounts.ownerId],
+    references: [crmUsers.id],
+  }),
+  contacts: many(crmContacts),
+  opportunities: many(crmOpportunities),
+}));
+
+
 // Contacts are individuals associated with an Account, scoped to an organization.
 export const crmContacts = pgTable("crm_contacts", {
   id: serial("id").primaryKey(),
@@ -134,6 +149,14 @@ export const crmContacts = pgTable("crm_contacts", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const crmContactsRelations = relations(crmContacts, ({ one }) => ({
+  account: one(crmAccounts, {
+    fields: [crmContacts.accountId],
+    references: [crmAccounts.id],
+  }),
+}));
+
 
 // Enums provide a fixed set of values for specific fields, ensuring data integrity.
 export const leadStatusEnum = pgEnum('lead_status', ['New', 'Contacted', 'Qualified', 'Lost']);
@@ -154,6 +177,13 @@ export const crmLeads = pgTable("crm_leads", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmLeadsRelations = relations(crmLeads, ({ one }) => ({
+  owner: one(crmUsers, {
+    fields: [crmLeads.ownerId],
+    references: [crmUsers.id],
+  }),
+}));
+
 export const opportunityStageEnum = pgEnum('opportunity_stage', ['Prospecting', 'Qualification', 'Proposal', 'Closing', 'Won', 'Lost']);
 
 // Opportunities are qualified leads, scoped to an organization.
@@ -173,6 +203,18 @@ export const crmOpportunities = pgTable("crm_opportunities", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmOpportunitiesRelations = relations(crmOpportunities, ({ one }) => ({
+  account: one(crmAccounts, {
+    fields: [crmOpportunities.accountId],
+    references: [crmAccounts.id],
+  }),
+  owner: one(crmUsers, {
+    fields: [crmOpportunities.ownerId],
+    references: [crmUsers.id],
+  }),
+}));
+
+
 export const taskStatusEnum = pgEnum('task_status', ['Pending', 'Completed']);
 export const relatedToTypeEnum = pgEnum('related_to_type', ['Account', 'Contact', 'Opportunity', 'Lead']);
 
@@ -190,6 +232,14 @@ export const crmTasks = pgTable("crm_tasks", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmTasksRelations = relations(crmTasks, ({ one }) => ({
+  assignedTo: one(crmUsers, {
+    fields: [crmTasks.assignedToId],
+    references: [crmUsers.id],
+  }),
+}));
+
+
 export const invoiceStatusEnum = pgEnum('invoice_status', ['Draft', 'Sent', 'Paid', 'Void']);
 
 // Invoices are created for leads, scoped to an organization.
@@ -205,6 +255,14 @@ export const crmInvoices = pgTable("crm_invoices", {
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmInvoicesRelations = relations(crmInvoices, ({ one }) => ({
+  lead: one(crmLeads, {
+    fields: [crmInvoices.leadId],
+    references: [crmLeads.id],
+  }),
+}));
+
+
 // Comments can be attached to various CRM records.
 export const crmComments = pgTable("crm_comments", {
   id: serial("id").primaryKey(),
@@ -215,6 +273,13 @@ export const crmComments = pgTable("crm_comments", {
   organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const crmCommentsRelations = relations(crmComments, ({ one }) => ({
+  user: one(crmUsers, {
+    fields: [crmComments.userId],
+    references: [crmUsers.id],
+  }),
+}));
 
 // A log of all significant actions taken within an organization.
 export const activityTypeEnum = pgEnum('activity_type', [
@@ -237,3 +302,10 @@ export const crmActivities = pgTable("crm_activities", {
     relatedToId: integer("related_to_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const crmActivitiesRelations = relations(crmActivities, ({ one }) => ({
+    user: one(crmUsers, {
+        fields: [crmActivities.userId],
+        references: [crmUsers.id],
+    }),
+}));

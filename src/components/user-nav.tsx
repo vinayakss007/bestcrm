@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -20,36 +21,44 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { logout, getUsers } from "@/lib/actions"
+import { logout, getCurrentUser } from "@/lib/actions"
 import { ThemeSwitcher } from "./theme-switcher"
 import { Sun } from "lucide-react"
 import type { User } from "@/lib/types"
 import { useEffect, useState } from "react"
+import { Skeleton } from "./ui/skeleton"
 
 export function UserNav() {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchUser() {
       try {
-        const users = await getUsers();
-        if (users && users.length > 0) {
-          setUser(users[0]);
-        }
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
       } catch (error) {
         console.error("Failed to fetch user:", error);
         // Handle error appropriately, maybe redirect to login
+      } finally {
+        setLoading(false);
       }
     }
     fetchUser();
   }, []);
 
+  if (loading) {
+    return <Skeleton className="h-9 w-9 rounded-full" />;
+  }
+
   if (!user) {
     return (
-       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-9 w-9">
-            <AvatarFallback></AvatarFallback>
-          </Avatar>
+       <Button variant="ghost" className="relative h-8 w-8 rounded-full asChild">
+          <Link href="/login">
+            <Avatar className="h-9 w-9">
+              <AvatarFallback></AvatarFallback>
+            </Avatar>
+          </Link>
         </Button>
     );
   }

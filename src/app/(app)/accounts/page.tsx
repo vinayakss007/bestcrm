@@ -44,13 +44,6 @@ export default async function AccountsPage({ searchParams }: { searchParams: { q
     getUsers(),
   ]);
 
-  const getOwnerById = (id: number | null) => {
-      // The user ID from the backend is a number, but the mock user ID is a string.
-      // This will need to be reconciled once we have a real user API.
-      return users.find(user => id !== null && parseInt(user.id) === id);
-  }
-
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
@@ -147,7 +140,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: { q
             </TableHeader>
             <TableBody>
               {accounts.map((account) => {
-                const owner = getOwnerById(account.ownerId);
+                const owner = account.owner;
                 return (
                     <TableRow key={account.id}>
                     <TableCell className="font-medium">
@@ -160,7 +153,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: { q
                         {owner ? (
                             <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6">
-                                    <AvatarImage src={owner.avatarUrl} alt={owner.name} data-ai-hint="person face" />
+                                    <AvatarImage src={owner.avatarUrl || ''} alt={owner.name} data-ai-hint="person face" />
                                     <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <span>{owner.name}</span>

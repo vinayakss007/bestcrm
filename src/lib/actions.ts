@@ -4,7 +4,8 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto } from "@/lib/types"
+import { jwtDecode } from 'jwt-decode'
+import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -104,6 +105,23 @@ async function getAuthHeaders() {
     Authorization: `Bearer ${token}`,
   }
 }
+
+export async function getCurrentUser(): Promise<User | null> {
+    const token = cookies().get('token')?.value;
+    if (!token) {
+        return null;
+    }
+    try {
+        const decodedToken: { sub: number, email: string } = jwtDecode(token);
+        const allUsers = await getUsers();
+        // The `sub` property in the JWT payload corresponds to the user's ID (`userId` in JWTStrategy).
+        return allUsers.find((user: User) => user.id === decodedToken.sub) || null;
+    } catch (error) {
+        console.error("Failed to decode token or fetch user:", error);
+        return null;
+    }
+}
+
 
 export async function getAccounts(query?: string) {
   const headers = await getAuthHeaders()

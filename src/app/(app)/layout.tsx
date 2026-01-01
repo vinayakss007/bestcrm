@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getUsers } from "@/lib/actions"
+import { getCurrentUser } from "@/lib/actions"
 import type { User } from "@/lib/types"
 
 export default async function AppLayout({
@@ -31,8 +31,7 @@ export default async function AppLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const users: User[] = await getUsers();
-  const user = users[0];
+  const user: User | null = await getCurrentUser();
   
   return (
     <SidebarProvider>
@@ -46,28 +45,32 @@ export default async function AppLayout({
                       <AvatarFallback>A</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden">
-                      <span className="text-sm">abetworks crm</span>
+                      <span className="text-sm">{user?.organization?.name || 'My Workspace'}</span>
                       <span className="text-xs font-normal text-muted-foreground">Workspace</span>
                     </div>
                     <ChevronsUpDown className="h-4 w-4 ml-auto group-data-[collapsible=icon]:hidden" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64" align="start">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      Super Administrator
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                {user && (
+                    <>
+                    <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                        {user.role}
+                        </p>
+                    </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    </>
+                )}
                 <DropdownMenuItem>
                    <Avatar className="h-8 w-8 mr-2">
                       <AvatarImage src="https://picsum.photos/seed/1/32/32" data-ai-hint="logo" />
                       <AvatarFallback>A</AvatarFallback>
                     </Avatar>
-                    abetworks crm
+                    {user?.organization?.name || 'My Workspace'}
                 </DropdownMenuItem>
                  <DropdownMenuItem>
                    <Avatar className="h-8 w-8 mr-2">
@@ -94,7 +97,7 @@ export default async function AppLayout({
       </Sidebar>
       <SidebarInset>
         <Header />
-        <main className="flex flex-1 flex-col overflow-y-auto p-4 sm:px-6 sm:py-4">
+        <main className="flex flex-1 flex-col overflow-y-auto p-4 sm:px-6 sm:py-4 min-w-0">
             {children}
         </main>
       </SidebarInset>
