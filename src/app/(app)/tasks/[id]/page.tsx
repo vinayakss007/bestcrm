@@ -6,14 +6,8 @@ import {
   Activity,
   Archive,
   CheckSquare,
-  ChevronDown,
   ChevronLeft,
-  ChevronUp,
   Link as LinkIcon,
-  Mail,
-  MessageSquare,
-  Paperclip,
-  Trash2,
   Calendar,
 } from "lucide-react"
 
@@ -86,7 +80,7 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
     notFound()
   }
 
-  const administrator = allUsers.find((u: User) => u.id === '1'); // Mock creator
+  const administrator = allUsers.find((u: User) => u.role === 'company-admin');
 
   const getRelatedEntity = (task: Task): RelatedEntity | undefined => {
     if (!task.relatedToType || !task.relatedToId) return undefined;
@@ -117,7 +111,7 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
             </Link>
             <h1 className="text-2xl font-bold">Tasks / {task.title}</h1>
             <div className="ml-auto flex items-center gap-2">
-                 <EditTaskDialog task={task} />
+                 <EditTaskDialog task={task} as="button" />
             </div>
         </div>
 
@@ -131,10 +125,6 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
               <Archive className="mr-2 h-4 w-4" />
               Notes
             </TabsTrigger>
-            <TabsTrigger value="attachments">
-              <Paperclip className="mr-2 h-4 w-4" />
-              Attachments
-            </TabsTrigger>
           </TabsList>
           <TabsContent value="activity">
              <Card>
@@ -145,7 +135,7 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
                     {administrator && (
                      <div className="flex items-start gap-4">
                         <Avatar>
-                            <AvatarImage src={administrator.avatarUrl} />
+                            <AvatarImage src={administrator.avatarUrl || ''} />
                             <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">

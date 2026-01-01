@@ -16,7 +16,8 @@ import {
   Plus,
   ChevronLeft,
   Contact as ContactIcon,
-  Briefcase
+  Briefcase,
+  Lightbulb
 } from "lucide-react"
 
 import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts, getCommentsForAccount, addComment } from "@/lib/actions"
