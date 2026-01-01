@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string;
   name: string;
@@ -6,6 +7,12 @@ export type User = {
   avatarUrl: string | null;
   role: 'user' | 'company-admin' | 'super-admin';
   createdAt: string;
+};
+
+export type RegisterDto = {
+  name: string;
+  email: string;
+  password?: string;
 };
 
 // This type is based on the Drizzle schema `crmAccounts`

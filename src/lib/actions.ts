@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto } from "@/lib/types"
+import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -43,6 +43,40 @@ export async function login(
 
   // Redirect to dashboard on successful login
   redirect('/dashboard')
+}
+
+export async function register(
+  prevState: { error?: string, message?: string } | undefined,
+  formData: FormData
+): Promise<{ error?: string, message?: string }> {
+  try {
+    const name = formData.get('name') as string
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
+    if (password.length < 8) {
+      return { error: 'Password must be at least 8 characters long.' }
+    }
+
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      return { error: data.message || 'Registration failed. Please try again.' }
+    }
+
+    // Don't log the user in automatically, make them sign in.
+    return { message: 'Registration successful!' }
+    
+  } catch (e: any) {
+    console.error(e)
+    return { error: 'An unexpected error occurred during registration.' }
+  }
 }
 
 export async function logout() {

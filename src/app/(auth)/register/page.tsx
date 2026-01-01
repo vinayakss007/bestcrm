@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { useFormState, useFormStatus } from "react-dom"
-import { login } from "@/lib/actions"
+import { register } from "@/lib/actions"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -20,22 +20,26 @@ import { AlertCircle } from "lucide-react"
 
 function SubmitButton() {
     const { pending } = useFormStatus()
-    return <Button className="w-full" type="submit" disabled={pending}>{pending ? "Signing in..." : "Sign In"}</Button>
+    return <Button className="w-full" type="submit" disabled={pending}>{pending ? "Creating account..." : "Create account"}</Button>
 }
 
-export default function LoginPage() {
-  const [state, formAction] = useFormState(login, undefined)
+export default function RegisterPage() {
+  const [state, formAction] = useFormState(register, undefined)
 
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
+        <CardTitle className="text-2xl">Sign Up</CardTitle>
         <CardDescription>
-          Enter your email below to login to your account
+          Enter your information to create an account
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="grid gap-4">
+            <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="name" placeholder="Alex Doe" required />
+            </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -48,7 +52,7 @@ export default function LoginPage() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" required />
+            <Input id="password" name="password" type="password" required minLength={8} />
           </div>
           {state?.error && (
             <Alert variant="destructive">
@@ -59,14 +63,23 @@ export default function LoginPage() {
                 </AlertDescription>
             </Alert>
           )}
+           {state?.message && (
+            <Alert variant="default">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>
+                    {state.message} Please <Link href="/login" className="underline">login</Link> to continue.
+                </AlertDescription>
+            </Alert>
+          )}
           <SubmitButton />
         </form>
       </CardContent>
-      <CardFooter className="text-sm">
+       <CardFooter className="text-sm">
         <div className="w-full text-center">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="underline">
-                Sign up
+            Already have an account?{" "}
+            <Link href="/login" className="underline">
+                Sign in
             </Link>
         </div>
       </CardFooter>
