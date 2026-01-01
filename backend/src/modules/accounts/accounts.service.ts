@@ -1,7 +1,7 @@
 
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or, ilike } from 'drizzle-orm';
 
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import * as schema from '@/db/schema';
@@ -26,16 +26,25 @@ export class AccountsService {
     return newAccount[0];
   }
 
-  async findAll(organizationId: number) {
+  async findAll(organizationId: number, query?: string) {
+    const conditions = [
+        eq(schema.crmAccounts.organizationId, organizationId),
+        eq(schema.crmAccounts.isDeleted, false),
+    ];
+
+    if (query) {
+        conditions.push(
+            or(
+                ilike(schema.crmAccounts.name, `%${query}%`),
+                ilike(schema.crmAccounts.industry, `%${query}%`)
+            )
+        )
+    }
+
     return await this.db
       .select()
       .from(schema.crmAccounts)
-      .where(
-        and(
-          eq(schema.crmAccounts.organizationId, organizationId),
-          eq(schema.crmAccounts.isDeleted, false), // Exclude soft-deleted accounts
-        ),
-      );
+      .where(and(...conditions));
   }
 
   async findOne(id: number, organizationId: number) {

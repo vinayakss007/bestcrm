@@ -12,6 +12,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -32,9 +33,9 @@ export class AccountsController {
   }
 
   @Get()
-  findAll(@GetUser() user: User) {
-    // Pass organizationId to scope the query
-    return this.accountsService.findAll(user.organizationId);
+  findAll(@GetUser() user: User, @Query('query') query?: string) {
+    // Pass organizationId and optional query to scope the query
+    return this.accountsService.findAll(user.organizationId, query);
   }
 
   @Get(':id')
