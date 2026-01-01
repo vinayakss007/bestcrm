@@ -27,15 +27,28 @@ export type CreateAccountDto = {
     ownerId?: number;
 };
 
-
+// This type is based on the Drizzle schema `crmContacts`
 export type Contact = {
-  id: string;
+  id: number;
   name: string;
-  email: string;
-  phone: string;
-  accountId: string;
-  accountName: string;
-};
+  email: string | null;
+  phone: string | null;
+  accountId: number;
+  organizationId: number;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  customFields: any | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateContactDto = {
+  name: string;
+  email?: string;
+  phone?: string;
+  accountId: number;
+}
+
 
 export const leadStatus = ['New', 'Contacted', 'Qualified', 'Lost'] as const;
 export type LeadStatus = (typeof leadStatus)[number];

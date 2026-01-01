@@ -1,7 +1,4 @@
 
-"use client"
-
-import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -31,25 +28,17 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { getContacts } from "@/lib/actions"
+import { getContacts, getAccounts } from "@/lib/actions"
 import { AddContactDialog } from "@/components/add-contact-dialog"
-import { Pagination } from "@/components/pagination"
-import type { Contact } from "@/lib/types"
+// import { Pagination } from "@/components/pagination"
+import type { Contact, Account } from "@/lib/types"
 import { Input } from "@/components/ui/input"
 
-export default function ContactsPage() {
-  const [contacts, setContacts] = React.useState<Contact[]>([]);
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(5);
-  const [total, setTotal] = React.useState(0);
-
-  React.useEffect(() => {
-    getContacts().then((allContacts) => {
-      setTotal(allContacts.length);
-      const paginatedContacts = allContacts.slice((page - 1) * pageSize, page * pageSize);
-      setContacts(paginatedContacts);
-    });
-  }, [page, pageSize]);
+export default async function ContactsPage() {
+  const contacts: Contact[] = await getContacts();
+  const accounts: Account[] = await getAccounts();
+  
+  const accountMap = new Map(accounts.map(acc => [acc.id, acc.name]));
 
 
   return (
@@ -124,7 +113,7 @@ export default function ContactsPage() {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-          <AddContactDialog />
+          <AddContactDialog accounts={accounts} />
         </div>
       </div>
       <Card>
@@ -165,7 +154,7 @@ export default function ContactsPage() {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                      <Link href={`/accounts/${contact.accountId}`} className="hover:underline">
-                        {contact.accountName}
+                        {accountMap.get(contact.accountId) || 'N/A'}
                      </Link>
                   </TableCell>
                   <TableCell>
@@ -193,13 +182,13 @@ export default function ContactsPage() {
           </Table>
         </CardContent>
         <CardFooter>
-            <Pagination
+            {/* <Pagination
                 page={page}
                 pageSize={pageSize}
                 total={total}
                 onPageChange={setPage}
                 onPageSizeChange={setPageSize}
-            />
+            /> */}
         </CardFooter>
       </Card>
     </div>

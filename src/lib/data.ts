@@ -1,4 +1,4 @@
-import type { User, Account, Contact, Lead, Opportunity, Task, RecentActivity } from './types';
+import type { User, Account, Lead, Opportunity, Task, RecentActivity, Contact } from './types';
 
 export const users: User[] = [
   { id: '1', name: 'Alex Doe', email: 'alex.doe@example.com', avatarUrl: 'https://picsum.photos/seed/alex/100/100' },
@@ -15,12 +15,12 @@ export const mockAccounts: Omit<Account, "id" | "organizationId" | "isDeleted" |
 ];
 
 
-export const contacts: Contact[] = [
-  { id: 'con-1', name: 'John Doe', email: 'john.doe@innovate.com', phone: '123-456-7890', accountId: 'acc-1', accountName: 'Innovate Inc.' },
-  { id: 'con-2', name: 'Emily White', email: 'emily.white@innovate.com', phone: '123-456-7891', accountId: 'acc-1', accountName: 'Innovate Inc.' },
-  { id: 'con-3', name: 'Michael Brown', email: 'michael.brown@apex.com', phone: '234-567-8901', accountId: 'acc-2', accountName: 'Apex Solutions' },
-  { id: 'con-4', name: 'Sarah Green', email: 'sarah.green@quantum.com', phone: '345-678-9012', accountId: 'acc-3', accountName: 'Quantum Corp' },
-  { id: 'con-5', name: 'David Black', email: 'david.black@synergy.com', phone: '456-789-0123', accountId: 'acc-4', accountName: 'Synergy Ltd.' },
+export const contacts: (Omit<Contact, "id" | "organizationId" | "isDeleted" | "deletedAt" | "customFields" | "createdAt" | "updatedAt"> & {id: string, accountName: string})[] = [
+  { id: 'con-1', name: 'John Doe', email: 'john.doe@innovate.com', phone: '123-456-7890', accountId: 1, accountName: 'Innovate Inc.' },
+  { id: 'con-2', name: 'Emily White', email: 'emily.white@innovate.com', phone: '123-456-7891', accountId: 1, accountName: 'Innovate Inc.' },
+  { id: 'con-3', name: 'Michael Brown', email: 'michael.brown@apex.com', phone: '234-567-8901', accountId: 2, accountName: 'Apex Solutions' },
+  { id: 'con-4', name: 'Sarah Green', email: 'sarah.green@quantum.com', phone: '345-678-9012', accountId: 3, accountName: 'Quantum Corp' },
+  { id: 'con-5', name: 'David Black', email: 'david.black@synergy.com', phone: '456-789-0123', accountId: 4, accountName: 'Synergy Ltd.' },
 ];
 
 export const leads: Lead[] = [

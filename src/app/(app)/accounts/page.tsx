@@ -29,21 +29,23 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AddAccountDialog } from "@/components/add-account-dialog"
-import { getAccounts } from "@/lib/actions"
+import { getAccounts, getUsers } from "@/lib/actions"
 // import { Pagination } from "@/components/pagination"
-import type { Account } from "@/lib/types"
+import type { Account, User } from "@/lib/types"
 import { Input } from "@/components/ui/input"
-import { users } from "@/lib/data" // We still need this for mock owner data
 
 export default async function AccountsPage() {
   const accounts: Account[] = await getAccounts();
+  const users: User[] = await getUsers();
   // const [page, setPage] = React.useState(1);
   // const [pageSize, setPageSize] = React.useState(5);
   // const total = accounts.length;
   // const paginatedAccounts = accounts.slice((page - 1) * pageSize, page * pageSize);
 
   const getOwnerById = (id: number | null) => {
-      return users.find(user => user.id === String(id));
+      // The user ID from the backend is a number, but the mock user ID is a string.
+      // This will need to be reconciled once we have a real user API.
+      return users.find(user => parseInt(user.id) === id);
   }
 
 
