@@ -8,6 +8,7 @@ import { DrizzleModule } from './modules/drizzle/drizzle.module';
 import { ConfigModule } from '@nestjs/config';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
+import { LeadsModule } from './modules/leads/leads.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ContactsModule } from './modules/contacts/contacts.module';
     UsersModule,
     AccountsModule,
     ContactsModule,
+    LeadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
