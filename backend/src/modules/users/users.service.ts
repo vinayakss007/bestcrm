@@ -41,7 +41,7 @@ export class UsersService {
     });
   }
 
-  async create(registerDto: RegisterDto): Promise<Omit<User, 'passwordHash'>> {
+  async create(registerDto: RegisterDto): Promise<User> {
     const existingUser = await this.findOneByEmail(registerDto.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
@@ -81,15 +81,7 @@ export class UsersService {
     const newUsers = await this.db
       .insert(schema.crmUsers)
       .values(newUserInsert)
-      .returning({
-          id: schema.crmUsers.id,
-          name: schema.crmUsers.name,
-          email: schema.crmUsers.email,
-          avatarUrl: schema.crmUsers.avatarUrl,
-          organizationId: schema.crmUsers.organizationId,
-          role: schema.crmUsers.role,
-          createdAt: schema.crmUsers.createdAt
-      });
+      .returning();
     
     return newUsers[0];
   }
