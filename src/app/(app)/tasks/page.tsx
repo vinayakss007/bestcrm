@@ -1,8 +1,5 @@
 
-"use client"
-
-import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Filter, Upload, RefreshCw, Search, CalendarIcon, Ellipsis } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Filter, Upload, RefreshCw, Search, Ellipsis } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -30,58 +27,23 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { format } from "date-fns"
-import { getTasks } from "@/lib/actions"
-import { Task, TaskStatus } from "@/lib/types"
+import { getTasks, getUsers } from "@/lib/actions"
+import { Task, TaskStatus, User } from "@/lib/types"
 import { AddTaskDialog } from "@/components/add-task-dialog"
-import { Pagination } from "@/components/pagination"
 import { Input } from "@/components/ui/input"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
     'Pending': 'secondary'
 }
 
-export default function TasksPage() {
-  const [allTasks, setAllTasks] = React.useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = React.useState<Task[]>([]);
-  const [paginatedTasks, setPaginatedTasks] = React.useState<Task[]>([]);
+export default async function TasksPage() {
+  const tasks: Task[] = await getTasks();
+  const users: User[] = await getUsers();
   
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
-
-  React.useEffect(() => {
-    getTasks().then((tasks) => {
-      setAllTasks(tasks);
-    });
-  }, []);
-
-  React.useEffect(() => {
-    // Set the initial date on the client to avoid hydration mismatch
-    if (typeof window !== 'undefined' && !selectedDate) {
-      setSelectedDate(new Date());
-    }
-  }, [selectedDate]);
-
-  React.useEffect(() => {
-    let tasks = allTasks;
-    if (selectedDate) {
-      tasks = allTasks.filter(task => {
-        const taskDueDate = new Date(task.dueDate);
-        return taskDueDate.toDateString() === selectedDate.toDateString();
-      });
-    }
-    setFilteredTasks(tasks);
-    setPage(1); // Reset to first page on filter change
-  }, [allTasks, selectedDate]);
-
-  React.useEffect(() => {
-    const paginated = filteredTasks.slice((page - 1) * pageSize, page * pageSize);
-    setPaginatedTasks(paginated);
-  }, [filteredTasks, page, pageSize]);
+  const getOwnerById = (id: number | null) => {
+      return users.find(user => id !== null && parseInt(user.id) === id);
+  }
 
   return (
       <div className="flex flex-col gap-4">
@@ -100,25 +62,6 @@ export default function TasksPage() {
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
             </Button>
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                        <CalendarIcon className="h-3.5 w-3.5" />
-                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                            {selectedDate ? format(selectedDate, "PPP") : "Filter by date"}
-                        </span>
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                    <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={setSelectedDate}
-                        captionLayout="dropdown-nav"
-                        initialFocus
-                    />
-                </PopoverContent>
-            </Popover>
             <Button variant="outline" size="sm" className="h-8 gap-1">
                 <Filter className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -152,10 +95,7 @@ export default function TasksPage() {
           <CardHeader>
             <CardTitle>My Tasks</CardTitle>
             <CardDescription>
-              {selectedDate 
-                ? `Tasks due on ${format(selectedDate, "PPP")}` 
-                : "Manage your tasks and activities."
-              }
+              Manage your tasks and activities.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1">
@@ -170,16 +110,15 @@ export default function TasksPage() {
                   <TableHead className="hidden md:table-cell">
                     Assigned To
                   </TableHead>
-                  <TableHead className="hidden md:table-cell">
-                    Related To
-                  </TableHead>
                   <TableHead>
                     <span className="sr-only">Actions</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedTasks.map((task) => (
+                {tasks.map((task) => {
+                  const assignedTo = getOwnerById(task.assignedToId);
+                  return (
                   <TableRow key={task.id}>
                     <TableCell className="font-medium">
                        <Link href={`/tasks/${task.id}`} className="hover:underline">
@@ -187,22 +126,23 @@ export default function TasksPage() {
                        </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusVariant[task.status]}>{task.status}</Badge>
+                      {task.status && <Badge variant={statusVariant[task.status]}>{task.status}</Badge>}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {new Date(task.dueDate).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                       <div className="flex items-center gap-2">
+                       {assignedTo ? (
+                        <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
-                              <AvatarImage src={task.assignedTo.avatarUrl} alt={task.assignedTo.name} data-ai-hint="person face" />
-                              <AvatarFallback>{task.assignedTo.name.charAt(0)}</AvatarFallback>
+                              <AvatarImage src={assignedTo.avatarUrl} alt={assignedTo.name} data-ai-hint="person face" />
+                              <AvatarFallback>{assignedTo.name.charAt(0)}</AvatarFallback>
                           </Avatar>
-                          <span>{task.assignedTo.name}</span>
+                          <span>{assignedTo.name}</span>
                        </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {task.relatedTo.name}
+                       ) : (
+                        <span className="text-muted-foreground">Unassigned</span>
+                       )}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -225,24 +165,20 @@ export default function TasksPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
+                )})}
               </TableBody>
             </Table>
-             {filteredTasks.length === 0 && (
+             {tasks.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
-                No tasks for this date.
+                No tasks found.
               </div>
             )}
           </CardContent>
-          {filteredTasks.length > 0 && (
+          {tasks.length > 0 && (
             <CardFooter>
-              <Pagination
-                  page={page}
-                  pageSize={pageSize}
-                  total={filteredTasks.length}
-                  onPageChange={setPage}
-                  onPageSizeChange={setPageSize}
-              />
+              <div className="text-xs text-muted-foreground">
+                Showing <strong>1-{tasks.length}</strong> of <strong>{tasks.length}</strong> tasks
+              </div>
             </CardFooter>
           )}
         </Card>

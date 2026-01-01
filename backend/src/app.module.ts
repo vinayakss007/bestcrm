@@ -11,6 +11,7 @@ import { ContactsModule } from './modules/contacts/contacts.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
     LeadsModule,
     OpportunitiesModule,
     InvoicesModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

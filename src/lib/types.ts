@@ -1,5 +1,4 @@
 
-
 export type User = {
   id: string;
   name: string;
@@ -138,17 +137,36 @@ export type CreateInvoiceDto = {
     status?: 'Draft' | 'Sent';
 }
 
-export type TaskStatus = 'Pending' | 'Completed';
+export const taskStatuses = ['Pending', 'Completed'] as const;
+export type TaskStatus = (typeof taskStatuses)[number];
+
+export const relatedToTypes = ['Account', 'Contact', 'Opportunity', 'Lead'] as const;
+export type RelatedToType = (typeof relatedToTypes)[number];
+
 export type Task = {
-  id: string;
+  id: number;
   title: string;
   dueDate: string;
-  status: TaskStatus;
-  assignedTo: User;
-  relatedTo: {
-    type: 'Account' | 'Contact' | 'Opportunity';
+  status: TaskStatus | null;
+  assignedToId: number | null;
+  relatedToType: RelatedToType | null;
+  relatedToId: number | null;
+  organizationId: number;
+  createdAt: string;
+  updatedAt: string;
+  assignedTo: {
     name: string;
-  };
+    avatarUrl: string | null;
+  } | null;
+};
+
+export type CreateTaskDto = {
+  title: string;
+  dueDate: string;
+  status?: TaskStatus;
+  assignedToId: number;
+  relatedToType?: RelatedToType;
+  relatedToId?: number;
 };
 
 export type RecentActivity = {

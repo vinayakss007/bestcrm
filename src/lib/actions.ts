@@ -6,10 +6,9 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
   recentActivities,
-  tasks,
   users,
 } from "@/lib/data"
-import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto } from "@/lib/types"
+import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -237,8 +236,40 @@ export async function createInvoice(invoiceData: CreateInvoiceDto) {
 }
 
 export async function getTasks() {
-  return tasks
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${API_URL}/tasks`, { headers, cache: 'no-store' });
+  if (!response.ok) {
+    if (response.status === 401) {
+      redirect('/login');
+    }
+    throw new Error('Failed to fetch tasks');
+  }
+  return response.json();
 }
+
+export async function createTask(taskData: CreateTaskDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/tasks`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(taskData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to create task');
+        }
+
+        revalidatePath('/tasks');
+        return await response.json();
+
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while creating the task.');
+    }
+}
+
 
 export async function getUsers() {
   return users

@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import {
   Form,
@@ -40,25 +41,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { users, accounts, contacts, opportunities } from "@/lib/data"
-import { TaskStatus } from "@/lib/types"
-
-const taskStatuses: TaskStatus[] = ['Pending', 'Completed']
-const relatedToTypes = ['Account', 'Contact', 'Opportunity']
+import { useToast } from "@/hooks/use-toast"
+import { createTask, getUsers, getAccounts, getContacts, getLeads, getOpportunities } from "@/lib/actions"
+import { taskStatuses, relatedToTypes } from "@/lib/types"
+import type { User, Account, Contact, Lead, Opportunity, RelatedToType } from "@/lib/types"
 
 const taskSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters." }),
   status: z.enum(taskStatuses, { required_error: "Please select a status." }),
   dueDate: z.date({ required_error: "A due date is required." }),
   assignedToId: z.string({ required_error: "Please select a user." }),
-  relatedToType: z.string({ required_error: "Please select a related type." }),
-  relatedToId: z.string({ required_error: "Please select a related item." }),
+  relatedToType: z.enum(relatedToTypes).optional(),
+  relatedToId: z.string().optional(),
 })
 
 type TaskFormValues = z.infer<typeof taskSchema>
 
+type RelatedData = {
+    users: User[];
+    accounts: Account[];
+    contacts: Contact[];
+    leads: Lead[];
+    opportunities: Opportunity[];
+}
+
 export function AddTaskDialog() {
   const [open, setOpen] = React.useState(false)
+  const [relatedData, setRelatedData] = React.useState<RelatedData | null>(null);
+  const { toast } = useToast()
+  
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -67,22 +78,57 @@ export function AddTaskDialog() {
     },
   })
 
+  React.useEffect(() => {
+    if (open) {
+        Promise.all([
+            getUsers(),
+            getAccounts(),
+            getContacts(),
+            getLeads(),
+            getOpportunities()
+        ]).then(([users, accounts, contacts, leads, opportunities]) => {
+            setRelatedData({ users, accounts, contacts, leads, opportunities });
+        });
+    }
+  }, [open]);
+
   const relatedToType = form.watch("relatedToType")
 
-  function onSubmit(data: TaskFormValues) {
-    console.log(data)
-    form.reset()
-    setOpen(false)
+  async function onSubmit(data: TaskFormValues) {
+    const taskData = {
+        ...data,
+        dueDate: data.dueDate.toISOString(),
+        assignedToId: parseInt(data.assignedToId),
+        relatedToId: data.relatedToId ? parseInt(data.relatedToId) : undefined,
+    }
+    try {
+        await createTask(taskData);
+        toast({
+            title: "Success",
+            description: "Task has been created.",
+        })
+        form.reset()
+        setOpen(false)
+    } catch(e) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to create task. Please try again.",
+        })
+    }
   }
 
   const getRelatedToOptions = () => {
+    if (!relatedData) return [];
     switch (relatedToType) {
       case 'Account':
-        return accounts;
+        return relatedData.accounts;
       case 'Contact':
-        return contacts;
+        return relatedData.contacts;
+      case 'Lead':
+        return relatedData.leads;
       case 'Opportunity':
-        return opportunities;
+        return relatedData.opportunities;
       default:
         return [];
     }
@@ -195,7 +241,7 @@ export function AddTaskDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {users.map((user) => (
+                      {relatedData?.users.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.name}
                         </SelectItem>
@@ -245,7 +291,7 @@ export function AddTaskDialog() {
                       </FormControl>
                       <SelectContent>
                         {getRelatedToOptions().map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
+                          <SelectItem key={item.id} value={String(item.id)}>
                             {item.name}
                           </SelectItem>
                         ))}
@@ -256,7 +302,12 @@ export function AddTaskDialog() {
                 )}
               />
             </div>
-            <Button type="submit">Create Task</Button>
+            <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? "Creating..." : "Create Task"}
+                </Button>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>
