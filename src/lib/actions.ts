@@ -656,3 +656,15 @@ export async function updateUser(id: number, userData: UpdateUserDto) {
         throw new Error('An unexpected error occurred while updating the user profile.');
     }
 }
+
+export async function getActivitiesForAccount(accountId: string) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/accounts/${accountId}/activities`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        throw new Error('Failed to fetch activities for account');
+    }
+    return response.json();
+}
+
+    

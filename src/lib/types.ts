@@ -237,4 +237,12 @@ export type RecentActivity = {
   timestamp: string;
 };
 
+export type Activity = {
+  id: string;
+  type: 'new_contact' | 'new_opportunity' | 'account_created';
+  timestamp: string;
+  user: { id: number; name: string; avatarUrl: string | null };
+  details: any;
+};
+
     

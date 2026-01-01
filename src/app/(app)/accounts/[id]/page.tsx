@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import {
-  Activity,
+  Activity as ActivityIcon,
   Archive,
   Building2,
   ChevronDown,
@@ -14,12 +14,13 @@ import {
   Paperclip,
   Phone,
   Trash2,
-  Users,
   Plus,
   ChevronLeft,
+  Contact as ContactIcon,
+  Briefcase
 } from "lucide-react"
 
-import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers } from "@/lib/actions"
+import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -51,7 +52,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Account, Contact, Opportunity, User } from "@/lib/types"
+import type { Account, Contact, Opportunity, User, Activity } from "@/lib/types"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -62,12 +63,32 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
     'Lost': 'destructive'
 }
 
+const activityIcons = {
+    new_contact: <ContactIcon className="h-4 w-4" />,
+    new_opportunity: <Briefcase className="h-4 w-4" />,
+    account_created: <Plus className="h-4 w-4" />,
+}
+
+function getActivityDescription(activity: Activity) {
+    switch (activity.type) {
+        case 'account_created':
+            return <>created account <span className="font-medium">{activity.details.name}</span></>;
+        case 'new_contact':
+            return <>added a new contact <span className="font-medium">{activity.details.name}</span></>;
+        case 'new_opportunity':
+            return <>created a new opportunity <span className="font-medium">{activity.details.name}</span> for ${activity.details.amount?.toLocaleString()}</>;
+        default:
+            return "performed an unknown action";
+    }
+}
+
 export default async function AccountDetailPage({ params }: { params: { id: string } }) {
-  const [account, accountContacts, accountOpportunities, users] = await Promise.all([
+  const [account, accountContacts, accountOpportunities, users, activities] = await Promise.all([
     getAccountById(params.id) as Promise<Account>,
     getContactsByAccountId(params.id) as Promise<Contact[]>,
     getOpportunitiesByAccountId(params.id) as Promise<Opportunity[]>,
     getUsers() as Promise<User[]>,
+    getActivitiesForAccount(params.id) as Promise<Activity[]>,
   ]);
 
   if (!account) {
@@ -114,15 +135,15 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
         <Tabs defaultValue="activity">
           <TabsList className="mb-4">
             <TabsTrigger value="activity">
-              <Activity className="mr-2 h-4 w-4" />
+              <ActivityIcon className="mr-2 h-4 w-4" />
               Activity
             </TabsTrigger>
             <TabsTrigger value="contacts">
-              <Users className="mr-2 h-4 w-4" />
+              <ContactIcon className="mr-2 h-4 w-4" />
               Contacts ({accountContacts.length})
             </TabsTrigger>
             <TabsTrigger value="opportunities">
-              <MessageSquare className="mr-2 h-4 w-4" />
+              <Briefcase className="mr-2 h-4 w-4" />
               Opportunities ({accountOpportunities.length})
             </TabsTrigger>
              <TabsTrigger value="notes">
@@ -139,10 +160,26 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                 <CardHeader>
                     <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="text-center text-muted-foreground py-10">
-                        Activity feed coming soon.
-                    </div>
+                <CardContent className="space-y-6">
+                     {activities.length > 0 ? activities.map((activity) => (
+                        <div key={activity.id} className="flex gap-4">
+                            <div className="p-2 bg-muted rounded-full h-fit">
+                                {activityIcons[activity.type] || <ActivityIcon className="h-4 w-4" />}
+                            </div>
+                            <div className="flex-1 space-y-1">
+                                <p className="text-sm text-muted-foreground">
+                                    <span className="font-medium text-foreground">{activity.user.name}</span> {getActivityDescription(activity)}
+                                </p>
+                                <time className="text-xs text-muted-foreground">
+                                    {new Date(activity.timestamp).toLocaleString()}
+                                </time>
+                            </div>
+                        </div>
+                     )) : (
+                        <div className="text-center text-muted-foreground py-10">
+                            No activity yet.
+                        </div>
+                     )}
                 </CardContent>
              </Card>
           </TabsContent>
@@ -252,7 +289,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                     {owner ? (
                         <div className="flex items-center gap-2">
                             <Avatar className="h-5 w-5">
-                                <AvatarImage src={owner.avatarUrl} />
+                                <AvatarImage src={owner.avatarUrl || ''} />
                                 <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <span>{owner.name}</span>
@@ -270,3 +307,5 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     </div>
   )
 }
+
+    
