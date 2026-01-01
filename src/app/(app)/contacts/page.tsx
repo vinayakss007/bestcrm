@@ -33,6 +33,8 @@ import { AddContactDialog } from "@/components/add-contact-dialog"
 // import { Pagination } from "@/components/pagination"
 import type { Contact, Account } from "@/lib/types"
 import { Input } from "@/components/ui/input"
+import { EditContactDialog } from "@/components/edit-contact-dialog"
+import { DeleteContactDialog } from "@/components/delete-contact-dialog"
 
 export default async function ContactsPage() {
   const contacts: Contact[] = await getContacts();
@@ -171,8 +173,8 @@ export default async function ContactsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <EditContactDialog contact={contact} accounts={accounts} />
+                        <DeleteContactDialog contactId={contact.id} />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

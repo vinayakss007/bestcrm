@@ -58,6 +58,13 @@ export type CreateContactDto = {
   accountId: number;
 }
 
+export type UpdateContactDto = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  accountId?: number;
+}
+
 
 export const leadStatus = ['New', 'Contacted', 'Qualified', 'Lost'] as const;
 export type LeadStatus = (typeof leadStatus)[number];

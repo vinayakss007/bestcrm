@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto } from "@/lib/types"
+import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -204,6 +204,53 @@ export async function createContact(contactData: CreateContactDto) {
         throw new Error('An unexpected error occurred while creating the contact.');
     }
 }
+
+export async function updateContact(id: number, contactData: UpdateContactDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/contacts/${id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(contactData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update contact');
+        }
+
+        revalidatePath('/contacts');
+        revalidatePath(`/contacts/${id}`);
+        if (contactData.accountId) {
+            revalidatePath(`/accounts/${contactData.accountId}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while updating the contact.');
+    }
+}
+
+export async function deleteContact(id: number) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/contacts/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+
+        if (!response.ok) {
+             const errorData = await response.json();
+             throw new Error(errorData.message || 'Failed to delete contact');
+        }
+        
+        revalidatePath('/contacts');
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while deleting the contact.');
+    }
+}
+
 
 export async function getLeads() {
     const headers = await getAuthHeaders();
