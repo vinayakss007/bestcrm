@@ -492,8 +492,8 @@ export async function deleteOpportunity(id: number) {
             headers,
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        if (response.status !== 204) {
+            const errorData = await response.text();
             throw new Error(errorData.message || 'Failed to delete opportunity');
         }
 
