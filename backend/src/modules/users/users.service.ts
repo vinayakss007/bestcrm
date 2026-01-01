@@ -26,6 +26,21 @@ export class UsersService {
     return users[0];
   }
 
+  async findAll(organizationId: number) {
+    return await this.db.query.crmUsers.findMany({
+      where: eq(schema.crmUsers.organizationId, organizationId),
+      columns: {
+        id: true,
+        name: true,
+        email: true,
+        avatarUrl: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: (users, { asc }) => [asc(users.name)],
+    });
+  }
+
   async create(registerDto: RegisterDto): Promise<Omit<User, 'passwordHash'>> {
     const existingUser = await this.findOneByEmail(registerDto.email);
     if (existingUser) {
