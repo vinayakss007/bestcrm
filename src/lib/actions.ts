@@ -118,6 +118,17 @@ export async function getContacts() {
     return response.json();
 }
 
+export async function getContactById(id: string) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/contacts/${id}`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        if (response.status === 404) return null;
+        throw new Error('Failed to fetch contact');
+    }
+    return response.json();
+}
+
 export async function getContactsByAccountId(accountId: string) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/accounts/${accountId}/contacts`, { headers, cache: 'no-store' });

@@ -40,6 +40,9 @@ export type Contact = {
   customFields: any | null;
   createdAt: string;
   updatedAt: string;
+  account?: {
+    name: string;
+  }
 }
 
 export type CreateContactDto = {
@@ -66,6 +69,10 @@ export type Lead = {
   customFields: any | null;
   createdAt: string;
   updatedAt: string;
+  owner?: {
+    name: string;
+    avatarUrl: string | null;
+  } | null;
 };
 
 export type CreateLeadDto = {

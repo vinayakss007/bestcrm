@@ -67,6 +67,13 @@ export class ContactsService {
 
     return await this.db.query.crmContacts.findMany({
       where: and(...conditions),
+      with: {
+        account: {
+            columns: {
+                name: true,
+            }
+        }
+      }
     });
   }
 
@@ -77,6 +84,13 @@ export class ContactsService {
         eq(schema.crmContacts.organizationId, organizationId),
         eq(schema.crmContacts.isDeleted, false),
       ),
+       with: {
+        account: {
+            columns: {
+                name: true,
+            }
+        }
+      }
     });
 
     if (!contact) {

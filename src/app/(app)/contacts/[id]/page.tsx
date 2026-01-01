@@ -1,5 +1,6 @@
 
-"use client"
+
+"use server"
 
 import { notFound } from "next/navigation"
 import {
@@ -9,15 +10,13 @@ import {
   ChevronLeft,
   ChevronUp,
   Mail,
-  MessageSquare,
   Paperclip,
   Phone,
   Plus,
   Trash2,
-  User,
 } from "lucide-react"
 
-import { contacts, users } from "@/lib/data"
+import { getContactById, getUsers } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,7 +32,6 @@ import {
 } from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import * as React from "react"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -41,15 +39,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import type { Contact, User } from "@/lib/types"
 
-export default function ContactDetailPage({ params }: { params: { id: string } }) {
-  const contact = contacts.find((c) => c.id === params.id)
-  const [isDetailsOpen, setIsDetailsOpen] = React.useState(true)
+export default async function ContactDetailPage({ params }: { params: { id: string } }) {
+  const [contact, users] = await Promise.all([
+    getContactById(params.id) as Promise<Contact | null>,
+    getUsers() as Promise<User[]>,
+  ]);
 
   if (!contact) {
     notFound()
   }
 
+  // Assuming the first user is the creator for mock purposes.
   const administrator = users[0];
 
   return (
@@ -115,7 +117,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
                         <div className="flex-1">
                             <div className="flex justify-between items-center">
                                 <p className="text-sm font-medium">{administrator.name} created this contact</p>
-                                <p className="text-xs text-muted-foreground">4 days ago</p>
+                                <p className="text-xs text-muted-foreground">{new Date(contact.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
                     </div>
@@ -155,21 +157,17 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
-            <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+            <Collapsible open={true}>
               <CollapsibleTrigger className="w-full">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold">Details</h4>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    {isDetailsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    <span className="sr-only">Toggle</span>
-                  </Button>
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="space-y-3 py-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Account</span>
-                    <Link href={`/accounts/${contact.accountId}`} className="text-primary hover:underline">{contact.accountName}</Link>
+                    <Link href={`/accounts/${contact.accountId}`} className="text-primary hover:underline">{contact.account?.name}</Link>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Email</span>
