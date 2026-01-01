@@ -48,8 +48,6 @@ export default async function TasksPage() {
       return users.find(user => id !== null && parseInt(user.id) === id);
   }
 
-  const markAsComplete = updateTask.bind(null, { status: 'Completed' })
-
   return (
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
@@ -142,7 +140,7 @@ export default async function TasksPage() {
                        {assignedTo ? (
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
-                              <AvatarImage src={assignedTo.avatarUrl} alt={assignedTo.name} data-ai-hint="person face" />
+                              <AvatarImage src={assignedTo.avatarUrl || undefined} alt={assignedTo.name} data-ai-hint="person face" />
                               <AvatarFallback>{assignedTo.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <span>{assignedTo.name}</span>
