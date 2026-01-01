@@ -16,12 +16,15 @@ import {
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { deleteLead } from "@/lib/actions"
 import { useToast } from "@/hooks/use-toast"
+import { Button } from "./ui/button"
+import { Trash2 } from "lucide-react"
 
 interface DeleteLeadDialogProps {
   leadId: number
+  as?: "button" | "menuitem"
 }
 
-export function DeleteLeadDialog({ leadId }: DeleteLeadDialogProps) {
+export function DeleteLeadDialog({ leadId, as = "menuitem" }: DeleteLeadDialogProps) {
   const { toast } = useToast()
 
   async function handleDelete() {
@@ -39,13 +42,16 @@ export function DeleteLeadDialog({ leadId }: DeleteLeadDialogProps) {
       })
     }
   }
+  
+  const Trigger = as === 'button' 
+    ? <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
+    : <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">Delete</DropdownMenuItem>;
+
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
-          Delete
-        </DropdownMenuItem>
+        {Trigger}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
