@@ -53,7 +53,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
   const [lead, users, comments] = await Promise.all([
     getLeadById(params.id) as Promise<Lead>,
     getUsers() as Promise<TUser[]>,
-    getCommentsForLead(leadId) as Promise<Comment[]>,
+    getCommentsForLead(leadId),
   ]);
 
   if (!lead) {
@@ -155,7 +155,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                     </form>
                     <Separator />
                     <div className="space-y-6">
-                        {comments.map(comment => (
+                        {comments.map((comment: Comment) => (
                             <div key={comment.id} className="flex items-start gap-4">
                                 <Avatar>
                                     <AvatarImage src={comment.user?.avatarUrl || undefined} />
