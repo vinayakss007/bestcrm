@@ -10,6 +10,8 @@ servers:
   - url: http://localhost:3000/api/v1
     description: Local Development Server
 tags:
+  - name: Auth
+    description: Authentication operations.
   - name: Accounts
     description: Operations related to customer accounts.
   - name: Contacts
@@ -22,13 +24,62 @@ tags:
     description: Operations related to invoices.
 
 paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: User login
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '401':
+          description: Unauthorized
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: User registration
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrmUser'
+        '409':
+          description: Conflict, user already exists
+
   /accounts:
     get:
       tags:
         - Accounts
       summary: List all accounts
-      description: Retrieves a paginated list of accounts.
+      description: Retrieves a paginated list of accounts for the user's organization.
       operationId: getAccounts
+      security:
+        - bearerAuth: []
       parameters:
         - name: page
           in: query
@@ -51,12 +102,16 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Account'
+        '401':
+          description: Unauthorized
     post:
       tags:
         - Accounts
       summary: Create a new account
-      description: Adds a new customer account to the CRM.
+      description: Adds a new customer account to the user's organization.
       operationId: createAccount
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -72,14 +127,18 @@ paths:
                 $ref: '#/components/schemas/Account'
         '400':
           description: Invalid input data.
+        '401':
+          description: Unauthorized
 
   /accounts/{accountId}:
     get:
       tags:
         - Accounts
       summary: Get an account by ID
-      description: Retrieves a single account by its unique ID.
+      description: Retrieves a single account by its unique ID, scoped to the user's organization.
       operationId: getAccountById
+      security:
+        - bearerAuth: []
       parameters:
         - name: accountId
           in: path
@@ -96,6 +155,111 @@ paths:
                 $ref: '#/components/schemas/Account'
         '404':
           description: Account not found.
+        '401':
+          description: Unauthorized
+
+  /contacts:
+    get:
+      tags:
+        - Contacts
+      summary: List all contacts
+      operationId: getContacts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of contacts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+    post:
+      tags:
+        - Contacts
+      summary: Create a new contact
+      operationId: createContact
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContactDto'
+      responses:
+        '201':
+          description: Contact created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+
+  /contacts/{contactId}:
+    get:
+      tags:
+        - Contacts
+      summary: Get a contact by ID
+      operationId: getContactById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested contact.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '404':
+          description: Contact not found.
+    patch:
+      tags:
+        - Contacts
+      summary: Update a contact
+      operationId: updateContact
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContactDto'
+      responses:
+        '200':
+          description: Contact updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+    delete:
+      tags:
+        - Contacts
+      summary: Delete a contact
+      operationId: deleteContact
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Contact deleted successfully.
   
   /invoices:
     get:
@@ -139,7 +303,7 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateInvoiceDto'
       responses:
-        '201':
+        '201G':
           description: Invoice created successfully.
           content:
             application/json:
@@ -160,6 +324,12 @@ components:
         name:
           type: string
           example: 'Alex Doe'
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [user, company-admin, super-admin]
         avatarUrl:
           type: string
           format: uri
@@ -178,8 +348,10 @@ components:
         industry:
           type: string
           example: 'Technology'
-        owner:
-          $ref: '#/components/schemas/CrmUser'
+        ownerId:
+          type: integer
+        organizationId:
+          type: integer
         createdAt:
           type: string
           format: date-time
@@ -214,7 +386,83 @@ components:
         customFields:
           type: object
           additionalProperties: true
-          
+    
+    Contact:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        accountId:
+          type: integer
+        organizationId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateContactDto:
+      type: object
+      required:
+        - name
+        - accountId
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        accountId:
+          type: integer
+
+    UpdateContactDto:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        accountId:
+          type: integer
+
+    LoginDto:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    RegisterDto:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+
     Invoice:
       type: object
       properties:
