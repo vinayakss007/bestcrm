@@ -6,7 +6,7 @@ This checklist tracks the implementation progress based on the `docs/CRM_SYSTEM_
 ## Phase 1: Foundation & Architecture
 - [x] Set up the core project structure (Next.js + NestJS).
 - [x] Design the database schema with tenant isolation (`tenant_id`).
-- [ ] Implement a `Tenant` model/table (`organizations`).
+- [x] Implement a `Tenant` model/table (`organizations`).
 - [ ] Create a middleware layer for "Tenant Awareness".
 - [ ] Implement a data access layer that automatically filters queries by `tenant_id`.
 
