@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string;
   name: string;
@@ -17,6 +18,14 @@ export type RegisterDto = {
   email: string;
   password?: string;
 };
+
+export type InviteUserDto = {
+  name: string;
+  email: string;
+  password?: string;
+  role: 'user' | 'company-admin';
+};
+
 
 export type UpdateUserDto = {
     name?: string;

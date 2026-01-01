@@ -8,6 +8,7 @@ import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import * as schema from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InviteUserDto } from './dto/invite-user.dto';
 
 // This is a real user type inferred from your Drizzle schema.
 export type User = typeof schema.crmUsers.$inferSelect;
@@ -91,36 +92,93 @@ export class UsersService {
         if (existingUser) {
             throw new ConflictException('User with this email already exists');
         }
-
+        
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
 
-        // For a new self-service sign-up, always create a new organization.
-        const newOrg = await tx
-            .insert(schema.organizations)
-            .values({ name: `${registerDto.name}'s Organization` })
-            .returning();
+        // Check if it's the very first user in the system
+        const anyOrg = await tx.query.organizations.findFirst();
         
-        const organizationId = newOrg[0].id;
-        // The first user of an organization is always the company-admin.
-        const userRole: 'company-admin' = 'company-admin';
+        if (!anyOrg) {
+            // First user ever, create a new org and make them super-admin
+            const newOrg = await tx
+                .insert(schema.organizations)
+                .values({ name: `${registerDto.name}'s Organization` })
+                .returning();
+            const organizationId = newOrg[0].id;
+            const userRole: 'super-admin' = 'super-admin';
+            
+            const newUsers = await tx.insert(schema.crmUsers).values({
+                email: registerDto.email,
+                name: registerDto.name,
+                passwordHash,
+                organizationId,
+                role: userRole,
+            }).returning();
+            return newUsers[0];
+        } else {
+            // For a new self-service sign-up, always create a new organization.
+            const newOrg = await tx
+                .insert(schema.organizations)
+                .values({ name: `${registerDto.name}'s Organization` })
+                .returning();
+            
+            const organizationId = newOrg[0].id;
+            // The first user of a new organization is always the company-admin.
+            const userRole: 'company-admin' = 'company-admin';
 
-        const newUserInsert = {
-            email: registerDto.email,
-            name: registerDto.name,
-            passwordHash,
-            organizationId,
-            role: userRole,
-        };
+            const newUserInsert = {
+                email: registerDto.email,
+                name: registerDto.name,
+                passwordHash,
+                organizationId,
+                role: userRole,
+            };
 
-        const newUsers = await tx
-            .insert(schema.crmUsers)
-            .values(newUserInsert)
-            .returning();
-        
-        return newUsers[0];
+            const newUsers = await tx
+                .insert(schema.crmUsers)
+                .values(newUserInsert)
+                .returning();
+            
+            return newUsers[0];
+        }
     });
   }
+
+  async invite(inviteUserDto: InviteUserDto, invitingUser: AuthenticatedUser): Promise<Omit<User, 'passwordHash'>> {
+    if (invitingUser.role === 'user') {
+      throw new ForbiddenException('Only admins can invite new users.');
+    }
+
+    const { email, name, password, role } = inviteUserDto;
+    
+    const existingUser = await this.findOneByEmail(email);
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists.');
+    }
+    
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    const newUser = await this.db.insert(schema.crmUsers).values({
+        email,
+        name,
+        passwordHash,
+        role,
+        organizationId: invitingUser.organizationId, // Assign to the inviter's organization
+    }).returning({
+        id: schema.crmUsers.id,
+        name: schema.crmUsers.name,
+        email: schema.crmUsers.email,
+        avatarUrl: schema.crmUsers.avatarUrl,
+        role: schema.crmUsers.role,
+        createdAt: schema.crmUsers.createdAt,
+        organizationId: schema.crmUsers.organizationId,
+    });
+
+    return newUser[0];
+  }
+
 
   async update(id: number, updateUserDto: UpdateUserDto, organizationId: number): Promise<Omit<User, 'passwordHash'>> {
     const userToUpdate = await this.findOneById(id, organizationId);
@@ -149,5 +207,3 @@ export class UsersService {
     return updatedUser[0];
   }
 }
-
-    

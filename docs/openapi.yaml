@@ -99,6 +99,32 @@ paths:
                 items:
                   $ref: '#/components/schemas/CrmUser'
   
+  /users/invite:
+    post:
+      tags:
+        - Users
+      summary: Invite a new user to the organization
+      operationId: inviteUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteUserDto'
+      responses:
+        '201':
+          description: User invited successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrmUser'
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict, user already exists
+
   /users/{userId}:
     patch:
       tags:
@@ -1186,6 +1212,26 @@ components:
           type: string
           format: uri
           example: 'https://picsum.photos/seed/alex/100/100'
+
+    InviteUserDto:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        role:
+          type: string
+          enum: [user, company-admin]
 
     UpdateUserDto:
       type: object

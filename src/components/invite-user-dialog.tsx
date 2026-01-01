@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { useForm, useFormState } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { PlusCircle, Send } from "lucide-react"
@@ -33,10 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { register } from "@/lib/actions"
+import { inviteUser } from "@/lib/actions"
 import { useToast } from "@/hooks/use-toast"
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
-import { AlertCircle } from "lucide-react"
 
 const inviteSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -62,28 +60,20 @@ export function InviteUserDialog() {
   })
 
   async function onSubmit(data: InviteFormValues) {
-    const formData = new FormData();
-    formData.append('name', data.name);
-    formData.append('email', data.email);
-    formData.append('password', data.password);
-    // The register action defaults to 'user' role if not the first user, 
-    // but we could extend it to accept a role. For now, this is client-side only.
-
-    const result = await register(undefined, formData);
-
-    if (result?.error) {
-        toast({
-            variant: "destructive",
-            title: "Invitation Failed",
-            description: result.error,
-        })
-    } else {
+    try {
+        await inviteUser(data);
         toast({
             title: "Success",
             description: `Invitation sent to ${data.email}.`,
         })
         form.reset()
         setOpen(false)
+    } catch(error: any) {
+        toast({
+            variant: "destructive",
+            title: "Invitation Failed",
+            description: error.message || "Could not send invitation. Please try again.",
+        })
     }
   }
 
