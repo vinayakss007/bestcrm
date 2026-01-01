@@ -17,7 +17,7 @@ import {
   Calendar,
 } from "lucide-react"
 
-import { getTasks, getUsers, getAccounts, getContacts, getOpportunities, getLeads } from "@/lib/actions"
+import { getTasks, getUsers, getAccounts, getContacts, getOpportunities, getLeads, updateTask } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -36,6 +36,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import type { Task, TaskStatus, User, Account, Contact, Opportunity, Lead } from "@/lib/types"
 import Link from "next/link"
+import { EditTaskDialog } from "@/components/edit-task-dialog"
+import { DeleteTaskDialog } from "@/components/delete-task-dialog"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
@@ -100,6 +102,7 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
 
   const relatedEntity = getRelatedEntity(task);
   const relatedLink = getRelatedLink(task, relatedEntity);
+  const markTaskCompleteAction = updateTask.bind(null, task.id, { status: 'Completed' });
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -114,7 +117,7 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
             </Link>
             <h1 className="text-2xl font-bold">Tasks / {task.title}</h1>
             <div className="ml-auto flex items-center gap-2">
-                 <Button>Edit</Button>
+                 <EditTaskDialog task={task} />
             </div>
         </div>
 
@@ -172,10 +175,12 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline">Mark as Complete</Button>
-              <Button variant="destructive" size="icon" className="ml-auto">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <form action={markTaskCompleteAction}>
+                <Button variant="outline" disabled={task.status === 'Completed'}>
+                    Mark as Complete
+                </Button>
+              </form>
+              <DeleteTaskDialog taskId={task.id} as="button" />
             </div>
           </CardHeader>
           <Separator />

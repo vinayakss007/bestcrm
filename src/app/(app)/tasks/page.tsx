@@ -121,7 +121,7 @@ export default async function TasksPage() {
               <TableBody>
                 {tasks.map((task) => {
                   const assignedTo = getOwnerById(task.assignedToId);
-                  const markTaskComplete = updateTask.bind(null, task.id, { status: "Completed" });
+                  const markTaskCompleteAction = updateTask.bind(null, task.id, { status: "Completed" });
 
                   return (
                   <TableRow key={task.id}>
@@ -163,9 +163,13 @@ export default async function TasksPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onSelect={markTaskComplete} disabled={task.status === 'Completed'}>
-                            Mark as Complete
-                          </DropdownMenuItem>
+                          <form action={markTaskCompleteAction} className="w-full">
+                            <button type="submit" className="w-full">
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={task.status === 'Completed'}>
+                                    Mark as Complete
+                                </DropdownMenuItem>
+                            </button>
+                          </form>
                           <EditTaskDialog task={task} />
                           <DeleteTaskDialog taskId={task.id} />
                         </DropdownMenuContent>

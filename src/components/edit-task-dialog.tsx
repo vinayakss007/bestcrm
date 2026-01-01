@@ -67,10 +67,11 @@ type RelatedData = {
 }
 
 interface EditTaskDialogProps {
-  task: Task
+  task: Task;
+  as?: "button" | "menuitem";
 }
 
-export function EditTaskDialog({ task }: EditTaskDialogProps) {
+export function EditTaskDialog({ task, as = "menuitem" }: EditTaskDialogProps) {
   const [open, setOpen] = React.useState(false)
   const [relatedData, setRelatedData] = React.useState<RelatedData | null>(null)
   const { toast } = useToast()
@@ -142,13 +143,15 @@ export function EditTaskDialog({ task }: EditTaskDialogProps) {
         return []
     }
   }
+  
+  const Trigger = as === "button" ? Button : DropdownMenuItem;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <Trigger onSelect={as === 'menuitem' ? (e) => e.preventDefault() : undefined}>
           Edit
-        </DropdownMenuItem>
+        </Trigger>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
