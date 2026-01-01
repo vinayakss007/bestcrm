@@ -96,6 +96,14 @@ export type CreateLeadDto = {
   ownerId?: number;
 }
 
+export type UpdateLeadDto = {
+  name?: string;
+  email?: string;
+  source?: string;
+  status?: LeadStatus;
+  ownerId?: number;
+}
+
 
 export const opportunityStages = ['Prospecting', 'Qualification', 'Proposal', 'Closing', 'Won', 'Lost'] as const;
 export type OpportunityStage = (typeof opportunityStages)[number];

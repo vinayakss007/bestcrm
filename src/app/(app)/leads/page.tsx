@@ -36,6 +36,8 @@ import type { Lead, LeadStatus, User } from "@/lib/types"
 import { AddLeadDialog } from "@/components/add-lead-dialog"
 // import { Pagination } from "@/components/pagination"
 import { Input } from "@/components/ui/input"
+import { EditLeadDialog } from "@/components/edit-lead-dialog"
+import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
 
 const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" | "outline"> = {
     'New': 'default',
@@ -202,9 +204,9 @@ export default async function LeadsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <EditLeadDialog lead={lead} users={users} />
                         <DropdownMenuItem>Convert to Opportunity</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DeleteLeadDialog leadId={lead.id} />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

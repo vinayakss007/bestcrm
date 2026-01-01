@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto } from "@/lib/types"
+import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -298,6 +298,50 @@ export async function createLead(leadData: CreateLeadDto) {
         throw new Error('An unexpected error occurred while creating the lead.');
     }
 }
+
+export async function updateLead(id: number, leadData: UpdateLeadDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/leads/${id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(leadData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update lead');
+        }
+
+        revalidatePath('/leads');
+        revalidatePath(`/leads/${id}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while updating the lead.');
+    }
+}
+
+export async function deleteLead(id: number) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/leads/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+
+        if (!response.ok) {
+             const errorData = await response.json();
+             throw new Error(errorData.message || 'Failed to delete lead');
+        }
+        
+        revalidatePath('/leads');
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while deleting the lead.');
+    }
+}
+
 
 export async function getOpportunities() {
     const headers = await getAuthHeaders();
