@@ -176,6 +176,17 @@ export async function getLeads() {
     return response.json();
 }
 
+export async function getLeadById(id: string) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/leads/${id}`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        if (response.status === 404) return null;
+        throw new Error('Failed to fetch lead');
+    }
+    return response.json();
+}
+
 export async function createLead(leadData: CreateLeadDto) {
     const headers = await getAuthHeaders();
     try {

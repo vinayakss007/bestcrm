@@ -31,12 +31,19 @@ export class LeadsService {
   }
 
   async findAll(organizationId: number) {
-    // In a real app, you'd probably join with the users table to get owner name
     return await this.db.query.crmLeads.findMany({
       where: and(
         eq(schema.crmLeads.organizationId, organizationId),
         eq(schema.crmLeads.isDeleted, false),
       ),
+      with: {
+        owner: {
+          columns: {
+            name: true,
+            avatarUrl: true,
+          }
+        }
+      },
       orderBy: (leads, { desc }) => [desc(leads.createdAt)],
     });
   }
@@ -48,6 +55,14 @@ export class LeadsService {
         eq(schema.crmLeads.organizationId, organizationId),
         eq(schema.crmLeads.isDeleted, false),
       ),
+      with: {
+        owner: {
+          columns: {
+            name: true,
+            avatarUrl: true,
+          }
+        }
+      }
     });
 
     if (!lead) {

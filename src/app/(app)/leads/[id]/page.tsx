@@ -1,14 +1,12 @@
 
-"use client"
+"use server"
 
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import {
   Activity,
   Archive,
-  ChevronDown,
   ChevronLeft,
-  ChevronUp,
   Mail,
   MessageSquare,
   Paperclip,
@@ -18,7 +16,7 @@ import {
   User,
 } from "lucide-react"
 
-import { leads, users } from "@/lib/data"
+import { getLeadById, getUsers } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,17 +39,20 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import * as React from "react"
+import type { Lead, User as TUser } from "@/lib/types"
 
-export default function LeadDetailPage({ params }: { params: { id: string } }) {
-  const lead = leads.find((l) => l.id === params.id)
-  const [isDetailsOpen, setIsDetailsOpen] = React.useState(true)
+export default async function LeadDetailPage({ params }: { params: { id: string } }) {
+  const [lead, users] = await Promise.all([
+    getLeadById(params.id) as Promise<Lead>,
+    getUsers() as Promise<TUser[]>
+  ]);
 
   if (!lead) {
     notFound()
   }
 
   const administrator = users[0];
+  const owner = lead.owner;
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -124,7 +125,7 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
                         <div className="flex-1">
                             <div className="flex justify-between items-center">
                                 <p className="text-sm font-medium">{administrator.name} created this lead</p>
-                                <p className="text-xs text-muted-foreground">just now</p>
+                                <p className="text-xs text-muted-foreground">{new Date(lead.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
                     </div>
@@ -170,14 +171,10 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
-            <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+            <Collapsible open={true}>
               <CollapsibleTrigger className="w-full">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold">Details</h4>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    {isDetailsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    <span className="sr-only">Toggle</span>
-                  </Button>
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -188,13 +185,17 @@ export default function LeadDetailPage({ params }: { params: { id: string } }) {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Lead Owner</span>
-                    <div className="flex items-center gap-2">
+                    {owner ? (
+                      <div className="flex items-center gap-2">
                         <Avatar className="h-5 w-5">
-                            <AvatarImage src={lead.owner.avatarUrl} />
-                            <AvatarFallback>{lead.owner.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={owner.avatarUrl || undefined} />
+                            <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span>{lead.owner.name}</span>
-                     </div>
+                        <span>{owner.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Unassigned</span>
+                    )}
                   </div>
                 </div>
               </CollapsibleContent>
