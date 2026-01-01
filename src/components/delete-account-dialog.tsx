@@ -44,7 +44,7 @@ export function DeleteAccountDialog({ accountId, as = "menuitem" }: DeleteAccoun
   }
   
   const Trigger = as === 'button' 
-    ? <Button variant="destructive" size="icon" className="ml-auto"><Trash2 className="h-4 w-4" /></Button>
+    ? <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
     : <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">Delete</DropdownMenuItem>;
 
 

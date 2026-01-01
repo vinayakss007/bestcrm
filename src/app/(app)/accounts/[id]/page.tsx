@@ -137,7 +137,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                         <DropdownMenuItem>New Task</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                 <EditAccountDialog account={account} users={users} />
+                 <EditAccountDialog account={account} users={users} as="button" />
             </div>
         </div>
 
@@ -266,7 +266,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
               <Button variant="outline" size="icon">
                 <Phone className="h-4 w-4" />
               </Button>
-              <DeleteAccountDialog accountId={account.id} />
+              <DeleteAccountDialog accountId={account.id} as="button" />
             </div>
           </CardHeader>
           <Separator />
