@@ -191,9 +191,13 @@ export async function deleteAccount(id: number) {
 }
 
 
-export async function getContacts() {
+export async function getContacts(query?: string) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/contacts`, { headers, cache: 'no-store' });
+    const url = new URL(`${API_URL}/contacts`);
+    if (query) {
+        url.searchParams.append('query', query);
+    }
+    const response = await fetch(url.toString(), { headers, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
             redirect('/login');

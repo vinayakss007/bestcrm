@@ -1,5 +1,6 @@
 
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
+
+import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,12 +33,13 @@ import { getContacts, getAccounts } from "@/lib/actions"
 import { AddContactDialog } from "@/components/add-contact-dialog"
 // import { Pagination } from "@/components/pagination"
 import type { Contact, Account } from "@/lib/types"
-import { Input } from "@/components/ui/input"
 import { EditContactDialog } from "@/components/edit-contact-dialog"
 import { DeleteContactDialog } from "@/components/delete-contact-dialog"
+import { SearchInput } from "@/components/search-input"
 
-export default async function ContactsPage() {
-  const contacts: Contact[] = await getContacts();
+export default async function ContactsPage({ searchParams }: { searchParams: { query?: string } }) {
+  const query = searchParams.query || '';
+  const contacts: Contact[] = await getContacts(query);
   const accounts: Account[] = await getAccounts();
   
   const accountMap = new Map(accounts.map(acc => [acc.id, acc.name]));
@@ -47,15 +49,8 @@ export default async function ContactsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
         <h1 className="text-xl font-semibold tracking-tight">Contacts</h1>
-        <div className="relative ml-auto flex-1 md:grow-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-            />
-        </div>
-        <div className="flex items-center gap-2">
+        <SearchInput placeholder="Search contacts..." />
+        <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
