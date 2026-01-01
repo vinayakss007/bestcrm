@@ -1,5 +1,5 @@
 
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,17 +32,16 @@ import { AddAccountDialog } from "@/components/add-account-dialog"
 import { getAccounts, getUsers } from "@/lib/actions"
 // import { Pagination } from "@/components/pagination"
 import type { Account, User } from "@/lib/types"
-import { Input } from "@/components/ui/input"
 import { EditAccountDialog } from "@/components/edit-account-dialog"
 import { DeleteAccountDialog } from "@/components/delete-account-dialog"
+import { SearchInput } from "@/components/search-input"
 
-export default async function AccountsPage() {
-  const accounts: Account[] = await getAccounts();
-  const users: User[] = await getUsers();
-  // const [page, setPage] = React.useState(1);
-  // const [pageSize, setPageSize] = React.useState(5);
-  // const total = accounts.length;
-  // const paginatedAccounts = accounts.slice((page - 1) * pageSize, page * pageSize);
+export default async function AccountsPage({ searchParams }: { searchParams: { query?: string } }) {
+  const query = searchParams.query || '';
+  const [accounts, users]: [Account[], User[]] = await Promise.all([
+    getAccounts(query),
+    getUsers(),
+  ]);
 
   const getOwnerById = (id: number | null) => {
       // The user ID from the backend is a number, but the mock user ID is a string.
@@ -55,15 +54,8 @@ export default async function AccountsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
         <h1 className="text-xl font-semibold tracking-tight">Accounts</h1>
-         <div className="relative ml-auto flex-1 md:grow-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-            />
-        </div>
-        <div className="flex items-center gap-2">
+        <SearchInput placeholder="Search accounts..." />
+        <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>

@@ -97,9 +97,13 @@ async function getAuthHeaders() {
   }
 }
 
-export async function getAccounts() {
+export async function getAccounts(query?: string) {
   const headers = await getAuthHeaders()
-  const response = await fetch(`${API_URL}/accounts`, { headers, cache: 'no-store' })
+  const url = new URL(`${API_URL}/accounts`);
+  if (query) {
+      url.searchParams.append('query', query);
+  }
+  const response = await fetch(url.toString(), { headers, cache: 'no-store' })
   if (!response.ok) {
     if (response.status === 401) {
       redirect('/login')
@@ -640,5 +644,3 @@ export async function updateUser(id: number, userData: UpdateUserDto) {
         throw new Error('An unexpected error occurred while updating the user profile.');
     }
 }
-
-    
