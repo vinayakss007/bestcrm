@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and, or, ilike } from 'drizzle-orm';
+import { eq, and, or, ilike, getTableColumns } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
@@ -68,29 +68,35 @@ export class OpportunitiesService {
         conditions.push(eq(schema.crmOpportunities.accountId, accountId));
     }
     
+    // Base query
+    let queryBuilder = this.db
+      .select({
+        ...getTableColumns(schema.crmOpportunities),
+        account: {
+          name: schema.crmAccounts.name,
+        },
+        owner: {
+          name: schema.crmUsers.name,
+          avatarUrl: schema.crmUsers.avatarUrl,
+        }
+      })
+      .from(schema.crmOpportunities)
+      .leftJoin(schema.crmAccounts, eq(schema.crmOpportunities.accountId, schema.crmAccounts.id))
+      .leftJoin(schema.crmUsers, eq(schema.crmOpportunities.ownerId, schema.crmUsers.id))
+
+
     if (query) {
         conditions.push(
             or(
                 ilike(schema.crmOpportunities.name, `%${query}%`),
-                // This requires a join to work, which we will add.
-                // ilike(schema.crmAccounts.name, `%${query}%`) 
+                ilike(schema.crmAccounts.name, `%${query}%`) 
             )
         )
     }
     
-    // We use the query builder syntax to easily add joins
-    return await this.db.query.crmOpportunities.findMany({
-        where: and(...conditions),
-        with: {
-            account: {
-                columns: { name: true }
-            },
-            owner: {
-                columns: { name: true, avatarUrl: true }
-            }
-        },
-        orderBy: (opportunities, { desc }) => [desc(opportunities.createdAt)],
-    });
+    return await queryBuilder
+        .where(and(...conditions))
+        .orderBy(schema.crmOpportunities.createdAt);
   }
 
   async findOne(id: number, organizationId: number) {
