@@ -4,10 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import {
-  users,
-} from "@/lib/data"
-import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto } from "@/lib/types"
+import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -105,6 +102,50 @@ export async function createAccount(accountData: CreateAccountDto) {
     throw new Error('An unexpected error occurred while creating the account.')
   }
 }
+
+export async function updateAccount(id: number, accountData: UpdateAccountDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/accounts/${id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(accountData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update account');
+        }
+
+        revalidatePath('/accounts');
+        revalidatePath(`/accounts/${id}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while updating the account.');
+    }
+}
+
+export async function deleteAccount(id: number) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/accounts/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+
+        if (!response.ok) {
+             const errorData = await response.json();
+             throw new Error(errorData.message || 'Failed to delete account');
+        }
+        
+        revalidatePath('/accounts');
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while deleting the account.');
+    }
+}
+
 
 export async function getContacts() {
     const headers = await getAuthHeaders();
@@ -341,7 +382,17 @@ export async function createTask(taskData: CreateTaskDto) {
 
 
 export async function getUsers() {
-  return users
+  const headers = await getAuthHeaders()
+  // In a real app, this would be a proper API endpoint
+  // For now, we simulate fetching users based on the organization of the logged-in user
+  // This is a placeholder and should be replaced with a real API call
+  // that respects multi-tenancy.
+  const response = await fetch(`${API_URL}/users`, { headers, cache: 'no-store' });
+  if (!response.ok) {
+    if (response.status === 401) {
+      redirect('/login');
+    }
+    throw new Error('Failed to fetch users');
+  }
+  return response.json();
 }
-
-    

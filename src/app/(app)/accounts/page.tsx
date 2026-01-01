@@ -33,6 +33,8 @@ import { getAccounts, getUsers } from "@/lib/actions"
 // import { Pagination } from "@/components/pagination"
 import type { Account, User } from "@/lib/types"
 import { Input } from "@/components/ui/input"
+import { EditAccountDialog } from "@/components/edit-account-dialog"
+import { DeleteAccountDialog } from "@/components/delete-account-dialog"
 
 export default async function AccountsPage() {
   const accounts: Account[] = await getAccounts();
@@ -45,7 +47,7 @@ export default async function AccountsPage() {
   const getOwnerById = (id: number | null) => {
       // The user ID from the backend is a number, but the mock user ID is a string.
       // This will need to be reconciled once we have a real user API.
-      return users.find(user => parseInt(user.id) === id);
+      return users.find(user => id !== null && parseInt(user.id) === id);
   }
 
 
@@ -126,7 +128,7 @@ export default async function AccountsPage() {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-          <AddAccountDialog />
+          <AddAccountDialog users={users} />
         </div>
       </div>
       <Card>
@@ -194,8 +196,8 @@ export default async function AccountsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                            <EditAccountDialog account={account} users={users} />
+                            <DeleteAccountDialog accountId={account.id} />
                         </DropdownMenuContent>
                         </DropdownMenu>
                     </TableCell>

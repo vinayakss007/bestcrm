@@ -5,8 +5,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { PlusCircle } from "lucide-react"
-
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -33,9 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { createAccount } from "@/lib/actions"
+import { updateAccount } from "@/lib/actions"
 import { useToast } from "@/hooks/use-toast"
-import type { User } from "@/lib/types"
+import type { Account, User } from "@/lib/types"
 
 const accountSchema = z.object({
   name: z.string().min(2, { message: "Account name must be at least 2 characters." }),
@@ -45,58 +44,61 @@ const accountSchema = z.object({
 
 type AccountFormValues = z.infer<typeof accountSchema>
 
-export function AddAccountDialog({ users }: { users: User[] }) {
+interface EditAccountDialogProps {
+  account: Account
+  users: User[]
+}
+
+export function EditAccountDialog({ account, users }: EditAccountDialogProps) {
   const [open, setOpen] = React.useState(false)
   const { toast } = useToast()
-  
+
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: {
-      name: "",
-      industry: "",
+      name: account.name,
+      industry: account.industry || "",
+      ownerId: account.ownerId ? String(account.ownerId) : undefined,
     },
   })
 
   async function onSubmit(data: AccountFormValues) {
     const accountData = {
-        ...data,
-        ownerId: data.ownerId ? parseInt(data.ownerId) : undefined,
+      ...data,
+      ownerId: data.ownerId ? parseInt(data.ownerId) : undefined,
     }
-    
+
     try {
-        await createAccount(accountData)
-        toast({
-            title: "Success",
-            description: `Account "${data.name}" has been created.`,
-        })
-        form.reset()
-        setOpen(false)
+      await updateAccount(account.id, accountData)
+      toast({
+        title: "Success",
+        description: `Account "${data.name}" has been updated.`,
+      })
+      form.reset(data)
+      setOpen(false)
     } catch (error) {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to create account. Please try again.",
-        })
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update account. Please try again.",
+      })
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="h-8 gap-1">
-          <PlusCircle className="h-3.5 w-3.5" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add Account
-          </span>
-        </Button>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          Edit
+        </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Add New Account</DialogTitle>
+              <DialogTitle>Edit Account</DialogTitle>
               <DialogDescription>
-                Fill in the details below to create a new customer account.
+                Update the details for {account.name}.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -152,10 +154,10 @@ export function AddAccountDialog({ users }: { users: User[] }) {
               />
             </div>
             <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? "Creating..." : "Create Account"}
-                </Button>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
