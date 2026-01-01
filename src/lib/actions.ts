@@ -114,7 +114,7 @@ export async function getAccounts(query?: string) {
   return response.json()
 }
 
-export async function getAccountById(id: string) {
+export async function getAccountById(id: number) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/accounts/${id}`, { headers, cache: 'no-store' });
     if (!response.ok) {
@@ -219,7 +219,7 @@ export async function getContactById(id: string) {
     return response.json();
 }
 
-export async function getContactsByAccountId(accountId: string) {
+export async function getContactsByAccountId(accountId: number) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/accounts/${accountId}/contacts`, { headers, cache: 'no-store' });
     if (!response.ok) {
@@ -452,7 +452,7 @@ export async function getOpportunityById(id: string) {
     return response.json();
 }
 
-export async function getOpportunitiesByAccountId(accountId: string) {
+export async function getOpportunitiesByAccountId(accountId: number) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/accounts/${accountId}/opportunities`, { headers, cache: 'no-store' });
     if (!response.ok) {
@@ -707,7 +707,7 @@ export async function updateUser(id: number, userData: UpdateUserDto) {
     }
 }
 
-export async function getActivitiesForAccount(accountId: string) {
+export async function getActivitiesForAccount(accountId: number) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/accounts/${accountId}/activities`, { headers, cache: 'no-store' });
     if (!response.ok) {
@@ -716,5 +716,3 @@ export async function getActivitiesForAccount(accountId: string) {
     }
     return response.json();
 }
-
-    

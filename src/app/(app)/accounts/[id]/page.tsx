@@ -63,7 +63,7 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
     'Lost': 'destructive'
 }
 
-const activityIcons = {
+const activityIcons: Record<Activity['type'], React.ReactNode> = {
     new_contact: <ContactIcon className="h-4 w-4" />,
     new_opportunity: <Briefcase className="h-4 w-4" />,
     account_created: <Plus className="h-4 w-4" />,
@@ -78,17 +78,23 @@ function getActivityDescription(activity: Activity) {
         case 'new_opportunity':
             return <>created a new opportunity <span className="font-medium">{activity.details.name}</span> for ${activity.details.amount?.toLocaleString()}</>;
         default:
+            const _exhaustiveCheck: never = activity.type;
             return "performed an unknown action";
     }
 }
 
 export default async function AccountDetailPage({ params }: { params: { id: string } }) {
+  const accountId = parseInt(params.id, 10);
+  if (isNaN(accountId)) {
+    notFound();
+  }
+
   const [account, accountContacts, accountOpportunities, users, activities] = await Promise.all([
-    getAccountById(params.id) as Promise<Account>,
-    getContactsByAccountId(params.id) as Promise<Contact[]>,
-    getOpportunitiesByAccountId(params.id) as Promise<Opportunity[]>,
+    getAccountById(accountId) as Promise<Account>,
+    getContactsByAccountId(accountId) as Promise<Contact[]>,
+    getOpportunitiesByAccountId(accountId) as Promise<Opportunity[]>,
     getUsers() as Promise<User[]>,
-    getActivitiesForAccount(params.id) as Promise<Activity[]>,
+    getActivitiesForAccount(accountId) as Promise<Activity[]>,
   ]);
 
   if (!account) {
@@ -96,8 +102,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
   }
 
   const getOwnerById = (id: number | null) => {
-      // The user ID from the backend is a number, but the mock user ID is a string.
-      return users.find(user => id !== null && parseInt(user.id) === id);
+      return users.find(user => id !== null && user.id === String(id));
   }
 
   const owner = getOwnerById(account.ownerId);
@@ -307,5 +312,3 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     </div>
   )
 }
-
-    

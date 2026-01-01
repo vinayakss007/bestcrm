@@ -34,14 +34,11 @@ export class ActivitiesService {
         eq(schema.crmAccounts.id, accountId),
         eq(schema.crmAccounts.organizationId, organizationId),
       ),
-      with: {
-        owner: {
-            columns: {
-                id: true,
-                name: true,
-                avatarUrl: true
-            }
-        }
+      columns: {
+        id: true,
+        name: true,
+        createdAt: true,
+        ownerId: true,
       }
     });
 
@@ -59,6 +56,11 @@ export class ActivitiesService {
     const opportunities = await this.db.query.crmOpportunities.findMany({
         where: eq(schema.crmOpportunities.accountId, accountId)
     });
+
+    const allUserIds = new Set<number>();
+    if (account.ownerId) allUserIds.add(account.ownerId);
+    contacts.forEach(c => { /* No user associated with contact creation yet */ });
+    opportunities.forEach(o => o.ownerId && allUserIds.add(o.ownerId));
 
     const users = await this.db.query.crmUsers.findMany({
         where: eq(schema.crmUsers.organizationId, organizationId),
@@ -81,7 +83,7 @@ export class ActivitiesService {
         id: `contact-${contact.id}`,
         type: 'new_contact',
         timestamp: contact.createdAt,
-        user: getActionUser(account.ownerId), // Assuming account owner created the contact for now
+        user: getActionUser(account.ownerId), // TODO: Attribute to the user who created the contact
         details: {
             name: contact.name,
             email: contact.email,
