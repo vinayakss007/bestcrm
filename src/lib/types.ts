@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string;
   name: string;
@@ -54,13 +55,28 @@ export const leadStatus = ['New', 'Contacted', 'Qualified', 'Lost'] as const;
 export type LeadStatus = (typeof leadStatus)[number];
 
 export type Lead = {
-  id: string;
+  id: number;
   name: string;
-  email: string;
-  source: string;
-  status: LeadStatus;
-  owner: User;
+  email: string | null;
+  source: string | null;
+  status: LeadStatus | null;
+  ownerId: number | null;
+  organizationId: number;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  customFields: any | null;
+  createdAt: string;
+  updatedAt: string;
 };
+
+export type CreateLeadDto = {
+  name: string;
+  email?: string;
+  source?: string;
+  status?: LeadStatus;
+  ownerId?: number;
+}
+
 
 export const opportunityStages = ['Prospecting', 'Qualification', 'Proposal', 'Closing', 'Won', 'Lost'] as const;
 export type OpportunityStage = (typeof opportunityStages)[number];

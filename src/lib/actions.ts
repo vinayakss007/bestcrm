@@ -5,13 +5,12 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
-  leads,
   opportunities,
   recentActivities,
   tasks,
   users,
 } from "@/lib/data"
-import type { CreateAccountDto, CreateContactDto } from "@/lib/types"
+import type { CreateAccountDto, CreateContactDto, CreateLeadDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -134,8 +133,40 @@ export async function createContact(contactData: CreateContactDto) {
 }
 
 export async function getLeads() {
-  return leads
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/leads`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) {
+            redirect('/login');
+        }
+        throw new Error('Failed to fetch leads');
+    }
+    return response.json();
 }
+
+export async function createLead(leadData: CreateLeadDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/leads`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(leadData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to create lead');
+        }
+
+        revalidatePath('/leads');
+        return await response.json();
+
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while creating the lead.');
+    }
+}
+
 
 export async function getOpportunities() {
   return opportunities

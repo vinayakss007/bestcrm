@@ -1,8 +1,5 @@
 
-"use client"
-
-import * as React from "react"
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search, CirclePlus } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
@@ -34,10 +31,10 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-import { getLeads } from "@/lib/actions"
-import type { Lead, LeadStatus } from "@/lib/types"
+import { getLeads, getUsers } from "@/lib/actions"
+import type { Lead, LeadStatus, User } from "@/lib/types"
 import { AddLeadDialog } from "@/components/add-lead-dialog"
-import { Pagination } from "@/components/pagination"
+// import { Pagination } from "@/components/pagination"
 import { Input } from "@/components/ui/input"
 
 const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" | "outline"> = {
@@ -47,19 +44,14 @@ const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" 
     'Lost': 'destructive'
 }
 
-export default function LeadsPage() {
-  const [leads, setLeads] = React.useState<Lead[]>([]);
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(5);
-  const [total, setTotal] = React.useState(0);
+export default async function LeadsPage() {
+  const leads: Lead[] = await getLeads();
+  const users: User[] = await getUsers();
 
-  React.useEffect(() => {
-    getLeads().then((allLeads) => {
-      setTotal(allLeads.length);
-      const paginatedLeads = allLeads.slice((page - 1) * pageSize, page * pageSize);
-      setLeads(paginatedLeads);
-    });
-  }, [page, pageSize]);
+  const getOwnerById = (id: number | null) => {
+      // The user ID from the backend is a number, but the mock user ID is a string.
+      return users.find(user => id !== null && parseInt(user.id) === id);
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -74,7 +66,7 @@ export default function LeadsPage() {
             />
         </div>
         <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="outline" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
             </Button>
@@ -134,7 +126,7 @@ export default function LeadsPage() {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-          <AddLeadDialog />
+          <AddLeadDialog users={users} />
         </div>
       </div>
       <Card>
@@ -165,7 +157,9 @@ export default function LeadsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leads.map((lead) => (
+              {leads.map((lead) => {
+                const owner = getOwnerById(lead.ownerId);
+                return (
                 <TableRow key={lead.id}>
                   <TableCell className="font-medium">
                     <Link href={`/leads/${lead.id}`} className="hover:underline">
@@ -173,7 +167,7 @@ export default function LeadsPage() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant[lead.status]}>{lead.status}</Badge>
+                    {lead.status && <Badge variant={statusVariant[lead.status]}>{lead.status}</Badge>}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     {lead.source}
@@ -182,13 +176,17 @@ export default function LeadsPage() {
                     {lead.email}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                     <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                            <AvatarImage src={lead.owner.avatarUrl} alt={lead.owner.name} data-ai-hint="person face"/>
-                            <AvatarFallback>{lead.owner.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span>{lead.owner.name}</span>
-                     </div>
+                     {owner ? (
+                        <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                                <AvatarImage src={owner.avatarUrl} alt={owner.name} data-ai-hint="person face" />
+                                <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{owner.name}</span>
+                        </div>
+                    ) : (
+                        <span className="text-muted-foreground">Unassigned</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -211,18 +209,18 @@ export default function LeadsPage() {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
             </TableBody>
           </Table>
         </CardContent>
          <CardFooter>
-            <Pagination
+            {/* <Pagination
                 page={page}
                 pageSize={pageSize}
                 total={total}
                 onPageChange={setPage}
                 onPageSizeChange={setPageSize}
-            />
+            /> */}
         </CardFooter>
       </Card>
     </div>

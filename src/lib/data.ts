@@ -1,4 +1,4 @@
-import type { User, Account, Lead, Opportunity, Task, RecentActivity, Contact } from './types';
+import type { User, Account, Opportunity, Task, RecentActivity, Contact } from './types';
 
 export const users: User[] = [
   { id: '1', name: 'Alex Doe', email: 'alex.doe@example.com', avatarUrl: 'https://picsum.photos/seed/alex/100/100' },
@@ -21,14 +21,6 @@ export const contacts: (Omit<Contact, "id" | "organizationId" | "isDeleted" | "d
   { id: 'con-3', name: 'Michael Brown', email: 'michael.brown@apex.com', phone: '234-567-8901', accountId: 2, accountName: 'Apex Solutions' },
   { id: 'con-4', name: 'Sarah Green', email: 'sarah.green@quantum.com', phone: '345-678-9012', accountId: 3, accountName: 'Quantum Corp' },
   { id: 'con-5', name: 'David Black', email: 'david.black@synergy.com', phone: '456-789-0123', accountId: 4, accountName: 'Synergy Ltd.' },
-];
-
-export const leads: Lead[] = [
-  { id: 'lead-1', name: 'New Project Inquiry', email: 'contact@website.com', source: 'Web Form', status: 'New', owner: users[0] },
-  { id: 'lead-2', name: 'Trade Show Follow-up', email: 'tradeshow@visitor.com', source: 'Event', status: 'Contacted', owner: users[1] },
-  { id: 'lead-3', name: 'Referral from Apex', email: 'referral@client.com', source: 'Referral', status: 'Qualified', owner: users[0] },
-  { id: 'lead-4', name: 'Cold Call Prospect', email: 'prospect@coldcall.com', source: 'Cold Call', status: 'Lost', owner: users[2] },
-  { id: 'lead-5', name: 'Website Download', email: 'download@resource.com', source: 'Web', status: 'New', owner: users[1] },
 ];
 
 export const opportunities: Opportunity[] = [
