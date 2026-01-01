@@ -1,9 +1,9 @@
 
 import { Module } from '@nestjs/common';
-import { DrizzleAsyncProvider } from './drizzle.provider';
+import { drizzleProvider } from './drizzle.provider';
 
 @Module({
-  providers: [DrizzleAsyncProvider],
-  exports: [DrizzleAsyncProvider],
+  providers: [drizzleProvider],
+  exports: [drizzleProvider],
 })
 export class DrizzleModule {}

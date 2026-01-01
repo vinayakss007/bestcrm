@@ -6,13 +6,13 @@ import * as schema from '@/db/schema';
 import { ConfigService } from '@nestjs/config';
 
 // Define a symbol to use as the injection token
-export const DrizzleAsyncProvider = Symbol('DrizzleAsyncProvider');
+export const DrizzleProvider = 'DrizzleProvider';
 
 // Create the provider
 export const drizzleProvider: FactoryProvider<
-  Promise<PostgresJsDatabase<typeof schema>>
+  PostgresJsDatabase<typeof schema>
 > = {
-  provide: DrizzleAsyncProvider,
+  provide: DrizzleProvider,
   inject: [ConfigService],
   useFactory: async (configService: ConfigService) => {
     const connectionString = configService.get<string>('DATABASE_URL');
@@ -23,6 +23,3 @@ export const drizzleProvider: FactoryProvider<
     return drizzle(client, { schema });
   },
 };
-
-// Re-export the provider under a more conventional name
-export { drizzleProvider as DrizzleAsyncProvider };

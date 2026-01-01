@@ -4,7 +4,7 @@ import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as bcrypt from 'bcrypt';
 
 import { RegisterDto } from '../auth/dto/register.dto';
-import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
+import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -14,7 +14,7 @@ export type User = typeof schema.crmUsers.$inferSelect;
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject(DrizzleAsyncProvider)
+    @Inject(DrizzleProvider)
     private db: PostgresJsDatabase<typeof schema>,
   ) {}
 
