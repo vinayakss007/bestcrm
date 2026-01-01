@@ -14,6 +14,8 @@ tags:
     description: Authentication operations.
   - name: Users
     description: Operations related to CRM users.
+  - name: Organizations
+    description: Operations related to tenant organizations.
   - name: Accounts
     description: Operations related to customer accounts.
   - name: Contacts
@@ -123,6 +125,37 @@ paths:
                 $ref: '#/components/schemas/CrmUser'
         '404':
           description: User not found
+
+  /organizations/{organizationId}:
+    patch:
+      tags:
+        - Organizations
+      summary: Update an organization's details
+      operationId: updateOrganization
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationDto'
+      responses:
+        '200':
+          description: Organization updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '403':
+          description: Forbidden
+        '404':
+          description: Organization not found
 
   /accounts:
     get:
@@ -926,6 +959,24 @@ components:
         name:
           type: string
           example: 'Alex J. Doe'
+
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    UpdateOrganizationDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "New Company Name"
 
     Account:
       type: object

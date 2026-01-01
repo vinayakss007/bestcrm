@@ -23,6 +23,10 @@ export type UpdateUserDto = {
     name?: string;
 };
 
+export type UpdateOrganizationDto = {
+    name?: string;
+}
+
 // This type is based on the Drizzle schema `crmAccounts`
 export type Account = {
   id: number;

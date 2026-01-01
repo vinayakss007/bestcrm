@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto } from "@/lib/types"
+import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -714,6 +714,30 @@ export async function getActivitiesForAccount(accountId: number) {
         throw new Error('Failed to fetch activities for account');
     }
     return response.json();
+}
+
+
+export async function updateOrganization(id: number, orgData: UpdateOrganizationDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/organizations/${id}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(orgData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update organization');
+        }
+
+        revalidatePath('/settings/brand');
+        revalidatePath('/(app)/layout'); // To update the workspace switcher
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while updating the organization.');
+    }
 }
 
     

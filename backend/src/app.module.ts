@@ -13,6 +13,7 @@ import { OpportunitiesModule } from './modules/opportunities/opportunities.modul
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ActivitiesModule } from './modules/activities/activities.module';
     InvoicesModule,
     TasksModule,
     ActivitiesModule,
+    OrganizationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
