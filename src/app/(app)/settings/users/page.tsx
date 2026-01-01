@@ -1,6 +1,8 @@
 
 
 import { MoreHorizontal } from "lucide-react"
+import { cookies } from "next/headers"
+import { jwtDecode } from "jwt-decode"
 
 import {
   Card,
@@ -30,8 +32,22 @@ import type { User } from "@/lib/types"
 import { InviteUserDialog } from "@/components/invite-user-dialog"
 import { Button } from "@/components/ui/button"
 
+type AuthenticatedUser = {
+    userId: number;
+    email: string;
+    organizationId: number;
+    role: 'user' | 'company-admin' | 'super-admin';
+}
+
 export default async function UsersSettingsPage() {
+  const token = cookies().get("token")?.value;
+  let currentUser: AuthenticatedUser | null = null;
+  if (token) {
+      currentUser = jwtDecode(token);
+  }
+
   const users: User[] = await getUsers();
+  const isSuperAdmin = currentUser?.role === 'super-admin';
 
   return (
     <Card>
@@ -50,6 +66,7 @@ export default async function UsersSettingsPage() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Role</TableHead>
+              {isSuperAdmin && <TableHead>Organization</TableHead>}
               <TableHead className="hidden md:table-cell">
                 Created At
               </TableHead>
@@ -74,6 +91,7 @@ export default async function UsersSettingsPage() {
                   </div>
                 </TableCell>
                 <TableCell>{user.role}</TableCell>
+                {isSuperAdmin && <TableCell>{(user as any).organization?.name || 'N/A'}</TableCell>}
                 <TableCell className="hidden md:table-cell">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </TableCell>

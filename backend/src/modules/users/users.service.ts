@@ -11,6 +11,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 // This is a real user type inferred from your Drizzle schema.
 export type User = typeof schema.crmUsers.$inferSelect;
+type AuthenticatedUser = {
+    userId: number;
+    email: string;
+    organizationId: number;
+    role: 'user' | 'company-admin' | 'super-admin';
+}
+
 
 @Injectable()
 export class UsersService {
@@ -35,9 +42,33 @@ export class UsersService {
     return users[0];
   }
 
-  async findAll(organizationId: number) {
+  async findAll(requestingUser: AuthenticatedUser) {
+    if (requestingUser.role === 'super-admin') {
+        // Super admin can see all users from all organizations
+        return await this.db.query.crmUsers.findMany({
+            columns: {
+                id: true,
+                name: true,
+                email: true,
+                avatarUrl: true,
+                role: true,
+                createdAt: true,
+                organizationId: true,
+            },
+            with: {
+                organization: {
+                    columns: {
+                        name: true,
+                    }
+                }
+            },
+            orderBy: (users, { asc }) => [asc(users.name)],
+        });
+    }
+
+    // Regular users and company admins only see users in their own organization
     return await this.db.query.crmUsers.findMany({
-      where: eq(schema.crmUsers.organizationId, organizationId),
+      where: eq(schema.crmUsers.organizationId, requestingUser.organizationId),
       columns: {
         id: true,
         name: true,
@@ -45,6 +76,7 @@ export class UsersService {
         avatarUrl: true,
         role: true,
         createdAt: true,
+        organizationId: true,
       },
       orderBy: (users, { asc }) => [asc(users.name)],
     });

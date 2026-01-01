@@ -7,6 +7,10 @@ export type User = {
   avatarUrl: string | null;
   role: 'user' | 'company-admin' | 'super-admin';
   createdAt: string;
+  organizationId?: number;
+  organization?: {
+      name: string;
+  }
 };
 
 export type RegisterDto = {

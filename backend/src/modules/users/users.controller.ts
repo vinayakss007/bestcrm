@@ -10,7 +10,7 @@ type AuthenticatedUser = {
     userId: number;
     email: string;
     organizationId: number;
-    role: string;
+    role: 'user' | 'company-admin' | 'super-admin';
 }
 
 @UseGuards(JwtAuthGuard)
@@ -20,7 +20,8 @@ export class UsersController {
 
     @Get()
     findAll(@GetUser() user: AuthenticatedUser) {
-        return this.usersService.findAll(user.organizationId);
+        // Pass the whole user object to the service
+        return this.usersService.findAll(user);
     }
 
     @Patch(':id')
@@ -34,5 +35,3 @@ export class UsersController {
         return this.usersService.update(id, updateUserDto, user.organizationId);
     }
 }
-
-    
