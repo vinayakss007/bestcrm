@@ -2,7 +2,8 @@
 "use client"
 
 import Link from "next/link"
-import { useFormState, useFormStatus } from "react-dom"
+import { useActionState } from "react"
+import { useFormStatus } from "react-dom"
 import { login, loginAsSuperAdmin } from "@/lib/actions"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,8 +31,8 @@ function SuperAdminLoginButton() {
 }
 
 export default function LoginPage() {
-  const [state, formAction] = useFormState(login, undefined)
-  const [superAdminState, superAdminFormAction] = useFormState(loginAsSuperAdmin, undefined);
+  const [state, formAction] = useActionState(login, undefined)
+  const [superAdminState, superAdminFormAction] = useActionState(loginAsSuperAdmin, undefined);
 
   return (
     <Card className="mx-auto max-w-sm">
