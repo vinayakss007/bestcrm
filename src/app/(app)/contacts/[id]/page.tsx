@@ -1,5 +1,4 @@
 
-
 "use server"
 
 import { notFound } from "next/navigation"
@@ -16,7 +15,7 @@ import {
   Trash2,
 } from "lucide-react"
 
-import { getContactById, getUsers } from "@/lib/actions"
+import { getContactById, getUsers, getAccounts } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,12 +38,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Contact, User } from "@/lib/types"
+import type { Contact, User, Account } from "@/lib/types"
+import { EditContactDialog } from "@/components/edit-contact-dialog"
+import { DeleteContactDialog } from "@/components/delete-contact-dialog"
 
 export default async function ContactDetailPage({ params }: { params: { id: string } }) {
-  const [contact, users] = await Promise.all([
+  const [contact, users, accounts] = await Promise.all([
     getContactById(params.id) as Promise<Contact | null>,
     getUsers() as Promise<User[]>,
+    getAccounts() as Promise<Account[]>,
   ]);
 
   if (!contact) {
@@ -80,7 +82,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                         <DropdownMenuItem>Task</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                 <Button>Edit</Button>
+                 <EditContactDialog contact={contact} accounts={accounts} as="button" />
             </div>
         </div>
 
@@ -111,7 +113,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                 <CardContent className="space-y-4">
                      <div className="flex items-start gap-4">
                         <Avatar>
-                            <AvatarImage src={administrator.avatarUrl} />
+                            <AvatarImage src={administrator.avatarUrl || undefined} />
                             <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -150,9 +152,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
               <Button variant="outline" size="icon">
                 <Phone className="h-4 w-4" />
               </Button>
-              <Button variant="destructive" size="icon" className="ml-auto">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <DeleteContactDialog contactId={contact.id} as="button" />
             </div>
           </CardHeader>
           <Separator />

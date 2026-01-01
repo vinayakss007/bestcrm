@@ -48,9 +48,10 @@ type ContactFormValues = z.infer<typeof contactSchema>
 interface EditContactDialogProps {
   contact: Contact
   accounts: Account[]
+  as?: "button" | "menuitem"
 }
 
-export function EditContactDialog({ contact, accounts }: EditContactDialogProps) {
+export function EditContactDialog({ contact, accounts, as = "menuitem" }: EditContactDialogProps) {
   const [open, setOpen] = React.useState(false)
   const { toast } = useToast()
 
@@ -87,12 +88,14 @@ export function EditContactDialog({ contact, accounts }: EditContactDialogProps)
     }
   }
 
+  const Trigger = as === "button" ? Button : DropdownMenuItem;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <Trigger onSelect={as === 'menuitem' ? (e) => e.preventDefault() : undefined}>
           Edit
-        </DropdownMenuItem>
+        </Trigger>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>
