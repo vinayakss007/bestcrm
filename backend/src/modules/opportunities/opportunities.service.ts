@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or, ilike } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
@@ -48,7 +48,7 @@ export class OpportunitiesService {
     return newOpportunity[0];
   }
 
-  async findAll(organizationId: number, accountId?: number) {
+  async findAll(organizationId: number, accountId?: number, query?: string) {
      const conditions = [
         eq(schema.crmOpportunities.organizationId, organizationId),
         eq(schema.crmOpportunities.isDeleted, false),
@@ -67,25 +67,52 @@ export class OpportunitiesService {
         }
         conditions.push(eq(schema.crmOpportunities.accountId, accountId));
     }
-
-
-    return await this.db.query.crmOpportunities.findMany({
-      where: and(...conditions),
-      with: {
-        account: {
-          columns: {
-            name: true,
-          },
-        },
-        owner: {
-            columns: {
-                name: true,
-                avatarUrl: true
+    
+    const queryBuilder = this.db
+        .select({
+            id: schema.crmOpportunities.id,
+            name: schema.crmOpportunities.name,
+            accountId: schema.crmOpportunities.accountId,
+            stage: schema.crmOpportunities.stage,
+            amount: schema.crmOpportunities.amount,
+            closeDate: schema.crmOpportunities.closeDate,
+            ownerId: schema.crmOpportunities.ownerId,
+            organizationId: schema.crmOpportunities.organizationId,
+            isDeleted: schema.crmOpportunities.isDeleted,
+            deletedAt: schema.crmOpportunities.deletedAt,
+            customFields: schema.crmOpportunities.customFields,
+            createdAt: schema.crmOpportunities.createdAt,
+            updatedAt: schema.crmOpportunities.updatedAt,
+            account: {
+                name: schema.crmAccounts.name
+            },
+            owner: {
+                name: schema.crmUsers.name,
+                avatarUrl: schema.crmUsers.avatarUrl
             }
-        }
-      },
-      orderBy: (opportunities, { desc }) => [desc(opportunities.createdAt)],
-    });
+        })
+        .from(schema.crmOpportunities)
+        .leftJoin(schema.crmAccounts, eq(schema.crmOpportunities.accountId, schema.crmAccounts.id))
+        .leftJoin(schema.crmUsers, eq(schema.crmOpportunities.ownerId, schema.crmUsers.id))
+        .orderBy(schema.crmOpportunities.createdAt)
+
+    if (query) {
+        conditions.push(
+            or(
+                ilike(schema.crmOpportunities.name, `%${query}%`),
+                ilike(schema.crmAccounts.name, `%${query}%`)
+            )
+        )
+    }
+
+    const results = await queryBuilder.where(and(...conditions));
+    
+    // Drizzle's select mapping needs to be adjusted when using joins to match the original structure.
+    return results.map(r => ({
+        ...r,
+        account: { name: r.account?.name || '' },
+        owner: r.owner ? { name: r.owner.name, avatarUrl: r.owner.avatarUrl } : null
+    }));
   }
 
   async findOne(id: number, organizationId: number) {

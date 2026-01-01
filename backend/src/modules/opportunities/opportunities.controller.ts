@@ -37,16 +37,17 @@ export class OpportunitiesController {
   }
 
   @Get('opportunities')
-  findAll(@GetUser() user: User) {
-    return this.opportunitiesService.findAll(user.organizationId);
+  findAll(@GetUser() user: User, @Query('query') query?: string) {
+    return this.opportunitiesService.findAll(user.organizationId, undefined, query);
   }
 
   @Get('accounts/:accountId/opportunities')
   findAllForAccount(
       @Param('accountId', ParseIntPipe) accountId: number,
-      @GetUser() user: User
+      @GetUser() user: User,
+      @Query('query') query?: string,
   ) {
-      return this.opportunitiesService.findAll(user.organizationId, accountId);
+      return this.opportunitiesService.findAll(user.organizationId, accountId, query);
   }
 
   @Get('opportunities/:id')

@@ -547,6 +547,12 @@ paths:
       operationId: getOpportunities
       security:
         - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          description: Search term to filter opportunities by name or account name.
+          schema:
+            type: string
       responses:
         '200':
           description: A list of opportunities.
