@@ -34,16 +34,18 @@ export class ContactsController {
   findAll(
     @GetUser() user: User,
     @Query('accountId', new ParseIntPipe({ optional: true })) accountId?: number,
+    @Query('query') query?: string,
     ) {
-    return this.contactsService.findAll(user.organizationId, accountId);
+    return this.contactsService.findAll(user.organizationId, accountId, query);
   }
 
   @Get('accounts/:accountId/contacts')
   findAllForAccount(
       @Param('accountId', ParseIntPipe) accountId: number,
-      @GetUser() user: User
+      @GetUser() user: User,
+      @Query('query') query?: string,
   ) {
-      return this.contactsService.findAll(user.organizationId, accountId);
+      return this.contactsService.findAll(user.organizationId, accountId, query);
   }
 
   @Get('contacts/:id')

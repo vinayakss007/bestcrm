@@ -274,6 +274,11 @@ paths:
           required: true
           schema:
             type: integer
+        - name: query
+          in: query
+          description: Search term to filter contacts by name or email.
+          schema:
+            type: string
       responses:
         '200':
           description: A list of contacts for the specified account.
@@ -321,6 +326,11 @@ paths:
           in: query
           schema:
             type: integer
+        - name: query
+          in: query
+          description: Search term to filter contacts by name or email.
+          schema:
+            type: string
       responses:
         '200':
           description: A list of contacts.

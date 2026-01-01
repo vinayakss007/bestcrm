@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or, ilike } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -45,7 +45,7 @@ export class ContactsService {
     return newContact[0];
   }
 
-  async findAll(organizationId: number, accountId?: number) {
+  async findAll(organizationId: number, accountId?: number, query?: string) {
     const conditions = [
         eq(schema.crmContacts.organizationId, organizationId),
         eq(schema.crmContacts.isDeleted, false),
@@ -63,6 +63,15 @@ export class ContactsService {
             throw new ForbiddenException("Access to this account's contacts is denied.");
         }
         conditions.push(eq(schema.crmContacts.accountId, accountId));
+    }
+
+    if (query) {
+        conditions.push(
+            or(
+                ilike(schema.crmContacts.name, `%${query}%`),
+                ilike(schema.crmContacts.email, `%${query}%`)
+            )
+        )
     }
 
     return await this.db.query.crmContacts.findMany({
