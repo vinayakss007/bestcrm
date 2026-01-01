@@ -1,4 +1,5 @@
-import { MoreHorizontal } from "lucide-react"
+
+import { MoreHorizontal, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -57,11 +58,19 @@ const users = [
 export default function UsersSettingsPage() {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Users</CardTitle>
-        <CardDescription>
-          Manage your team members and their roles.
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Users</CardTitle>
+          <CardDescription>
+            Manage your team members and their roles.
+          </CardDescription>
+        </div>
+        <Button size="sm" className="h-8 gap-1">
+            <PlusCircle className="h-3.5 w-3.5" />
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                Invite User
+            </span>
+        </Button>
       </CardHeader>
       <CardContent>
         <Table>
