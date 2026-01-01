@@ -1,7 +1,6 @@
 
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, PlusCircle } from "lucide-react"
-import Link from "next/link"
 
+import { MoreHorizontal } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,50 +25,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { getInvoices, getLeads } from "@/lib/actions"
+import type { Invoice, InvoiceStatus } from "@/lib/types"
+import { AddInvoiceDialog } from "@/components/add-invoice-dialog"
 
-// Mock data for invoices
-const invoices = [
-    {
-        id: 'inv-1',
-        invoiceNumber: 'INV-2024-001',
-        leadName: 'New Project Inquiry',
-        amount: 2500,
-        dueDate: '2024-08-15',
-        status: 'Paid'
-    },
-    {
-        id: 'inv-2',
-        invoiceNumber: 'INV-2024-002',
-        leadName: 'Trade Show Follow-up',
-        amount: 5000,
-        dueDate: '2024-08-20',
-        status: 'Sent'
-    },
-    {
-        id: 'inv-3',
-        invoiceNumber: 'INV-2024-003',
-        leadName: 'Referral from Apex',
-        amount: 1500,
-        dueDate: '2024-09-01',
-        status: 'Draft'
-    }
-]
+const statusVariant: Record<InvoiceStatus, "default" | "secondary" | "destructive" | "outline"> = {
+    'Draft': 'secondary',
+    'Sent': 'outline',
+    'Paid': 'default',
+    'Void': 'destructive'
+}
 
 export default async function InvoicesPage() {
+  const invoices: Invoice[] = await getInvoices()
+  const leads = await getLeads()
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
         <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">Invoices</h1>
-        <div className="flex items-center gap-2">
-            {/* Action buttons can be added here */}
-        </div>
         <div className="ml-auto flex items-center gap-2">
-          <Button size="sm" className="h-8 gap-1">
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Create Invoice
-            </span>
-          </Button>
+          <AddInvoiceDialog leads={leads} />
         </div>
       </div>
       <Card>
@@ -100,16 +76,16 @@ export default async function InvoicesPage() {
                     {invoice.invoiceNumber}
                   </TableCell>
                    <TableCell>
-                    {invoice.leadName}
+                    {invoice.lead?.name || 'N/A'}
                   </TableCell>
                   <TableCell>
                     ${invoice.amount.toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    {invoice.dueDate}
+                    {new Date(invoice.dueDate).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <Badge>{invoice.status}</Badge>
+                    <Badge variant={statusVariant[invoice.status]}>{invoice.status}</Badge>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

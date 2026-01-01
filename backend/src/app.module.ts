@@ -10,6 +10,7 @@ import { AccountsModule } from './modules/accounts/accounts.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { OpportunitiesModule } from './modules/opportunities/opportunities.modul
     ContactsModule,
     LeadsModule,
     OpportunitiesModule,
+    InvoicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

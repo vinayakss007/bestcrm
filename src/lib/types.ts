@@ -113,6 +113,31 @@ export type CreateOpportunityDto = {
   ownerId?: number;
 };
 
+export const invoiceStatuses = ['Draft', 'Sent', 'Paid', 'Void'] as const;
+export type InvoiceStatus = (typeof invoiceStatuses)[number];
+
+export type Invoice = {
+    id: number;
+    invoiceNumber: string;
+    leadId: number;
+    amount: number;
+    dueDate: string;
+    status: InvoiceStatus;
+    organizationId: number;
+    createdAt: string;
+    updatedAt: string;
+    lead?: {
+      name: string;
+    }
+}
+
+export type CreateInvoiceDto = {
+    leadId: number;
+    amount: number;
+    dueDate: string;
+    status?: 'Draft' | 'Sent';
+}
+
 export type TaskStatus = 'Pending' | 'Completed';
 export type Task = {
   id: string;
@@ -125,17 +150,6 @@ export type Task = {
     name: string;
   };
 };
-
-export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Void';
-export type Invoice = {
-    id: string;
-    invoiceNumber: string;
-    leadId: string;
-    leadName: string;
-    amount: number;
-    dueDate: string;
-    status: InvoiceStatus;
-}
 
 export type RecentActivity = {
   id: string;

@@ -474,6 +474,8 @@ paths:
       summary: List all invoices
       description: Retrieves a paginated list of invoices.
       operationId: getInvoices
+      security:
+        - bearerAuth: []
       parameters:
         - name: page
           in: query
@@ -502,6 +504,8 @@ paths:
       summary: Create a new invoice
       description: Creates a new invoice for a lead.
       operationId: createInvoice
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -509,7 +513,7 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateInvoiceDto'
       responses:
-        '201G':
+        '201':
           description: Invoice created successfully.
           content:
             application/json:
@@ -838,6 +842,13 @@ components:
           type: string
           enum: [Draft, Sent]
           default: Draft
+    
+    UpdateInvoiceDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [Draft, Sent, Paid, Void]
 
   securitySchemes:
     bearerAuth:
