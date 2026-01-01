@@ -8,6 +8,14 @@ import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, Cr
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
+export async function getHealthCheck() {
+  const response = await fetch(`${API_URL}/health`, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error('Health check failed');
+  }
+  return response.json();
+}
+
 export async function login(
   prevState: { error: string } | undefined,
   formData: FormData

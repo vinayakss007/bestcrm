@@ -12,6 +12,8 @@ servers:
 tags:
   - name: Auth
     description: Authentication operations.
+  - name: Health
+    description: Health check operations.
   - name: Users
     description: Operations related to CRM users.
   - name: Organizations
@@ -34,6 +36,24 @@ tags:
     description: Operations related to comments and notes.
 
 paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'ok'
+
   /auth/login:
     post:
       tags:
@@ -392,7 +412,25 @@ paths:
                 items:
                   $ref: '#/components/schemas/Opportunity'
 
-  /accounts/{accountId}/activities:
+  /activities:
+    get:
+      tags:
+        - Activities
+      summary: List all activities
+      operationId: getActivities
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A chronological list of activities.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Activity'
+
+  /activities/accounts/{accountId}:
     get:
       tags:
         - Activities
@@ -1212,6 +1250,11 @@ components:
           type: string
           format: uri
           example: 'https://picsum.photos/seed/alex/100/100'
+        organization:
+          type: object
+          properties:
+            name:
+              type: string
 
     InviteUserDto:
       type: object
@@ -1659,23 +1702,15 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
         type:
           type: string
-          enum: [new_contact, new_opportunity, account_created]
-        timestamp:
+          enum: [account_created, contact_created, lead_created, opportunity_created]
+        createdAt:
           type: string
           format: date-time
         user:
-          type: object
-          properties:
-            id: 
-              type: integer
-            name:
-              type: string
-            avatarUrl:
-              type: string
-              format: uri
+          $ref: '#/components/schemas/CrmUser'
         details:
           type: object
           additionalProperties: true

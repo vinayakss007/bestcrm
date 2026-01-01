@@ -26,7 +26,7 @@ export class ActivitiesService {
                 columns: {
                     id: true,
                     name: true,
-                    avatarUrl: true
+                    avatarUrl: true,
                 }
             }
         }
