@@ -4,7 +4,7 @@ import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, and, or, ilike } from 'drizzle-orm';
 
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
-import * as schema from '@/db/schema';
+import * as schema from '../../db/schema';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 

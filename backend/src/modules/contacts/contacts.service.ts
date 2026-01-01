@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, and, or, ilike } from 'drizzle-orm';
-import * as schema from '@/db/schema';
+import * as schema from '../../db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';

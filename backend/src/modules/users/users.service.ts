@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 
 import { RegisterDto } from '../auth/dto/register.dto';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
-import * as schema from '@/db/schema';
+import * as schema from '../../db/schema';
 import { and, eq } from 'drizzle-orm';
 import { UpdateUserDto } from './dto/update-user.dto';
 

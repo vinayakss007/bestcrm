@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, and, or, ilike } from 'drizzle-orm';
-import * as schema from '@/db/schema';
+import * as schema from '../../db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
@@ -116,7 +116,7 @@ export class LeadsService {
     return;
   }
 
-  async convert(leadId: number, convertLeadDto: ConvertLeadDto, organizationId: number, userId: number) {
+  async convert(leadId: number, convertLeadDto: ConvertLeadDto, organizationId: number, ownerId: number) {
     const lead = await this.findOne(leadId, organizationId);
     if (lead.isDeleted) {
         throw new ConflictException('Cannot convert a deleted lead.');
@@ -127,7 +127,7 @@ export class LeadsService {
         const newAccount = await tx.insert(schema.crmAccounts).values({
             name: convertLeadDto.accountName,
             organizationId,
-            ownerId: userId,
+            ownerId: ownerId,
         }).returning();
 
         // 2. Create Contact
@@ -142,7 +142,7 @@ export class LeadsService {
         const newOpportunity = await tx.insert(schema.crmOpportunities).values({
             name: convertLeadDto.opportunityName,
             accountId: newAccount[0].id,
-            ownerId: userId,
+            ownerId: ownerId,
             organizationId,
             stage: 'Qualification', // Default stage after conversion
             // You can add more fields here like amount, closeDate if needed

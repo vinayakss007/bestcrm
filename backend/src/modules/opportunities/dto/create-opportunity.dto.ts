@@ -7,7 +7,7 @@ import {
   IsEnum,
   IsDateString,
 } from 'class-validator';
-import { opportunityStageEnum } from '@/db/schema';
+import { OpportunityStageEnum } from '../../../enums';
 
 export class CreateOpportunityDto {
   @IsString()
@@ -18,9 +18,9 @@ export class CreateOpportunityDto {
   @IsNotEmpty()
   accountId: number;
 
-  @IsEnum(opportunityStageEnum.enumValues)
+  @IsEnum(OpportunityStageEnum)
   @IsOptional()
-  stage?: (typeof opportunityStageEnum.enumValues)[number];
+  stage?: (typeof OpportunityStageEnum)[number];
 
   @IsInt()
   @IsOptional()

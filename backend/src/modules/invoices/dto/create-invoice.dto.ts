@@ -1,6 +1,6 @@
 
 import { IsInt, IsNotEmpty, IsDateString, IsEnum, IsOptional, IsNumber } from 'class-validator';
-import { invoiceStatusEnum } from '@/db/schema';
+import { InvoiceStatusEnum } from '../../../enums';
 
 export class CreateInvoiceDto {
   @IsInt()
@@ -15,7 +15,7 @@ export class CreateInvoiceDto {
   @IsNotEmpty()
   dueDate: string;
 
-  @IsEnum(invoiceStatusEnum.enumValues)
+  @IsEnum(InvoiceStatusEnum)
   @IsOptional()
-  status?: (typeof invoiceStatusEnum.enumValues)[number];
+  status?: (typeof InvoiceStatusEnum)[number];
 }

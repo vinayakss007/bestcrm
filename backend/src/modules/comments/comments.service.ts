@@ -6,10 +6,10 @@ import {
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, and } from 'drizzle-orm';
-import * as schema from '@/db/schema';
+import * as schema from '../../db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { relatedToTypeEnum } from '@/db/schema';
+import { relatedToTypeEnum } from '../../db/schema';
 
 type RelatedToType = typeof relatedToTypeEnum.enumValues[number];
 

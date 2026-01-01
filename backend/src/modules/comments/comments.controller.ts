@@ -13,7 +13,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/users.service';
-import { relatedToTypeEnum } from '@/db/schema';
+import { relatedToTypeEnum } from '../../db/schema';
 
 @UseGuards(JwtAuthGuard)
 @Controller()
@@ -21,14 +21,14 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   private createComment(
-    entityType: typeof relatedToTypeEnum.enumValues[number], 
-    entityId: number, 
-    createCommentDto: CreateCommentDto, 
+    entityType: typeof relatedToTypeEnum.enumValues[number],
+    entityId: number,
+    createCommentDto: CreateCommentDto,
     user: User
     ) {
     return this.commentsService.create(
       createCommentDto,
-      user.userId,
+      user.id,
       entityType,
       entityId,
       user.organizationId,

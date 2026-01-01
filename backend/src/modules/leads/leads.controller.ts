@@ -62,6 +62,6 @@ export class LeadsController {
     @Body() convertLeadDto: ConvertLeadDto,
     @GetUser() user: User,
   ) {
-    return this.leadsService.convert(id, convertLeadDto, user.organizationId, user.userId);
+    return this.leadsService.convert(id, convertLeadDto, user.organizationId, user.id);
   }
 }

@@ -2,7 +2,7 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq } from 'drizzle-orm';
-import * as schema from '@/db/schema';
+import * as schema from '../../db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 

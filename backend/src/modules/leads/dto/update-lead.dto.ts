@@ -1,6 +1,6 @@
 
 import { IsString, IsEmail, IsOptional, IsInt, IsEnum } from 'class-validator';
-import { leadStatusEnum } from '@/db/schema';
+import { LeadStatusEnum } from '../../../enums';
 
 export class UpdateLeadDto {
   @IsString()
@@ -15,9 +15,9 @@ export class UpdateLeadDto {
   @IsOptional()
   source?: string;
 
-  @IsEnum(leadStatusEnum.enumValues)
+  @IsEnum(LeadStatusEnum)
   @IsOptional()
-  status?: (typeof leadStatusEnum.enumValues)[number];
+  status?: (typeof LeadStatusEnum)[number];
 
   @IsInt()
   @IsOptional()

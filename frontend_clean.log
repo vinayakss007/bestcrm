@@ -1,0 +1,151 @@
+
+> nextn@0.1.0 dev
+> npx next dev --turbopack -p 9002
+
+   ▲ Next.js 15.5.9 (Turbopack)
+   - Local:        http://localhost:9002
+   - Network:      http://10.0.0.255:9002
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2s
+ ○ Compiling / ...
+ ✓ Compiled / in 10.2s
+Error: Route "/" used `cookies().get('token')`. `cookies()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at Home (src/app/page.tsx:7:29)
+   5 | export default function Home() {
+   6 |   const cookieStore = cookies()
+>  7 |   const token = cookieStore.get('token')
+     |                             ^
+   8 |
+   9 |   if (!token) {
+  10 |     redirect('/login');
+ GET / 307 in 10782ms
+ ○ Compiling /register ...
+ ✓ Compiled /register in 1570ms
+ ⨯ TypeError: (0 , __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$dom$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__.useActionState) is not a function or its return value is not iterable
+    at RegisterPage (src/app/(auth)/register/page.tsx:27:45)
+  25 |
+  26 | export default function RegisterPage() {
+> 27 |   const [state, formAction] = useActionState(register, undefined)
+     |                                             ^
+  28 |
+  29 |   return (
+  30 |     <Card className="mx-auto max-w-sm"> {
+  digest: '4155258258'
+}
+ GET /register 500 in 1842ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 982ms
+ GET /favicon.ico 200 in 1138ms
+ GET /favicon.ico?favicon.7ed73651.ico 200 in 1342ms
+ ✓ Compiled in 245ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /register 200 in 511ms
+ GET /favicon.ico?favicon.7ed73651.ico 200 in 259ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 771ms
+ GET /login 200 in 921ms
+ ✓ Compiled in 232ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /login 200 in 385ms
+ GET /favicon.ico?favicon.7ed73651.ico 200 in 250ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 2.7s
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.5oo5xsr7fns'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.5oo5xsr7fns'
+}
+[Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.kyjtahxh0e'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.kyjtahxh0e'
+}
+[Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.63mukmg7o43'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.63mukmg7o43'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.fymkbbac2qp'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.fymkbbac2qp'
+}
+[Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.zb6m8ayemus'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.zb6m8ayemus'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.oc9df1s10lk'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.oc9df1s10lk'
+}
+[Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.oj9nn9bt3gf'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.oj9nn9bt3gf'
+}
+[Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/server/app/(auth)/register/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.tqju5l76hb'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.tqju5l76hb'
+}
+[Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.e17ts22bdga'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/static/development/_buildManifest.js.tmp.e17ts22bdga'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/workspaces/bestcrm/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspaces/bestcrm/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+[?25h

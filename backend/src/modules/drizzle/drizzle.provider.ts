@@ -1,9 +1,8 @@
 
 import { FactoryProvider } from '@nestjs/common';
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import * as schema from '@/db/schema';
 import { ConfigService } from '@nestjs/config';
+import * as schema from '../../db/schema';
 
 // Define a symbol to use as the injection token
 export const DrizzleProvider = 'DrizzleProvider';
@@ -19,7 +18,11 @@ export const drizzleProvider: FactoryProvider<
     if (!connectionString) {
       throw new Error('DATABASE_URL environment variable is not set');
     }
+
+    // Use require for CommonJS compatibility
+    const postgres = require('postgres');
     const client = postgres(connectionString);
+
     return drizzle(client, { schema });
   },
 };

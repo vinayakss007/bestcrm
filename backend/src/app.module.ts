@@ -15,11 +15,15 @@ import { TasksModule } from './modules/tasks/tasks.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { S3Module } from './modules/s3/s3.module';
+import { FilesModule } from './modules/files/files.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }), // Makes .env variables available globally
     DrizzleModule,
+    S3Module,
+    FilesModule,
     AuthModule,
     UsersModule,
     AccountsModule,

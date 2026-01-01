@@ -1,9 +1,9 @@
 
 import { IsEnum, IsOptional } from 'class-validator';
-import { invoiceStatusEnum } from '@/db/schema';
+import { InvoiceStatusEnum } from '../../../enums';
 
 export class UpdateInvoiceDto {
-  @IsEnum(invoiceStatusEnum.enumValues)
+  @IsEnum(InvoiceStatusEnum)
   @IsOptional()
-  status?: (typeof invoiceStatusEnum.enumValues)[number];
+  status?: (typeof InvoiceStatusEnum)[number];
 }

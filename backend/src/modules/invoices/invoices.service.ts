@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, and } from 'drizzle-orm';
-import * as schema from '@/db/schema';
+import * as schema from '../../db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';

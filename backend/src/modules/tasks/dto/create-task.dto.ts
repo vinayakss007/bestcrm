@@ -1,6 +1,6 @@
 
 import { IsString, IsNotEmpty, IsDateString, IsEnum, IsOptional, IsInt } from 'class-validator';
-import { taskStatusEnum, relatedToTypeEnum } from '@/db/schema';
+import { TaskStatusEnum, RelatedToTypeEnum } from '../../../enums';
 
 export class CreateTaskDto {
   @IsString()
@@ -11,17 +11,17 @@ export class CreateTaskDto {
   @IsNotEmpty()
   dueDate: string;
 
-  @IsEnum(taskStatusEnum.enumValues)
+  @IsEnum(TaskStatusEnum)
   @IsOptional()
-  status?: (typeof taskStatusEnum.enumValues)[number];
+  status?: (typeof TaskStatusEnum)[number];
 
   @IsInt()
   @IsNotEmpty()
   assignedToId: number;
 
-  @IsEnum(relatedToTypeEnum.enumValues)
+  @IsEnum(RelatedToTypeEnum)
   @IsOptional()
-  relatedToType?: (typeof relatedToTypeEnum.enumValues)[number];
+  relatedToType?: (typeof RelatedToTypeEnum)[number];
 
   @IsInt()
   @IsOptional()
