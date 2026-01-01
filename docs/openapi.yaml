@@ -565,6 +565,8 @@ paths:
       responses:
         '204':
           description: Lead deleted successfully.
+        '404':
+          description: Lead not found.
   
   /opportunities:
     get:
