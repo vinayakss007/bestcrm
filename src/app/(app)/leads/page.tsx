@@ -1,4 +1,5 @@
 
+
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 
@@ -38,6 +39,7 @@ import { AddLeadDialog } from "@/components/add-lead-dialog"
 import { EditLeadDialog } from "@/components/edit-lead-dialog"
 import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
 import { SearchInput } from "@/components/search-input"
+import { ConvertLeadDialog } from "@/components/convert-lead-dialog"
 
 const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" | "outline"> = {
     'New': 'default',
@@ -199,7 +201,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: { quer
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <EditLeadDialog lead={lead} users={users} />
-                        <DropdownMenuItem>Convert to Opportunity</DropdownMenuItem>
+                        <ConvertLeadDialog lead={lead} as="menuitem" />
                         <DeleteLeadDialog leadId={lead.id} />
                       </DropdownMenuContent>
                     </DropdownMenu>

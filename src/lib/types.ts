@@ -117,6 +117,11 @@ export type UpdateLeadDto = {
   ownerId?: number;
 }
 
+export type ConvertLeadDto = {
+  accountName: string;
+  opportunityName: string;
+};
+
 
 export const opportunityStages = ['Prospecting', 'Qualification', 'Proposal', 'Closing', 'Won', 'Lost'] as const;
 export type OpportunityStage = (typeof opportunityStages)[number];

@@ -1,10 +1,11 @@
 
+
 'use server'
 
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto } from "@/lib/types"
+import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -391,6 +392,35 @@ export async function deleteLead(id: number) {
     } catch (error) {
         console.error(error);
         throw new Error('An unexpected error occurred while deleting the lead.');
+    }
+}
+
+export async function convertLead(leadId: number, convertData: ConvertLeadDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/leads/${leadId}/convert`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(convertData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to convert lead');
+        }
+
+        const { opportunityId } = await response.json();
+        revalidatePath('/leads');
+        revalidatePath('/accounts');
+        revalidatePath('/contacts');
+        revalidatePath('/opportunities');
+        revalidatePath('/dashboard');
+
+        redirect(`/opportunities/${opportunityId}`);
+        
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while converting the lead.');
     }
 }
 
