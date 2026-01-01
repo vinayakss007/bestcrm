@@ -92,6 +92,35 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CrmUser'
+  
+  /users/{userId}:
+    patch:
+      tags:
+        - Users
+      summary: Update a user's profile
+      operationId: updateUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrmUser'
+        '404':
+          description: User not found
 
   /accounts:
     get:
@@ -779,6 +808,13 @@ components:
           type: string
           format: uri
           example: 'https://picsum.photos/seed/alex/100/100'
+
+    UpdateUserDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Alex J. Doe'
 
     Account:
       type: object
