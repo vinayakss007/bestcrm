@@ -6,6 +6,7 @@ import { eq, and } from 'drizzle-orm';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import * as schema from '@/db/schema';
 import { CreateAccountDto } from './dto/create-account.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Injectable()
 export class AccountsService {
@@ -53,5 +54,40 @@ export class AccountsService {
       throw new NotFoundException('Account not found');
     }
     return account[0];
+  }
+
+  async update(
+    id: number,
+    updateAccountDto: UpdateAccountDto,
+    organizationId: number,
+  ) {
+    // First, verify the account exists and belongs to the user's organization
+    await this.findOne(id, organizationId);
+
+    const updatedAccount = await this.db
+      .update(schema.crmAccounts)
+      .set({
+        ...updateAccountDto,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.crmAccounts.id, id))
+      .returning();
+
+    return updatedAccount[0];
+  }
+
+  async remove(id: number, organizationId: number) {
+    // Verify the account exists and belongs to the organization before soft-deleting
+    await this.findOne(id, organizationId);
+
+    await this.db
+      .update(schema.crmAccounts)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+      })
+      .where(eq(schema.crmAccounts.id, id));
+
+    return; // Return nothing on successful delete
   }
 }

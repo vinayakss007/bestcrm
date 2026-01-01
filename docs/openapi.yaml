@@ -159,6 +159,52 @@ paths:
           description: Account not found.
         '401':
           description: Unauthorized
+    patch:
+      tags:
+        - Accounts
+      summary: Update an account
+      operationId: updateAccount
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountDto'
+      responses:
+        '200':
+          description: Account updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Account not found.
+    delete:
+      tags:
+        - Accounts
+      summary: Delete an account
+      operationId: deleteAccount
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Account deleted successfully.
+        '404':
+          description: Account not found.
+
 
   /accounts/{accountId}/contacts:
     get:
@@ -753,6 +799,16 @@ components:
         customFields:
           type: object
           additionalProperties: true
+
+    UpdateAccountDto:
+      type: object
+      properties:
+        name:
+          type: string
+        industry:
+          type: string
+        ownerId:
+          type: integer
     
     Contact:
       type: object

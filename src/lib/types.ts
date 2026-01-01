@@ -27,6 +27,12 @@ export type CreateAccountDto = {
     ownerId?: number;
 };
 
+export type UpdateAccountDto = {
+  name?: string;
+  industry?: string;
+  ownerId?: number;
+};
+
 // This type is based on the Drizzle schema `crmContacts`
 export type Contact = {
   id: number;
