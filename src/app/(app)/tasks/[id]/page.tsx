@@ -1,5 +1,5 @@
 
-"use client"
+"use server"
 
 import { notFound } from "next/navigation"
 import {
@@ -17,7 +17,7 @@ import {
   Calendar,
 } from "lucide-react"
 
-import { tasks, users, accounts, contacts, opportunities } from "@/lib/data"
+import { getTasks, getUsers, getAccounts, getContacts, getOpportunities, getLeads } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,9 +33,8 @@ import {
 } from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import * as React from "react"
 import { Badge } from "@/components/ui/badge"
-import type { TaskStatus } from "@/lib/types"
+import type { Task, TaskStatus, User, Account, Contact, Opportunity, Lead } from "@/lib/types"
 import Link from "next/link"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
@@ -43,31 +42,64 @@ const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Pending': 'secondary'
 }
 
-const getRelatedLink = (task: typeof tasks[0]) => {
-    switch (task.relatedTo.type) {
+type RelatedEntity = Account | Contact | Opportunity | Lead;
+
+const getRelatedLink = (task: Task, relatedEntity: RelatedEntity | undefined) => {
+    if (!task.relatedToType || !relatedEntity) return "#";
+    
+    switch (task.relatedToType) {
         case "Account":
-            const account = accounts.find(a => a.name === task.relatedTo.name)
-            return `/accounts/${account?.id}`
+            return `/accounts/${relatedEntity.id}`
         case "Contact":
-            const contact = contacts.find(c => c.name === task.relatedTo.name)
-            return `/contacts/${contact?.id}`
+            return `/contacts/${relatedEntity.id}`
         case "Opportunity":
-             const opportunity = opportunities.find(o => o.name === task.relatedTo.name)
-            return `/opportunities/${opportunity?.id}`
+            return `/opportunities/${relatedEntity.id}`
+        case "Lead":
+            return `/leads/${relatedEntity.id}`
         default:
             return "#"
     }
 }
 
-export default function TaskDetailPage({ params }: { params: { id: string } }) {
-  const task = tasks.find((t) => t.id === params.id)
-  const [isDetailsOpen, setIsDetailsOpen] = React.useState(true)
+export default async function TaskDetailPage({ params }: { params: { id: string } }) {
+  const [
+    allTasks, 
+    allUsers, 
+    allAccounts, 
+    allContacts, 
+    allOpportunities, 
+    allLeads
+  ] = await Promise.all([
+    getTasks(),
+    getUsers(),
+    getAccounts(),
+    getContacts(),
+    getLeads(),
+    getOpportunities(),
+  ]);
 
+  const task = allTasks.find((t: Task) => t.id === parseInt(params.id))
+  
   if (!task) {
     notFound()
   }
-  
-  const administrator = users[0];
+
+  const administrator = allUsers.find((u: User) => u.id === '1'); // Mock creator
+
+  const getRelatedEntity = (task: Task): RelatedEntity | undefined => {
+    if (!task.relatedToType || !task.relatedToId) return undefined;
+
+    switch (task.relatedToType) {
+        case 'Account': return allAccounts.find((e: Account) => e.id === task.relatedToId);
+        case 'Contact': return allContacts.find((e: Contact) => e.id === task.relatedToId);
+        case 'Opportunity': return allOpportunities.find((e: Opportunity) => e.id === task.relatedToId);
+        case 'Lead': return allLeads.find((e: Lead) => e.id === task.relatedToId);
+        default: return undefined;
+    }
+  }
+
+  const relatedEntity = getRelatedEntity(task);
+  const relatedLink = getRelatedLink(task, relatedEntity);
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -107,6 +139,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                     <CardTitle>Activity</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    {administrator && (
                      <div className="flex items-start gap-4">
                         <Avatar>
                             <AvatarImage src={administrator.avatarUrl} />
@@ -115,10 +148,11 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                         <div className="flex-1">
                             <div className="flex justify-between items-center">
                                 <p className="text-sm font-medium">{administrator.name} created this task</p>
-                                <p className="text-xs text-muted-foreground">3 hours ago</p>
+                                <p className="text-xs text-muted-foreground">{new Date(task.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
                     </div>
+                    )}
                 </CardContent>
              </Card>
           </TabsContent>
@@ -146,41 +180,41 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
-            <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+            <Collapsible open={true}>
               <CollapsibleTrigger className="w-full">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold">Details</h4>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    {isDetailsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    <span className="sr-only">Toggle</span>
-                  </Button>
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="space-y-3 py-2 text-sm">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground flex items-center gap-2"><CheckSquare className="h-4 w-4" /> Status</span>
-                    <Badge variant={statusVariant[task.status]}>{task.status}</Badge>
+                    {task.status && <Badge variant={statusVariant[task.status]}>{task.status}</Badge>}
                   </div>
                    <div className="flex justify-between items-center">
                     <span className="text-muted-foreground flex items-center gap-2"><Calendar className="h-4 w-4" /> Due Date</span>
                     <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                   </div>
-                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground flex items-center gap-2"><LinkIcon className="h-4 w-4" /> Related To</span>
-                    <Link href={getRelatedLink(task)} className="text-primary hover:underline">
-                        {task.relatedTo.name}
-                    </Link>
-                  </div>
+                   {relatedEntity && (
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground flex items-center gap-2"><LinkIcon className="h-4 w-4" /> Related To</span>
+                        <Link href={relatedLink} className="text-primary hover:underline">
+                            {relatedEntity.name}
+                        </Link>
+                    </div>
+                   )}
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Assigned To</span>
-                    <div className="flex items-center gap-2">
-                        <Avatar className="h-5 w-5">
-                            <AvatarImage src={task.assignedTo.avatarUrl} />
-                            <AvatarFallback>{task.assignedTo.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span>{task.assignedTo.name}</span>
-                     </div>
+                    {task.assignedTo ? (
+                        <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                                <AvatarImage src={task.assignedTo.avatarUrl || undefined} />
+                                <AvatarFallback>{task.assignedTo.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{task.assignedTo.name}</span>
+                        </div>
+                    ) : <span className="text-muted-foreground">Unassigned</span>}
                   </div>
                 </div>
               </CollapsibleContent>

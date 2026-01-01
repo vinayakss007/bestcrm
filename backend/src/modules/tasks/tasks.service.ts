@@ -107,6 +107,14 @@ export class TasksService {
         eq(schema.crmTasks.id, id),
         eq(schema.crmTasks.organizationId, organizationId),
       ),
+      with: {
+        assignedTo: {
+          columns: {
+            name: true,
+            avatarUrl: true,
+          }
+        }
+      }
     });
 
     if (!task) {
