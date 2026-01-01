@@ -1,4 +1,6 @@
 
+"use server"
+
 import {
   SidebarProvider,
   Sidebar,
@@ -21,13 +23,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { users } from "@/lib/data"
+import { getUsers } from "@/lib/actions"
+import type { User } from "@/lib/types"
 
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const users: User[] = await getUsers();
   const user = users[0];
   
   return (

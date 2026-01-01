@@ -1,4 +1,5 @@
-"use client"
+
+"use server"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,10 +12,12 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { users } from "@/lib/data"
+import { getUsers } from "@/lib/actions"
+import type { User } from "@/lib/types"
 
-export default function ProfileSettingsPage() {
-  const user = users[0]
+export default async function ProfileSettingsPage() {
+  const users: User[] = await getUsers();
+  const user = users[0] // For now, we'll just use the first user as the logged in user
 
   return (
     <Card>

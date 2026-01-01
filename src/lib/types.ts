@@ -3,7 +3,9 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
+  role: 'user' | 'company-admin' | 'super-admin';
+  createdAt: string;
 };
 
 // This type is based on the Drizzle schema `crmAccounts`
@@ -223,5 +225,3 @@ export type RecentActivity = {
   target: string;
   timestamp: string;
 };
-
-    

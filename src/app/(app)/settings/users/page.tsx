@@ -25,37 +25,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getUsers } from "@/lib/actions"
+import type { User } from "@/lib/types"
 
-// Placeholder data for users
-const users = [
-  {
-    id: "user-1",
-    name: "Alex Doe",
-    email: "alex.doe@example.com",
-    role: "Company Admin",
-    lastActivity: "Online",
-    avatarUrl: "https://picsum.photos/seed/alex/100/100",
-  },
-  {
-    id: "user-2",
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
-    role: "Admin",
-    lastActivity: "2 hours ago",
-    avatarUrl: "https://picsum.photos/seed/jane/100/100",
-  },
-   {
-    id: "user-3",
-    name: "Sam Wilson",
-    email: "sam.wilson@example.com",
-    role: "User",
-    lastActivity: "1 day ago",
-    avatarUrl: "https://picsum.photos/seed/sam/100/100",
-  }
-];
+export default async function UsersSettingsPage() {
+  const users: User[] = await getUsers();
 
-
-export default function UsersSettingsPage() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -79,7 +54,7 @@ export default function UsersSettingsPage() {
               <TableHead>Name</TableHead>
               <TableHead>Role</TableHead>
               <TableHead className="hidden md:table-cell">
-                Last Activity
+                Created At
               </TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
@@ -103,7 +78,7 @@ export default function UsersSettingsPage() {
                 </TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {user.lastActivity}
+                  {new Date(user.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>

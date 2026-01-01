@@ -1,3 +1,6 @@
+
+"use server"
+
 import Link from "next/link"
 import {
   Avatar,
@@ -18,13 +21,19 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { users } from "@/lib/data"
+import { getUsers } from "@/lib/actions"
 import { ThemeSwitcher } from "./theme-switcher"
 import { Sun } from "lucide-react"
+import type { User } from "@/lib/types"
 
-export function UserNav() {
-  const user = users[0]; // mock user
+export async function UserNav() {
+  const users: User[] = await getUsers();
+  const user = users[0]; // mock logged in user
   
+  if (!user) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
