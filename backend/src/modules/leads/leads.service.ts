@@ -20,16 +20,30 @@ export class LeadsService {
     private db: PostgresJsDatabase<typeof schema>,
   ) {}
 
-  async create(createLeadDto: CreateLeadDto, organizationId: number) {
-    const newLead = await this.db
-      .insert(schema.crmLeads)
-      .values({
-        ...createLeadDto,
-        organizationId,
-      })
-      .returning();
+  async create(createLeadDto: CreateLeadDto, organizationId: number, userId: number) {
+    return await this.db.transaction(async (tx) => {
+        const newLead = await tx
+        .insert(schema.crmLeads)
+        .values({
+            ...createLeadDto,
+            organizationId,
+        })
+        .returning();
 
-    return newLead[0];
+        const lead = newLead[0];
+
+        // Log activity
+        await tx.insert(schema.crmActivities).values({
+            type: 'lead_created',
+            details: { name: lead.name },
+            userId,
+            organizationId,
+            relatedToType: 'Lead',
+            relatedToId: lead.id,
+        });
+
+        return lead;
+    });
   }
 
   async findAll(organizationId: number, query?: string) {

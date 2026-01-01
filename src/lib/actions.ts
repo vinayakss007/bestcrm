@@ -718,9 +718,20 @@ export async function updateUser(id: number, userData: UpdateUserDto) {
     }
 }
 
+export async function getActivities() {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/activities`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        throw new Error('Failed to fetch activities');
+    }
+    return response.json();
+}
+
+
 export async function getActivitiesForAccount(accountId: number) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/accounts/${accountId}/activities`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/activities/accounts/${accountId}`, { headers, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         throw new Error('Failed to fetch activities for account');
@@ -817,5 +828,3 @@ export async function addComment(
 export async function addCommentForLead(leadId: number, formData: FormData) {
     return addComment('Lead', leadId, formData);
 }
-
-    

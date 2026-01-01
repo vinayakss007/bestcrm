@@ -15,15 +15,30 @@ export class AccountsService {
     private db: PostgresJsDatabase<typeof schema>,
   ) {}
 
-  async create(createAccountDto: CreateAccountDto, organizationId: number) {
-    const newAccount = await this.db
-      .insert(schema.crmAccounts)
-      .values({
-        ...createAccountDto,
-        organizationId, // Ensure account is tied to the user's organization
-      })
-      .returning();
-    return newAccount[0];
+  async create(createAccountDto: CreateAccountDto, organizationId: number, userId: number) {
+    return await this.db.transaction(async (tx) => {
+        const newAccount = await tx
+        .insert(schema.crmAccounts)
+        .values({
+            ...createAccountDto,
+            organizationId, // Ensure account is tied to the user's organization
+        })
+        .returning();
+
+        const account = newAccount[0];
+
+        // Log this action in the activity feed
+        await tx.insert(schema.crmActivities).values({
+            type: 'account_created',
+            details: { name: account.name },
+            userId,
+            organizationId,
+            relatedToType: 'Account',
+            relatedToId: account.id,
+        });
+
+        return account;
+    });
   }
 
   async findAll(organizationId: number, query?: string) {

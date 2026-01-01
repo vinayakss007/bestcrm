@@ -28,8 +28,8 @@ export class AccountsController {
 
   @Post()
   create(@Body() createAccountDto: CreateAccountDto, @GetUser() user: User) {
-    // Pass organizationId from the authenticated user to the service
-    return this.accountsService.create(createAccountDto, user.organizationId);
+    // Pass organizationId and userId from the authenticated user to the service
+    return this.accountsService.create(createAccountDto, user.organizationId, user.userId);
   }
 
   @Get()

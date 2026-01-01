@@ -22,30 +22,45 @@ export class OpportunitiesService {
   async create(
     createOpportunityDto: CreateOpportunityDto,
     organizationId: number,
+    userId: number,
   ) {
-    // Verify that the associated account belongs to the same organization
-    const account = await this.db.query.crmAccounts.findFirst({
-      where: and(
-        eq(schema.crmAccounts.id, createOpportunityDto.accountId),
-        eq(schema.crmAccounts.organizationId, organizationId),
-      ),
+    return await this.db.transaction(async (tx) => {
+        // Verify that the associated account belongs to the same organization
+        const account = await tx.query.crmAccounts.findFirst({
+        where: and(
+            eq(schema.crmAccounts.id, createOpportunityDto.accountId),
+            eq(schema.crmAccounts.organizationId, organizationId),
+        ),
+        });
+
+        if (!account) {
+        throw new ForbiddenException(
+            'Account not found or does not belong to your organization.',
+        );
+        }
+
+        const newOpportunity = await tx
+        .insert(schema.crmOpportunities)
+        .values({
+            ...createOpportunityDto,
+            organizationId,
+        })
+        .returning();
+        
+        const opportunity = newOpportunity[0];
+
+        // Log activity
+        await tx.insert(schema.crmActivities).values({
+            type: 'opportunity_created',
+            details: { name: opportunity.name, accountName: account.name, amount: opportunity.amount },
+            userId,
+            organizationId,
+            relatedToType: 'Account',
+            relatedToId: account.id,
+        });
+
+        return opportunity;
     });
-
-    if (!account) {
-      throw new ForbiddenException(
-        'Account not found or does not belong to your organization.',
-      );
-    }
-
-    const newOpportunity = await this.db
-      .insert(schema.crmOpportunities)
-      .values({
-        ...createOpportunityDto,
-        organizationId,
-      })
-      .returning();
-
-    return newOpportunity[0];
   }
 
   async findAll(organizationId: number, accountId?: number, query?: string) {
@@ -188,5 +203,3 @@ export class OpportunitiesService {
     }, {} as Record<number, number>);
   }
 }
-
-    

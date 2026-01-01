@@ -215,3 +215,25 @@ export const crmComments = pgTable("crm_comments", {
   organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// A log of all significant actions taken within an organization.
+export const activityTypeEnum = pgEnum('activity_type', [
+    'account_created',
+    'contact_created',
+    'lead_created',
+    'opportunity_created'
+]);
+
+export const crmActivities = pgTable("crm_activities", {
+    id: serial("id").primaryKey(),
+    type: activityTypeEnum("type").notNull(),
+    details: jsonb("details").notNull(),
+    // The user who performed the action.
+    userId: integer("user_id").notNull().references(() => crmUsers.id),
+    // All activities are scoped to an organization for security and filtering.
+    organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    // Polymorphic association to the primary record (e.g., the account that was created).
+    relatedToType: relatedToTypeEnum("related_to_type"),
+    relatedToId: integer("related_to_id"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});

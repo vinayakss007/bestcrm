@@ -33,6 +33,7 @@ export class OpportunitiesController {
     return this.opportunitiesService.create(
       createOpportunityDto,
       user.organizationId,
+      user.userId
     );
   }
 
@@ -79,5 +80,3 @@ export class OpportunitiesController {
     return this.opportunitiesService.remove(id, user.organizationId);
   }
 }
-
-    

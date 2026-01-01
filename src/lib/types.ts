@@ -1,5 +1,4 @@
 
-
 export type User = {
   id: string;
   name: string;
@@ -251,12 +250,21 @@ export type RecentActivity = {
 };
 
 export type Activity = {
-  id: string;
-  type: 'new_contact' | 'new_opportunity' | 'account_created';
-  timestamp: string;
-  user: { id: number; name: string; avatarUrl: string | null };
+  id: number;
+  type: 'account_created' | 'contact_created' | 'lead_created' | 'opportunity_created';
   details: any;
+  userId: number;
+  organizationId: number;
+  relatedToType: RelatedToType | null;
+  relatedToId: number | null;
+  createdAt: string;
+  user: {
+      id: string;
+      name: string;
+      avatarUrl: string | null;
+  };
 };
+
 
 export type Comment = {
   id: number;

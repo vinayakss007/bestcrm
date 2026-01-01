@@ -69,21 +69,21 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
 }
 
 const activityIcons: Record<Activity['type'], React.ReactNode> = {
-    new_contact: <ContactIcon className="h-4 w-4" />,
-    new_opportunity: <Briefcase className="h-4 w-4" />,
+    contact_created: <ContactIcon className="h-4 w-4" />,
+    opportunity_created: <Briefcase className="h-4 w-4" />,
     account_created: <Plus className="h-4 w-4" />,
+    lead_created: <Lightbulb className="h-4 w-4" />,
 }
 
 function getActivityDescription(activity: Activity) {
     switch (activity.type) {
         case 'account_created':
-            return <>created account <span className="font-medium">{activity.details.name}</span></>;
-        case 'new_contact':
+            return <>created this account</>;
+        case 'contact_created':
             return <>added a new contact <span className="font-medium">{activity.details.name}</span></>;
-        case 'new_opportunity':
+        case 'opportunity_created':
             return <>created a new opportunity <span className="font-medium">{activity.details.name}</span> for ${activity.details.amount?.toLocaleString()}</>;
         default:
-            const _exhaustiveCheck: never = activity.type;
             return "performed an unknown action";
     }
 }
@@ -186,7 +186,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                                     <span className="font-medium text-foreground">{activity.user.name}</span> {getActivityDescription(activity)}
                                 </p>
                                 <time className="text-xs text-muted-foreground">
-                                    {new Date(activity.timestamp).toLocaleString()}
+                                    {new Date(activity.createdAt).toLocaleString()}
                                 </time>
                             </div>
                         </div>
@@ -352,5 +352,3 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     </div>
   )
 }
-
-    

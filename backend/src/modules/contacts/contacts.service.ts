@@ -19,30 +19,44 @@ export class ContactsService {
     private db: PostgresJsDatabase<typeof schema>,
   ) {}
 
-  async create(createContactDto: CreateContactDto, organizationId: number) {
-    // Verify that the account being assigned belongs to the same organization
-    const account = await this.db.query.crmAccounts.findFirst({
-      where: and(
-        eq(schema.crmAccounts.id, createContactDto.accountId),
-        eq(schema.crmAccounts.organizationId, organizationId),
-      ),
+  async create(createContactDto: CreateContactDto, organizationId: number, userId: number) {
+    return await this.db.transaction(async (tx) => {
+        // Verify that the account being assigned belongs to the same organization
+        const account = await tx.query.crmAccounts.findFirst({
+        where: and(
+            eq(schema.crmAccounts.id, createContactDto.accountId),
+            eq(schema.crmAccounts.organizationId, organizationId),
+        ),
+        });
+
+        if (!account) {
+        throw new ForbiddenException(
+            'Account not found or does not belong to your organization.',
+        );
+        }
+
+        const newContact = await tx
+        .insert(schema.crmContacts)
+        .values({
+            ...createContactDto,
+            organizationId,
+        })
+        .returning();
+
+        const contact = newContact[0];
+
+        // Log activity
+        await tx.insert(schema.crmActivities).values({
+            type: 'contact_created',
+            details: { name: contact.name, accountName: account.name },
+            userId,
+            organizationId,
+            relatedToType: 'Account',
+            relatedToId: account.id,
+        });
+
+        return contact;
     });
-
-    if (!account) {
-      throw new ForbiddenException(
-        'Account not found or does not belong to your organization.',
-      );
-    }
-
-    const newContact = await this.db
-      .insert(schema.crmContacts)
-      .values({
-        ...createContactDto,
-        organizationId,
-      })
-      .returning();
-
-    return newContact[0];
   }
 
   async findAll(organizationId: number, accountId?: number, query?: string) {
@@ -158,5 +172,3 @@ export class ContactsService {
     return; // Return nothing on successful delete
   }
 }
-
-    

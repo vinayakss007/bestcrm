@@ -6,11 +6,16 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/users.service';
 
 @UseGuards(JwtAuthGuard)
-@Controller()
+@Controller('activities')
 export class ActivitiesController {
   constructor(private readonly activitiesService: ActivitiesService) {}
 
-  @Get('accounts/:accountId/activities')
+  @Get()
+  findAll(@GetUser() user: User) {
+    return this.activitiesService.findAll(user.organizationId);
+  }
+
+  @Get('/accounts/:accountId')
   findAllForAccount(
     @Param('accountId', ParseIntPipe) accountId: number,
     @GetUser() user: User,

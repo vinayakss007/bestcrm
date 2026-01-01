@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Briefcase, DollarSign, Lightbulb, Users, Activity, Plus, Edit, CalendarDays } from "lucide-react"
-import { getAccounts, getLeads, getOpportunities, getOpportunityForecast } from "@/lib/actions"
+import { getAccounts, getLeads, getOpportunities, getOpportunityForecast, getActivities } from "@/lib/actions"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,8 +23,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Lead, Opportunity, Account, OpportunityStage } from "@/lib/types"
+import type { Lead, Opportunity, Account, OpportunityStage, Activity as TActivity } from "@/lib/types"
 import { format, getMonth, parseISO } from "date-fns"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 
 const chartConfig = {
@@ -34,12 +35,28 @@ const chartConfig = {
   },
 }
 
+function getActivityDescription(activity: TActivity) {
+    switch (activity.type) {
+        case 'account_created':
+            return <>created account <span className="font-medium">{activity.details.name}</span></>;
+        case 'contact_created':
+            return <>added a new contact <span className="font-medium">{activity.details.name}</span> to account <span className="font-medium">{activity.details.accountName}</span></>;
+        case 'opportunity_created':
+            return <>created a new opportunity <span className="font-medium">{activity.details.name}</span> for account <span className="font-medium">{activity.details.accountName}</span></>;
+        case 'lead_created':
+             return <>created a new lead <span className="font-medium">{activity.details.name}</span></>;
+        default:
+            return "performed an unknown action";
+    }
+}
+
 export default async function Dashboard() {
-    const [leads, opportunities, accounts, forecastData]: [Lead[], Opportunity[], Account[], Record<number, number>] = await Promise.all([
+    const [leads, opportunities, accounts, forecastData, activities]: [Lead[], Opportunity[], Account[], Record<number, number>, TActivity[]] = await Promise.all([
       getLeads(),
       getOpportunities(),
       getAccounts(),
       getOpportunityForecast(),
+      getActivities(),
     ]);
 
   const totalRevenue = opportunities
@@ -181,9 +198,29 @@ export default async function Dashboard() {
                     <Activity className="ml-auto h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent className="grid gap-8">
-                   <div className="text-center text-muted-foreground py-10">
-                        Activity feed coming soon.
+                   {activities.length > 0 ? (
+                        activities.map((activity) => (
+                            <div key={activity.id} className="flex items-center gap-4">
+                                <Avatar className="h-9 w-9">
+                                    <AvatarImage src={activity.user?.avatarUrl || undefined} alt={activity.user.name} />
+                                    <AvatarFallback>{activity.user.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="grid gap-1">
+                                    <p className="text-sm text-muted-foreground">
+                                        <span className="font-medium text-foreground">{activity.user.name}</span>{' '}
+                                        {getActivityDescription(activity)}
+                                    </p>
+                                    <time className="text-xs text-muted-foreground">
+                                        {new Date(activity.createdAt).toLocaleString()}
+                                    </time>
+                                </div>
+                            </div>
+                        ))
+                   ) : (
+                     <div className="text-center text-muted-foreground py-10">
+                        No recent activity.
                     </div>
+                   )}
                 </CardContent>
                 </Card>
             </div>

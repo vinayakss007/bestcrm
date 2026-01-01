@@ -28,7 +28,7 @@ export class LeadsController {
 
   @Post()
   create(@Body() createLeadDto: CreateLeadDto, @GetUser() user: User) {
-    return this.leadsService.create(createLeadDto, user.organizationId);
+    return this.leadsService.create(createLeadDto, user.organizationId, user.userId);
   }
 
   @Get()

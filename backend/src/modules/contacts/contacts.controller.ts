@@ -27,7 +27,7 @@ export class ContactsController {
 
   @Post('contacts')
   create(@Body() createContactDto: CreateContactDto, @GetUser() user: User) {
-    return this.contactsService.create(createContactDto, user.organizationId);
+    return this.contactsService.create(createContactDto, user.organizationId, user.userId);
   }
 
   @Get('contacts')
@@ -74,5 +74,3 @@ export class ContactsController {
     return this.contactsService.remove(id, user.organizationId);
   }
 }
-
-    
