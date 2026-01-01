@@ -82,14 +82,35 @@ export const opportunityStages = ['Prospecting', 'Qualification', 'Proposal', 'C
 export type OpportunityStage = (typeof opportunityStages)[number];
 
 export type Opportunity = {
-  id: string;
+  id: number;
   name: string;
-  accountId: string;
-  accountName: string;
-  stage: OpportunityStage;
-  amount: number;
-  closeDate: string;
-  owner: User;
+  accountId: number;
+  stage: OpportunityStage | null;
+  amount: number | null;
+  closeDate: string | null;
+  ownerId: number | null;
+  organizationId: number;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  customFields: any | null;
+  createdAt: string;
+  updatedAt: string;
+  account: {
+    name: string;
+  };
+  owner: {
+    name: string;
+    avatarUrl: string | null;
+  } | null;
+};
+
+export type CreateOpportunityDto = {
+  name: string;
+  accountId: number;
+  stage?: OpportunityStage;
+  amount?: number;
+  closeDate?: string;
+  ownerId?: number;
 };
 
 export type TaskStatus = 'Pending' | 'Completed';

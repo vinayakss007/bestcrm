@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import {
   Form,
@@ -40,22 +41,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { accounts, users } from "@/lib/data"
 import { opportunityStages } from "@/lib/types"
+import type { Account, User } from "@/lib/types"
+import { createOpportunity } from "@/lib/actions"
+import { useToast } from "@/hooks/use-toast"
 
 const opportunitySchema = z.object({
   name: z.string().min(2, { message: "Opportunity name must be at least 2 characters." }),
   accountId: z.string({ required_error: "Please select an account." }),
-  stage: z.enum(opportunityStages, { required_error: "Please select a stage." }),
-  amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
-  closeDate: z.date({ required_error: "A close date is required." }),
-  ownerId: z.string({ required_error: "Please select an owner." }),
+  stage: z.enum(opportunityStages),
+  amount: z.coerce.number().positive({ message: "Amount must be a positive number." }).optional(),
+  closeDate: z.date().optional(),
+  ownerId: z.string().optional(),
 })
 
 type OpportunityFormValues = z.infer<typeof opportunitySchema>
 
-export function AddOpportunityDialog() {
+interface AddOpportunityDialogProps {
+    accounts: Account[];
+    users: User[];
+}
+
+export function AddOpportunityDialog({ accounts, users }: AddOpportunityDialogProps) {
   const [open, setOpen] = React.useState(false)
+  const { toast } = useToast()
+  
   const form = useForm<OpportunityFormValues>({
     resolver: zodResolver(opportunitySchema),
     defaultValues: {
@@ -64,10 +74,29 @@ export function AddOpportunityDialog() {
     },
   })
 
-  function onSubmit(data: OpportunityFormValues) {
-    console.log(data)
-    form.reset()
-    setOpen(false)
+  async function onSubmit(data: OpportunityFormValues) {
+    const opportunityData = {
+        ...data,
+        accountId: parseInt(data.accountId),
+        ownerId: data.ownerId ? parseInt(data.ownerId) : undefined,
+        closeDate: data.closeDate ? data.closeDate.toISOString() : undefined,
+    }
+
+    try {
+        await createOpportunity(opportunityData)
+        toast({
+            title: "Success",
+            description: `Opportunity "${data.name}" has been created.`,
+        })
+        form.reset()
+        setOpen(false)
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to create opportunity. Please try again.",
+        })
+    }
   }
 
   return (
@@ -81,157 +110,164 @@ export function AddOpportunityDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Add New Opportunity</DialogTitle>
-          <DialogDescription>
-            Fill in the details below to create a new opportunity.
-          </DialogDescription>
-        </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Opportunity Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Website Redesign" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="accountId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Account</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an account" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {accounts.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                control={form.control}
-                name="stage"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Stage</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+                <DialogHeader>
+                <DialogTitle>Add New Opportunity</DialogTitle>
+                <DialogDescription>
+                    Fill in the details below to create a new opportunity.
+                </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Opportunity Name</FormLabel>
                         <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select a stage" />
-                        </SelectTrigger>
+                            <Input placeholder="Website Redesign" {...field} />
                         </FormControl>
-                        <SelectContent>
-                        {opportunityStages.map((stage) => (
-                            <SelectItem key={stage} value={stage}>
-                            {stage}
-                            </SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                        <Input type="number" placeholder="25000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </div>
-             <FormField
-              control={form.control}
-              name="closeDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Close Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date(new Date().setHours(0,0,0,0))
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="ownerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Opportunity Owner</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an owner" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">Create Opportunity</Button>
-          </form>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="accountId"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Account</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select an account" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            {accounts.map((account) => (
+                                <SelectItem key={account.id} value={String(account.id)}>
+                                {account.name}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                        control={form.control}
+                        name="stage"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Stage</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a stage" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {opportunityStages.map((stage) => (
+                                    <SelectItem key={stage} value={stage}>
+                                    {stage}
+                                    </SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Amount</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="25000" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+                    <FormField
+                    control={form.control}
+                    name="closeDate"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                        <FormLabel>Close Date</FormLabel>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                )}
+                                >
+                                {field.value ? (
+                                    format(field.value, "PPP")
+                                ) : (
+                                    <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                date < new Date(new Date().setHours(0,0,0,0))
+                                }
+                                initialFocus
+                            />
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="ownerId"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Opportunity Owner</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select an owner" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            {users.map((user) => (
+                                <SelectItem key={user.id} value={user.id}>
+                                {user.name}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                <DialogFooter>
+                    <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                        {form.formState.isSubmitting ? "Creating..." : "Create Opportunity"}
+                    </Button>
+                </DialogFooter>
+            </form>
         </Form>
       </DialogContent>
     </Dialog>

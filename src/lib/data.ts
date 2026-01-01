@@ -1,4 +1,5 @@
-import type { User, Account, Opportunity, Task, RecentActivity, Contact } from './types';
+
+import type { User, Account, Task, RecentActivity, Contact } from './types';
 
 export const users: User[] = [
   { id: '1', name: 'Alex Doe', email: 'alex.doe@example.com', avatarUrl: 'https://picsum.photos/seed/alex/100/100' },
@@ -21,14 +22,6 @@ export const contacts: (Omit<Contact, "id" | "organizationId" | "isDeleted" | "d
   { id: 'con-3', name: 'Michael Brown', email: 'michael.brown@apex.com', phone: '234-567-8901', accountId: 2, accountName: 'Apex Solutions' },
   { id: 'con-4', name: 'Sarah Green', email: 'sarah.green@quantum.com', phone: '345-678-9012', accountId: 3, accountName: 'Quantum Corp' },
   { id: 'con-5', name: 'David Black', email: 'david.black@synergy.com', phone: '456-789-0123', accountId: 4, accountName: 'Synergy Ltd.' },
-];
-
-export const opportunities: Opportunity[] = [
-  { id: 'opp-1', name: 'Innovate Inc. - Website Redesign', accountId: 'acc-1', accountName: 'Innovate Inc.', stage: 'Proposal', amount: 25000, closeDate: '2024-08-30', owner: users[0] },
-  { id: 'opp-2', name: 'Apex Solutions - Consulting Deal', accountId: 'acc-2', accountName: 'Apex Solutions', stage: 'Qualification', amount: 50000, closeDate: '2024-09-15', owner: users[1] },
-  { id: 'opp-3', name: 'Quantum Corp - Financial Software', accountId: 'acc-3', accountName: 'Quantum Corp', stage: 'Won', amount: 120000, closeDate: '2024-07-20', owner: users[0] },
-  { id: 'opp-4', name: 'Synergy Ltd. - Yearly Contract', accountId: 'acc-4', accountName: 'Synergy Ltd.', stage: 'Closing', amount: 75000, closeDate: '2024-07-28', owner: users[2] },
-  { id: 'opp-5', name: 'Pioneer LLC - System Upgrade', accountId: 'acc-5', accountName: 'Pioneer LLC', stage: 'Lost', amount: 30000, closeDate: '2024-06-30', owner: users[1] },
 ];
 
 export const tasks: Task[] = [

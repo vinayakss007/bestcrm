@@ -1,7 +1,4 @@
 
-"use client"
-
-import * as React from "react"
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw, Search } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -32,10 +29,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { getOpportunities } from "@/lib/actions"
-import type { Opportunity, OpportunityStage } from "@/lib/types"
+import { getAccounts, getOpportunities, getUsers } from "@/lib/actions"
+import type { Opportunity, OpportunityStage, Account, User } from "@/lib/types"
 import { AddOpportunityDialog } from "@/components/add-opportunity-dialog"
-import { Pagination } from "@/components/pagination"
 import { Input } from "@/components/ui/input"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
@@ -47,19 +43,10 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
     'Lost': 'destructive'
 }
 
-export default function OpportunitiesPage() {
-  const [opportunities, setOpportunities] = React.useState<Opportunity[]>([]);
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(5);
-  const [total, setTotal] = React.useState(0);
-
-  React.useEffect(() => {
-    getOpportunities().then((allOpportunities) => {
-      setTotal(allOpportunities.length);
-      const paginatedOpportunities = allOpportunities.slice((page - 1) * pageSize, page * pageSize);
-      setOpportunities(paginatedOpportunities);
-    });
-  }, [page, pageSize]);
+export default async function OpportunitiesPage() {
+  const opportunities: Opportunity[] = await getOpportunities();
+  const accounts: Account[] = await getAccounts();
+  const users: User[] = await getUsers();
 
 
   return (
@@ -136,7 +123,7 @@ export default function OpportunitiesPage() {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-          <AddOpportunityDialog />
+          <AddOpportunityDialog accounts={accounts} users={users} />
         </div>
       </div>
       <Card>
@@ -175,17 +162,17 @@ export default function OpportunitiesPage() {
                      </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={stageVariant[opportunity.stage]}>{opportunity.stage}</Badge>
+                    {opportunity.stage && <Badge variant={stageVariant[opportunity.stage]}>{opportunity.stage}</Badge>}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    ${opportunity.amount.toLocaleString()}
+                    ${opportunity.amount?.toLocaleString()}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {new Date(opportunity.closeDate).toLocaleDateString()}
+                    {opportunity.closeDate ? new Date(opportunity.closeDate).toLocaleDateString() : 'N/A'}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <Link href={`/accounts/${opportunity.accountId}`} className="hover:underline">
-                        {opportunity.accountName}
+                        {opportunity.account.name}
                     </Link>
                   </TableCell>
                   <TableCell>
@@ -213,13 +200,13 @@ export default function OpportunitiesPage() {
           </Table>
         </CardContent>
          <CardFooter>
-            <Pagination
+            {/* <Pagination
                 page={page}
                 pageSize={pageSize}
                 total={total}
                 onPageChange={setPage}
                 onPageSizeChange={setPageSize}
-            />
+            /> */}
         </CardFooter>
       </Card>
     </div>

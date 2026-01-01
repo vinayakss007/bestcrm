@@ -5,12 +5,11 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
-  opportunities,
   recentActivities,
   tasks,
   users,
 } from "@/lib/data"
-import type { CreateAccountDto, CreateContactDto, CreateLeadDto } from "@/lib/types"
+import type { CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -167,10 +166,41 @@ export async function createLead(leadData: CreateLeadDto) {
     }
 }
 
-
 export async function getOpportunities() {
-  return opportunities
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/opportunities`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) {
+            redirect('/login');
+        }
+        throw new Error('Failed to fetch opportunities');
+    }
+    return response.json();
 }
+
+export async function createOpportunity(opportunityData: CreateOpportunityDto) {
+    const headers = await getAuthHeaders();
+    try {
+        const response = await fetch(`${API_URL}/opportunities`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(opportunityData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to create opportunity');
+        }
+
+        revalidatePath('/opportunities');
+        return await response.json();
+
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while creating the opportunity.');
+    }
+}
+
 
 export async function getTasks() {
   return tasks
