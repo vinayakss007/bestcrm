@@ -438,6 +438,12 @@ paths:
       operationId: getLeads
       security:
         - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          description: Search term to filter leads by name, email, or source.
+          schema:
+            type: string
       responses:
         '200':
           description: A list of leads.

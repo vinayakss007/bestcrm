@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or, ilike } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateLeadDto } from './dto/create-lead.dto';
@@ -30,12 +30,24 @@ export class LeadsService {
     return newLead[0];
   }
 
-  async findAll(organizationId: number) {
-    return await this.db.query.crmLeads.findMany({
-      where: and(
+  async findAll(organizationId: number, query?: string) {
+    const conditions = [
         eq(schema.crmLeads.organizationId, organizationId),
         eq(schema.crmLeads.isDeleted, false),
-      ),
+    ];
+
+    if (query) {
+        conditions.push(
+            or(
+                ilike(schema.crmLeads.name, `%${query}%`),
+                ilike(schema.crmLeads.email, `%${query}%`),
+                ilike(schema.crmLeads.source, `%${query}%`)
+            )
+        )
+    }
+
+    return await this.db.query.crmLeads.findMany({
+      where: and(...conditions),
       with: {
         owner: {
           columns: {

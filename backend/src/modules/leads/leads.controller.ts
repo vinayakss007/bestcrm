@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { LeadsService } from './leads.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
@@ -30,8 +31,8 @@ export class LeadsController {
   }
 
   @Get()
-  findAll(@GetUser() user: User) {
-    return this.leadsService.findAll(user.organizationId);
+  findAll(@GetUser() user: User, @Query('query') query?: string) {
+    return this.leadsService.findAll(user.organizationId, query);
   }
 
   @Get(':id')
