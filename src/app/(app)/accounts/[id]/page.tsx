@@ -56,6 +56,7 @@ import type { Account, Contact, Opportunity, User, Activity } from "@/lib/types"
 import { EditAccountDialog } from "@/components/edit-account-dialog"
 import { DeleteAccountDialog } from "@/components/delete-account-dialog"
 import { AddContactDialog } from "@/components/add-contact-dialog"
+import { AddOpportunityDialog } from "@/components/add-opportunity-dialog"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -135,7 +136,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <AddContactDialog accounts={allAccounts} accountId={account.id} as="menuitem" />
-                        <DropdownMenuItem>New Opportunity</DropdownMenuItem>
+                        <AddOpportunityDialog accounts={allAccounts} users={users} accountId={account.id} as="menuitem" />
                         <DropdownMenuItem>New Task</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

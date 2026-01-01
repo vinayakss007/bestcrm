@@ -45,6 +45,7 @@ import { opportunityStages } from "@/lib/types"
 import type { Account, User } from "@/lib/types"
 import { createOpportunity } from "@/lib/actions"
 import { useToast } from "@/hooks/use-toast"
+import { DropdownMenuItem } from "./ui/dropdown-menu"
 
 const opportunitySchema = z.object({
   name: z.string().min(2, { message: "Opportunity name must be at least 2 characters." }),
@@ -60,9 +61,11 @@ type OpportunityFormValues = z.infer<typeof opportunitySchema>
 interface AddOpportunityDialogProps {
     accounts: Account[];
     users: User[];
+    accountId?: number;
+    as?: "button" | "menuitem";
 }
 
-export function AddOpportunityDialog({ accounts, users }: AddOpportunityDialogProps) {
+export function AddOpportunityDialog({ accounts, users, accountId, as = "button" }: AddOpportunityDialogProps) {
   const [open, setOpen] = React.useState(false)
   const { toast } = useToast()
   
@@ -71,8 +74,16 @@ export function AddOpportunityDialog({ accounts, users }: AddOpportunityDialogPr
     defaultValues: {
       name: "",
       stage: "Prospecting",
+      accountId: accountId ? String(accountId) : undefined,
     },
   })
+
+  React.useEffect(() => {
+    if (accountId) {
+      form.setValue("accountId", String(accountId));
+    }
+  }, [accountId, form]);
+
 
   async function onSubmit(data: OpportunityFormValues) {
     const opportunityData = {
@@ -99,15 +110,22 @@ export function AddOpportunityDialog({ accounts, users }: AddOpportunityDialogPr
     }
   }
 
+  const Trigger = as === "button" ? (
+     <Button size="sm" className="h-8 gap-1">
+        <PlusCircle className="h-3.5 w-3.5" />
+        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Add Opportunity
+        </span>
+    </Button>
+  ) : (
+    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>New Opportunity</DropdownMenuItem>
+  );
+
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="h-8 gap-1">
-          <PlusCircle className="h-3.5 w-3.5" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add Opportunity
-          </span>
-        </Button>
+        {Trigger}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <Form {...form}>
@@ -138,7 +156,7 @@ export function AddOpportunityDialog({ accounts, users }: AddOpportunityDialogPr
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Account</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!!accountId}>
                             <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select an account" />
