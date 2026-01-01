@@ -82,11 +82,11 @@ export default function BrandSettingsPage() {
             title: "Success",
             description: "Brand settings have been updated.",
         });
-    } catch (error) {
+    } catch (error: any) {
          toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to update brand settings. Please try again.",
+            description: error.message || "Failed to update brand settings. Please try again.",
         });
     }
   }
