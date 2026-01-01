@@ -83,11 +83,12 @@ export class OpportunitiesService {
         conditions.push(eq(schema.crmOpportunities.accountId, accountId));
     }
     
-    // Base query
+    // Join with accounts to search by account name
     let queryBuilder = this.db
       .select({
         ...getTableColumns(schema.crmOpportunities),
         account: {
+          id: schema.crmAccounts.id,
           name: schema.crmAccounts.name,
         },
         owner: {
@@ -124,6 +125,7 @@ export class OpportunitiesService {
       with: {
         account: {
           columns: {
+            id: true,
             name: true,
           },
         },

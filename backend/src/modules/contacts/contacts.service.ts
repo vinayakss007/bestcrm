@@ -93,10 +93,12 @@ export class ContactsService {
       with: {
         account: {
             columns: {
+                id: true,
                 name: true,
             }
         }
-      }
+      },
+      orderBy: (contacts, { asc }) => [asc(contacts.name)],
     });
   }
 
@@ -110,6 +112,7 @@ export class ContactsService {
        with: {
         account: {
             columns: {
+                id: true,
                 name: true,
             }
         }

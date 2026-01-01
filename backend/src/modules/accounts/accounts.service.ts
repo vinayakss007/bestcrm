@@ -57,28 +57,42 @@ export class AccountsService {
         )
     }
 
-    return await this.db
-      .select()
-      .from(schema.crmAccounts)
-      .where(and(...conditions));
+    return await this.db.query.crmAccounts.findMany({
+        where: and(...conditions),
+        with: {
+            owner: {
+                columns: {
+                    name: true,
+                    avatarUrl: true
+                }
+            }
+        },
+        orderBy: (accounts, { asc }) => [asc(accounts.name)],
+    });
   }
 
   async findOne(id: number, organizationId: number) {
-    const account = await this.db
-      .select()
-      .from(schema.crmAccounts)
-      .where(
+    const account = await this.db.query.crmAccounts.findFirst({
+        where:
         and(
           eq(schema.crmAccounts.id, id),
           eq(schema.crmAccounts.organizationId, organizationId), // Security check
           eq(schema.crmAccounts.isDeleted, false),
         ),
-      );
+        with: {
+            owner: {
+                columns: {
+                    name: true,
+                    avatarUrl: true
+                }
+            }
+        }
+    });
 
-    if (account.length === 0) {
+    if (!account) {
       throw new NotFoundException('Account not found');
     }
-    return account[0];
+    return account;
   }
 
   async update(

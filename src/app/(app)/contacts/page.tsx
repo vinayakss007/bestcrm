@@ -39,8 +39,10 @@ import { SearchInput } from "@/components/search-input"
 
 export default async function ContactsPage({ searchParams }: { searchParams: { query?: string } }) {
   const query = searchParams.query || '';
-  const contacts: Contact[] = await getContacts(query);
-  const accounts: Account[] = await getAccounts();
+  const [contacts, accounts]: [Contact[], Account[]] = await Promise.all([
+    getContacts(query),
+    getAccounts(),
+  ]);
   
   const accountMap = new Map(accounts.map(acc => [acc.id, acc.name]));
 
@@ -150,8 +152,8 @@ export default async function ContactsPage({ searchParams }: { searchParams: { q
                     {contact.phone}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                     <Link href={`/accounts/${contact.accountId}`} className="hover:underline">
-                        {accountMap.get(contact.accountId) || 'N/A'}
+                     <Link href={`/accounts/${contact.account?.id}`} className="hover:underline">
+                        {contact.account?.name || 'N/A'}
                      </Link>
                   </TableCell>
                   <TableCell>
