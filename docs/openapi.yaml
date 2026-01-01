@@ -555,6 +555,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Opportunity'
+        '404':
+          description: Opportunity not found.
     delete:
       tags:
         - Opportunities
@@ -571,6 +573,8 @@ paths:
       responses:
         '204':
           description: Opportunity deleted successfully.
+        '404':
+          description: Opportunity not found.
 
   /invoices:
     get:
