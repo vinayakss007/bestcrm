@@ -47,9 +47,10 @@ type AccountFormValues = z.infer<typeof accountSchema>
 interface EditAccountDialogProps {
   account: Account
   users: User[]
+  as?: "button" | "menuitem"
 }
 
-export function EditAccountDialog({ account, users }: EditAccountDialogProps) {
+export function EditAccountDialog({ account, users, as = "menuitem" }: EditAccountDialogProps) {
   const [open, setOpen] = React.useState(false)
   const { toast } = useToast()
 
@@ -85,12 +86,14 @@ export function EditAccountDialog({ account, users }: EditAccountDialogProps) {
     }
   }
 
+  const Trigger = as === "button" ? Button : DropdownMenuItem;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-          Edit
-        </DropdownMenuItem>
+        <Trigger onSelect={as === 'menuitem' ? (e) => e.preventDefault() : undefined}>
+          {as === "button" ? "Edit" : "Edit"}
+        </Trigger>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>

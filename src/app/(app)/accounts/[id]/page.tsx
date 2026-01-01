@@ -53,6 +53,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import type { Account, Contact, Opportunity, User, Activity } from "@/lib/types"
+import { EditAccountDialog } from "@/components/edit-account-dialog"
+import { DeleteAccountDialog } from "@/components/delete-account-dialog"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -102,7 +104,9 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
   }
 
   const getOwnerById = (id: number | null) => {
-      return users.find(user => id !== null && user.id === String(id));
+      // The user ID from the backend is a number, but the mock user ID is a string.
+      // This will need to be reconciled once we have a real user API.
+      return users.find(user => id !== null && parseInt(user.id) === id);
   }
 
   const owner = getOwnerById(account.ownerId);
@@ -133,7 +137,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                         <DropdownMenuItem>New Task</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                 <Button>Edit</Button>
+                 <EditAccountDialog account={account} users={users} />
             </div>
         </div>
 
@@ -262,9 +266,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
               <Button variant="outline" size="icon">
                 <Phone className="h-4 w-4" />
               </Button>
-              <Button variant="destructive" size="icon" className="ml-auto">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <DeleteAccountDialog accountId={account.id} />
             </div>
           </CardHeader>
           <Separator />
