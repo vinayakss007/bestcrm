@@ -14,6 +14,7 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
     TasksModule,
     ActivitiesModule,
     OrganizationsModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

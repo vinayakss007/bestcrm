@@ -15,7 +15,7 @@ import {
   User,
 } from "lucide-react"
 
-import { getLeadById, getUsers } from "@/lib/actions"
+import { getLeadById, getUsers, getCommentsForLead, addCommentForLead } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,16 +38,22 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import type { Lead, User as TUser } from "@/lib/types"
+import type { Lead, User as TUser, Comment } from "@/lib/types"
 import { ConvertLeadDialog } from "@/components/convert-lead-dialog"
 import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
 import { EditLeadDialog } from "@/components/edit-lead-dialog"
 import { AddTaskDialog } from "@/components/add-task-dialog"
 
 export default async function LeadDetailPage({ params }: { params: { id: string } }) {
-  const [lead, users] = await Promise.all([
+  const leadId = parseInt(params.id, 10);
+  if (isNaN(leadId)) {
+    notFound();
+  }
+
+  const [lead, users, comments] = await Promise.all([
     getLeadById(params.id) as Promise<Lead>,
-    getUsers() as Promise<TUser[]>
+    getUsers() as Promise<TUser[]>,
+    getCommentsForLead(leadId) as Promise<Comment[]>,
   ]);
 
   if (!lead) {
@@ -56,6 +62,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
 
   const administrator = users[0];
   const owner = lead.owner;
+  const addCommentAction = addCommentForLead.bind(null, leadId);
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -94,13 +101,13 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               <Activity className="mr-2 h-4 w-4" />
               Activity
             </TabsTrigger>
+            <TabsTrigger value="comments">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Comments ({comments.length})
+            </TabsTrigger>
             <TabsTrigger value="emails">
               <Mail className="mr-2 h-4 w-4" />
               Emails
-            </TabsTrigger>
-            <TabsTrigger value="comments">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Comments
             </TabsTrigger>
              <TabsTrigger value="tasks">
               <User className="mr-2 h-4 w-4" />
@@ -136,14 +143,40 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                 </CardContent>
              </Card>
           </TabsContent>
-          <TabsContent value="emails">
-            <p className="text-muted-foreground text-center py-8">No emails yet.</p>
+          <TabsContent value="comments">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Comments</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <form action={addCommentAction}>
+                        <Textarea name="content" placeholder="Add a comment..."/>
+                        <Button className="mt-2">Save Comment</Button>
+                    </form>
+                    <Separator />
+                    <div className="space-y-6">
+                        {comments.map(comment => (
+                            <div key={comment.id} className="flex items-start gap-4">
+                                <Avatar>
+                                    <AvatarImage src={comment.user?.avatarUrl || undefined} />
+                                    <AvatarFallback>{comment.user?.name.charAt(0) || '?'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-sm font-medium">{comment.user?.name || 'Unknown User'}</p>
+                                        <p className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleString()}</p>
+                                    </div>
+                                    <p className="text-sm mt-1">{comment.content}</p>
+                                </div>
+                            </div>
+                        ))}
+                        {comments.length === 0 && <p className="text-muted-foreground text-center py-4">No comments yet.</p>}
+                    </div>
+                </CardContent>
+            </Card>
           </TabsContent>
-           <TabsContent value="comments">
-            <div className="space-y-4">
-              <Textarea placeholder="Add a comment..."/>
-              <Button>Save Comment</Button>
-            </div>
+           <TabsContent value="emails">
+            <p className="text-muted-foreground text-center py-8">No emails yet.</p>
           </TabsContent>
         </Tabs>
       </div>

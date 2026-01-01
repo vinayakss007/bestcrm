@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto } from "@/lib/types"
+import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -740,4 +740,40 @@ export async function updateOrganization(id: number, orgData: UpdateOrganization
     }
 }
 
-    
+export async function getCommentsForLead(leadId: number) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/leads/${leadId}/comments`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        throw new Error('Failed to fetch comments for lead');
+    }
+    return response.json();
+}
+
+export async function addCommentForLead(leadId: number, formData: FormData) {
+    const headers = await getAuthHeaders();
+    const content = formData.get('content') as string;
+
+    if (!content) {
+        return; // Or throw an error
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/leads/${leadId}/comments`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ content }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to add comment');
+        }
+
+        revalidatePath(`/leads/${leadId}`);
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        throw new Error('An unexpected error occurred while adding the comment.');
+    }
+}

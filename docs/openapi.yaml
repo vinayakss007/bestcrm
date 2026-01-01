@@ -30,6 +30,8 @@ tags:
     description: Operations related to tasks.
   - name: Activities
     description: Operations related to activity feeds.
+  - name: Comments
+    description: Operations related to comments and notes.
 
 paths:
   /auth/login:
@@ -635,6 +637,56 @@ paths:
           description: Lead not found
         '409':
           description: Lead is already deleted/converted
+  
+  /leads/{leadId}/comments:
+    get:
+      tags:
+        - Comments
+      summary: List comments for a lead
+      operationId: getCommentsForLead
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: leadId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of comments for the specified lead.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+    post:
+      tags:
+        - Comments
+      summary: Create a comment for a lead
+      operationId: createCommentForLead
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: leadId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentDto'
+      responses:
+        '201':
+          description: Comment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
 
   /opportunities:
     get:
@@ -1400,6 +1452,28 @@ components:
           type: object
           additionalProperties: true
 
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        userId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/CrmUser'
+          
+    CreateCommentDto:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
 
 components:
   securitySchemes:
@@ -1410,5 +1484,3 @@ components:
 
 security:
   - bearerAuth: []
-
-    

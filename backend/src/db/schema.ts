@@ -12,6 +12,7 @@ import {
   pgEnum,
   jsonb,
 } from "drizzle-orm/pg-core"
+import { relations } from "drizzle-orm"
 import type { AdapterAccount } from "@auth/core/adapters"
 
 // This section defines tables for NextAuth.js if you integrate it directly.
@@ -92,6 +93,13 @@ export const crmUsers = pgTable("crm_users", {
   role: userRoleEnum("role").default("user").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const crmUsersRelations = relations(crmUsers, ({ one }) => ({
+	organization: one(organizations, {
+		fields: [crmUsers.organizationId],
+		references: [organizations.id],
+	}),
+}));
 
 // Accounts represent customer companies or organizations, scoped to an organization.
 export const crmAccounts = pgTable("crm_accounts", {
@@ -195,4 +203,15 @@ export const crmInvoices = pgTable("crm_invoices", {
     organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Comments can be attached to various CRM records.
+export const crmComments = pgTable("crm_comments", {
+  id: serial("id").primaryKey(),
+  content: text("content").notNull(),
+  userId: integer("user_id").notNull().references(() => crmUsers.id),
+  relatedToType: relatedToTypeEnum("related_to_type").notNull(),
+  relatedToId: integer("related_to_id").notNull(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

@@ -258,4 +258,18 @@ export type Activity = {
   details: any;
 };
 
-    
+export type Comment = {
+  id: number;
+  content: string;
+  userId: number;
+  createdAt: string;
+  user?: {
+    id: string;
+    name: string;
+    avatarUrl: string | null;
+  }
+}
+
+export type CreateCommentDto = {
+    content: string;
+}
