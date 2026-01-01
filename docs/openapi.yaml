@@ -568,6 +568,41 @@ paths:
         '404':
           description: Lead not found.
   
+  /leads/{leadId}/convert:
+    post:
+      tags:
+        - Leads
+      summary: Convert a lead
+      operationId: convertLead
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: leadId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvertLeadDto'
+      responses:
+        '200':
+          description: Lead converted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  opportunityId:
+                    type: integer
+        '404':
+          description: Lead not found
+        '409':
+          description: Lead is already deleted/converted
+
   /opportunities:
     get:
       tags:
@@ -1067,6 +1102,17 @@ components:
           enum: [New, Contacted, Qualified, Lost]
         ownerId:
           type: integer
+
+    ConvertLeadDto:
+      type: object
+      required:
+        - accountName
+        - opportunityName
+      properties:
+        accountName:
+          type: string
+        opportunityName:
+          type: string
 
     Opportunity:
       type: object

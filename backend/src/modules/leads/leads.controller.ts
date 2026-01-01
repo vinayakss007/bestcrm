@@ -19,6 +19,7 @@ import { UpdateLeadDto } from './dto/update-lead.dto';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/users.service';
+import { ConvertLeadDto } from './dto/convert-lead.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('leads')
@@ -53,5 +54,14 @@ export class LeadsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
     return this.leadsService.remove(id, user.organizationId);
+  }
+
+  @Post(':id/convert')
+  convert(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() convertLeadDto: ConvertLeadDto,
+    @GetUser() user: User,
+  ) {
+    return this.leadsService.convert(id, convertLeadDto, user.organizationId, user.userId);
   }
 }
