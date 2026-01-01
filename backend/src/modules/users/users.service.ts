@@ -99,52 +99,50 @@ export class UsersService {
         const anyOrg = await tx.query.organizations.findFirst();
         
         if (!anyOrg) {
-            // First user ever, create a new org and make them super-admin
-            const newOrg = await tx
+            // First time setup: create a Super Admin and then create the actual user's org.
+            // 1. Create Super Admin's Organization
+            const superAdminOrg = await tx
                 .insert(schema.organizations)
-                .values({ name: `${registerDto.name}'s Organization` })
+                .values({ name: "Super Admin Workspace" })
                 .returning();
-            const organizationId = newOrg[0].id;
-            const userRole: 'super-admin' = 'super-admin';
-            
-            // For the first user (super-admin), use a known password for dev login purposes.
-            const passwordHash = await bcrypt.hash('password123', saltRounds);
+            const superAdminOrgId = superAdminOrg[0].id;
 
-            const newUsers = await tx.insert(schema.crmUsers).values({
-                email: 'super@admin.com', // Use a known email for dev login
+            // 2. Create the Super Admin user with known credentials for development
+            const superAdminPasswordHash = await bcrypt.hash('password123', saltRounds);
+            await tx.insert(schema.crmUsers).values({
+                email: 'super@admin.com',
                 name: 'Super Admin',
-                passwordHash,
-                organizationId,
-                role: userRole,
+                passwordHash: superAdminPasswordHash,
+                organizationId: superAdminOrgId,
+                role: 'super-admin',
             }).returning();
-            return newUsers[0];
-        } else {
-            // For a new self-service sign-up, always create a new organization.
-            const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
-            const newOrg = await tx
-                .insert(schema.organizations)
-                .values({ name: `${registerDto.name}'s Organization` })
-                .returning();
-            
-            const organizationId = newOrg[0].id;
-            // The first user of a new organization is always the company-admin.
-            const userRole: 'company-admin' = 'company-admin';
-
-            const newUserInsert = {
-                email: registerDto.email,
-                name: registerDto.name,
-                passwordHash,
-                organizationId,
-                role: userRole,
-            };
-
-            const newUsers = await tx
-                .insert(schema.crmUsers)
-                .values(newUserInsert)
-                .returning();
-            
-            return newUsers[0];
         }
+
+        // For every new self-service sign-up, always create a new organization.
+        const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
+        const newOrg = await tx
+            .insert(schema.organizations)
+            .values({ name: `${registerDto.name}'s Organization` })
+            .returning();
+        
+        const organizationId = newOrg[0].id;
+        // The first user of a new organization is always the company-admin.
+        const userRole: 'company-admin' = 'company-admin';
+
+        const newUserInsert = {
+            email: registerDto.email,
+            name: registerDto.name,
+            passwordHash,
+            organizationId,
+            role: userRole,
+        };
+
+        const newUsers = await tx
+            .insert(schema.crmUsers)
+            .values(newUserInsert)
+            .returning();
+        
+        return newUsers[0];
     });
   }
 
