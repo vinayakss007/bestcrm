@@ -223,6 +223,17 @@ export async function getOpportunities() {
     return response.json();
 }
 
+export async function getOpportunityById(id: string) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/opportunities/${id}`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        if (response.status === 404) return null;
+        throw new Error('Failed to fetch opportunity');
+    }
+    return response.json();
+}
+
 export async function getOpportunitiesByAccountId(accountId: string) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/accounts/${accountId}/opportunities`, { headers, cache: 'no-store' });
@@ -332,3 +343,5 @@ export async function createTask(taskData: CreateTaskDto) {
 export async function getUsers() {
   return users
 }
+
+    

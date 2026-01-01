@@ -1,5 +1,5 @@
 
-"use client"
+"use server"
 
 import { notFound } from "next/navigation"
 import {
@@ -11,14 +11,13 @@ import {
   ChevronUp,
   DollarSign,
   Mail,
-  MessageSquare,
   Paperclip,
   Trash2,
   Calendar,
   Plus,
 } from "lucide-react"
 
-import { opportunities, users, accounts } from "@/lib/data"
+import { getOpportunityById, getUsers } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -34,9 +33,8 @@ import {
 } from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import * as React from "react"
 import { Badge } from "@/components/ui/badge"
-import type { OpportunityStage } from "@/lib/types"
+import type { OpportunityStage, Opportunity, User } from "@/lib/types"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -54,15 +52,16 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
     'Lost': 'destructive'
 }
 
-export default function OpportunityDetailPage({ params }: { params: { id: string } }) {
-  const opportunity = opportunities.find((o) => o.id === params.id)
-  const [isDetailsOpen, setIsDetailsOpen] = React.useState(true)
+export default async function OpportunityDetailPage({ params }: { params: { id: string } }) {
+  const [opportunity, users] = await Promise.all([
+    getOpportunityById(params.id) as Promise<Opportunity | null>,
+    getUsers() as Promise<User[]>,
+  ]);
 
   if (!opportunity) {
     notFound()
   }
 
-  const account = accounts.find(a => a.id === opportunity.accountId);
   const administrator = users[0];
 
   return (
@@ -127,7 +126,7 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
                         <div className="flex-1">
                             <div className="flex justify-between items-center">
                                 <p className="text-sm font-medium">{administrator.name} created this opportunity</p>
-                                <p className="text-xs text-muted-foreground">1 hour ago</p>
+                                <p className="text-xs text-muted-foreground">{new Date(opportunity.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
                     </div>
@@ -150,7 +149,7 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
               </div>
               <div>
                 <CardTitle className="text-xl">{opportunity.name}</CardTitle>
-                <Link href={`/accounts/${account?.id}`} className="text-sm text-primary hover:underline">{account?.name}</Link>
+                <Link href={`/accounts/${opportunity.accountId}`} className="text-sm text-primary hover:underline">{opportunity.account.name}</Link>
               </div>
             </div>
             <div className="flex gap-2 pt-4">
@@ -164,39 +163,39 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
           </CardHeader>
           <Separator />
           <CardContent className="pt-6">
-            <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+            <Collapsible open={true}>
               <CollapsibleTrigger className="w-full">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold">Details</h4>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    {isDetailsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    <span className="sr-only">Toggle</span>
-                  </Button>
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="space-y-3 py-2 text-sm">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground flex items-center gap-2"><DollarSign className="h-4 w-4" /> Amount</span>
-                    <span>${opportunity.amount.toLocaleString()}</span>
+                    <span>${opportunity.amount?.toLocaleString()}</span>
                   </div>
                    <div className="flex justify-between items-center">
                     <span className="text-muted-foreground flex items-center gap-2"><Briefcase className="h-4 w-4" /> Stage</span>
-                    <Badge variant={stageVariant[opportunity.stage]}>{opportunity.stage}</Badge>
+                    {opportunity.stage && <Badge variant={stageVariant[opportunity.stage]}>{opportunity.stage}</Badge>}
                   </div>
                    <div className="flex justify-between items-center">
                     <span className="text-muted-foreground flex items-center gap-2"><Calendar className="h-4 w-4" /> Close Date</span>
-                    <span>{new Date(opportunity.closeDate).toLocaleDateString()}</span>
+                    <span>{opportunity.closeDate ? new Date(opportunity.closeDate).toLocaleDateString() : 'N/A'}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Opportunity Owner</span>
-                    <div className="flex items-center gap-2">
-                        <Avatar className="h-5 w-5">
-                            <AvatarImage src={opportunity.owner.avatarUrl} />
-                            <AvatarFallback>{opportunity.owner.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span>{opportunity.owner.name}</span>
-                     </div>
+                    {opportunity.owner ? (
+                        <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                                <AvatarImage src={opportunity.owner.avatarUrl || undefined} />
+                                <AvatarFallback>{opportunity.owner.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{opportunity.owner.name}</span>
+                        </div>
+                    ) : (
+                        <span className="text-muted-foreground">Unassigned</span>
+                    )}
                   </div>
                 </div>
               </CollapsibleContent>
@@ -207,3 +206,5 @@ export default function OpportunityDetailPage({ params }: { params: { id: string
     </div>
   )
 }
+
+    
