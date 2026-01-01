@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { EditOpportunityDialog } from "@/components/edit-opportunity-dialog"
 import { DeleteOpportunityDialog } from "@/components/delete-opportunity-dialog"
+import { AddTaskDialog } from "@/components/add-task-dialog"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -85,7 +86,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem>New Task</DropdownMenuItem>
+                        <AddTaskDialog as="menuitem" relatedToType="Opportunity" relatedToId={opportunity.id} />
                         <DropdownMenuItem>Log a Call</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
