@@ -1,4 +1,6 @@
 
+"use server"
+
 import {
   Card,
   CardContent,
@@ -12,7 +14,6 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Briefcase, DollarSign, Lightbulb, Users, Activity, Plus, Edit, CalendarDays } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getAccounts, getLeads, getOpportunities } from "@/lib/actions"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
@@ -22,7 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Lead, Opportunity, Account, RecentActivity } from "@/lib/types"
+import type { Lead, Opportunity, Account } from "@/lib/types"
 
 const chartData = [
   { month: "January", revenue: 18600 },
@@ -41,7 +42,7 @@ const chartConfig = {
 }
 
 export default async function Dashboard() {
-    const [leads, opportunities, accounts] = await Promise.all([
+    const [leads, opportunities, accounts]: [Lead[], Opportunity[], Account[]] = await Promise.all([
       getLeads(),
       getOpportunities(),
       getAccounts(),
