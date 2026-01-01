@@ -45,6 +45,7 @@ import { useToast } from "@/hooks/use-toast"
 import { createTask, getUsers, getAccounts, getContacts, getLeads, getOpportunities } from "@/lib/actions"
 import { taskStatuses, relatedToTypes } from "@/lib/types"
 import type { User, Account, Contact, Lead, Opportunity, RelatedToType } from "@/lib/types"
+import { DropdownMenuItem } from "./ui/dropdown-menu"
 
 const taskSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters." }),
@@ -65,9 +66,19 @@ type RelatedData = {
     opportunities: Opportunity[];
 }
 
-export function AddTaskDialog() {
+interface AddTaskDialogProps {
+  as?: "button" | "menuitem"
+  relatedToType?: RelatedToType
+  relatedToId?: number
+}
+
+export function AddTaskDialog({
+  as = "button",
+  relatedToType: defaultRelatedToType,
+  relatedToId: defaultRelatedToId,
+}: AddTaskDialogProps) {
   const [open, setOpen] = React.useState(false)
-  const [relatedData, setRelatedData] = React.useState<RelatedData | null>(null);
+  const [relatedData, setRelatedData] = React.useState<RelatedData | null>(null)
   const { toast } = useToast()
   
   const form = useForm<TaskFormValues>({
@@ -75,22 +86,35 @@ export function AddTaskDialog() {
     defaultValues: {
       title: "",
       status: "Pending",
+      relatedToType: defaultRelatedToType,
+      relatedToId: defaultRelatedToId ? String(defaultRelatedToId) : undefined,
     },
   })
 
   React.useEffect(() => {
     if (open) {
-        Promise.all([
-            getUsers(),
-            getAccounts(),
-            getContacts(),
-            getLeads(),
-            getOpportunities()
-        ]).then(([users, accounts, contacts, leads, opportunities]) => {
-            setRelatedData({ users, accounts, contacts, leads, opportunities });
-        });
+      Promise.all([
+        getUsers(),
+        getAccounts(),
+        getContacts(),
+        getLeads(),
+        getOpportunities(),
+      ]).then(([users, accounts, contacts, leads, opportunities]) => {
+        setRelatedData({ users, accounts, contacts, leads, opportunities })
+      })
+
+      // Reset form with default values when dialog opens
+      form.reset({
+        title: "",
+        status: "Pending",
+        dueDate: undefined,
+        assignedToId: undefined,
+        relatedToType: defaultRelatedToType,
+        relatedToId: defaultRelatedToId ? String(defaultRelatedToId) : undefined,
+      });
+
     }
-  }, [open]);
+  }, [open, defaultRelatedToType, defaultRelatedToId, form])
 
   const relatedToType = form.watch("relatedToType")
 
@@ -102,7 +126,7 @@ export function AddTaskDialog() {
         relatedToId: data.relatedToId ? parseInt(data.relatedToId) : undefined,
     }
     try {
-        await createTask(taskData);
+        await createTask(taskData)
         toast({
             title: "Success",
             description: "Task has been created.",
@@ -119,30 +143,36 @@ export function AddTaskDialog() {
   }
 
   const getRelatedToOptions = () => {
-    if (!relatedData) return [];
+    if (!relatedData) return []
     switch (relatedToType) {
       case 'Account':
-        return relatedData.accounts;
+        return relatedData.accounts
       case 'Contact':
-        return relatedData.contacts;
+        return relatedData.contacts
       case 'Lead':
-        return relatedData.leads;
+        return relatedData.leads
       case 'Opportunity':
-        return relatedData.opportunities;
+        return relatedData.opportunities
       default:
-        return [];
+        return []
     }
   }
+
+  const Trigger = as === "button" ? (
+    <Button size="sm" className="h-8 gap-1">
+      <PlusCircle className="h-3.5 w-3.5" />
+      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+        Add Task
+      </span>
+    </Button>
+  ) : (
+    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>New Task</DropdownMenuItem>
+  )
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="h-8 gap-1">
-          <PlusCircle className="h-3.5 w-3.5" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add Task
-          </span>
-        </Button>
+        {Trigger}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -259,7 +289,7 @@ export function AddTaskDialog() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Related To</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!!defaultRelatedToType}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />
@@ -283,7 +313,7 @@ export function AddTaskDialog() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>&nbsp;</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!relatedToType}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!relatedToType || !!defaultRelatedToId}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select item" />
