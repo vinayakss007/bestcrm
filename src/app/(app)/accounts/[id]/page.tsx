@@ -352,3 +352,5 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     </div>
   )
 }
+
+    
