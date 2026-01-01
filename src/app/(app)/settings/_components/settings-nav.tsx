@@ -21,7 +21,6 @@ export function SettingsNav() {
       title: "Team",
       links: [
         { title: "Users", href: "/settings/users", icon: Users },
-        { title: "Invite", href: "/settings/invite", icon: Mail },
       ],
     },
     {
