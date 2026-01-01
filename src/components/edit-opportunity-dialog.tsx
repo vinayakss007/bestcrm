@@ -62,9 +62,10 @@ interface EditOpportunityDialogProps {
   opportunity: Opportunity
   accounts: Account[]
   users: User[]
+  as?: "button" | "menuitem"
 }
 
-export function EditOpportunityDialog({ opportunity, accounts, users }: EditOpportunityDialogProps) {
+export function EditOpportunityDialog({ opportunity, accounts, users, as = "menuitem" }: EditOpportunityDialogProps) {
   const [open, setOpen] = React.useState(false)
   const { toast } = useToast()
 
@@ -105,12 +106,14 @@ export function EditOpportunityDialog({ opportunity, accounts, users }: EditOppo
     }
   }
 
+  const Trigger = as === "button" ? Button : DropdownMenuItem;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <Trigger onSelect={as === 'menuitem' ? (e) => e.preventDefault() : undefined}>
           Edit
-        </DropdownMenuItem>
+        </Trigger>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <Form {...form}>

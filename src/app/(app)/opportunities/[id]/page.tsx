@@ -6,18 +6,15 @@ import {
   Activity,
   Archive,
   Briefcase,
-  ChevronDown,
   ChevronLeft,
-  ChevronUp,
   DollarSign,
   Mail,
   Paperclip,
-  Trash2,
   Calendar,
   Plus,
 } from "lucide-react"
 
-import { getOpportunityById, getUsers } from "@/lib/actions"
+import { getOpportunityById, getUsers, getAccounts } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -34,7 +31,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import type { OpportunityStage, Opportunity, User } from "@/lib/types"
+import type { OpportunityStage, Opportunity, User, Account } from "@/lib/types"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -42,6 +39,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { EditOpportunityDialog } from "@/components/edit-opportunity-dialog"
+import { DeleteOpportunityDialog } from "@/components/delete-opportunity-dialog"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -53,9 +52,10 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
 }
 
 export default async function OpportunityDetailPage({ params }: { params: { id: string } }) {
-  const [opportunity, users] = await Promise.all([
+  const [opportunity, users, accounts] = await Promise.all([
     getOpportunityById(params.id) as Promise<Opportunity | null>,
     getUsers() as Promise<User[]>,
+    getAccounts() as Promise<Account[]>,
   ]);
 
   if (!opportunity) {
@@ -89,7 +89,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                         <DropdownMenuItem>Log a Call</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                 <Button>Edit</Button>
+                 <EditOpportunityDialog opportunity={opportunity} accounts={accounts} users={users} as="button" />
             </div>
         </div>
 
@@ -120,7 +120,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                 <CardContent className="space-y-4">
                      <div className="flex items-start gap-4">
                         <Avatar>
-                            <AvatarImage src={administrator.avatarUrl} />
+                            <AvatarImage src={administrator.avatarUrl || undefined} />
                             <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -156,9 +156,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
               <Button variant="outline" size="icon">
                 <Mail className="h-4 w-4" />
               </Button>
-              <Button variant="destructive" size="icon" className="ml-auto">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <DeleteOpportunityDialog opportunityId={opportunity.id} as="button" />
             </div>
           </CardHeader>
           <Separator />
@@ -206,5 +204,3 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
     </div>
   )
 }
-
-    
