@@ -5,7 +5,6 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import {
   Activity as ActivityIcon,
-  Archive,
   Building2,
   ChevronDown,
   ChevronUp,
@@ -20,7 +19,7 @@ import {
   Briefcase
 } from "lucide-react"
 
-import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts } from "@/lib/actions"
+import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts, getCommentsForAccount, addComment } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -52,12 +51,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Account, Contact, Opportunity, User, Activity } from "@/lib/types"
+import type { Account, Contact, Opportunity, User, Activity, Comment } from "@/lib/types"
 import { EditAccountDialog } from "@/components/edit-account-dialog"
 import { DeleteAccountDialog } from "@/components/delete-account-dialog"
 import { AddContactDialog } from "@/components/add-contact-dialog"
 import { AddOpportunityDialog } from "@/components/add-opportunity-dialog"
 import { AddTaskDialog } from "@/components/add-task-dialog"
+import { Textarea } from "@/components/ui/textarea"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -94,13 +94,14 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     notFound();
   }
 
-  const [account, accountContacts, accountOpportunities, users, activities, allAccounts] = await Promise.all([
+  const [account, accountContacts, accountOpportunities, users, activities, allAccounts, comments] = await Promise.all([
     getAccountById(accountId) as Promise<Account>,
     getContactsByAccountId(accountId) as Promise<Contact[]>,
     getOpportunitiesByAccountId(accountId) as Promise<Opportunity[]>,
     getUsers() as Promise<User[]>,
     getActivitiesForAccount(accountId) as Promise<Activity[]>,
     getAccounts() as Promise<Account[]>,
+    getCommentsForAccount(accountId) as Promise<Comment[]>,
   ]);
 
   if (!account) {
@@ -114,6 +115,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
   }
 
   const owner = getOwnerById(account.ownerId);
+  const addCommentAction = addComment.bind(null, 'Account', accountId);
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -159,9 +161,9 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
               <Briefcase className="mr-2 h-4 w-4" />
               Opportunities ({accountOpportunities.length})
             </TabsTrigger>
-             <TabsTrigger value="notes">
-              <Archive className="mr-2 h-4 w-4" />
-              Notes
+             <TabsTrigger value="comments">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Comments ({comments.length})
             </TabsTrigger>
             <TabsTrigger value="attachments">
               <Paperclip className="mr-2 h-4 w-4" />
@@ -245,6 +247,38 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                             ))}
                         </TableBody>
                     </Table>
+                </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="comments">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Comments</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <form action={addCommentAction}>
+                        <Textarea name="content" placeholder="Add a comment..."/>
+                        <Button className="mt-2">Save Comment</Button>
+                    </form>
+                    <Separator />
+                    <div className="space-y-6">
+                        {comments.map(comment => (
+                            <div key={comment.id} className="flex items-start gap-4">
+                                <Avatar>
+                                    <AvatarImage src={comment.user?.avatarUrl || undefined} />
+                                    <AvatarFallback>{comment.user?.name.charAt(0) || '?'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-sm font-medium">{comment.user?.name || 'Unknown User'}</p>
+                                        <p className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleString()}</p>
+                                    </div>
+                                    <p className="text-sm mt-1">{comment.content}</p>
+                                </div>
+                            </div>
+                        ))}
+                        {comments.length === 0 && <p className="text-muted-foreground text-center py-4">No comments yet.</p>}
+                    </div>
                 </CardContent>
             </Card>
           </TabsContent>

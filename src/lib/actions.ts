@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto } from "@/lib/types"
+import type { RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -740,26 +740,50 @@ export async function updateOrganization(id: number, orgData: UpdateOrganization
     }
 }
 
-export async function getCommentsForLead(leadId: number) {
+async function getCommentsFor(entityType: string, entityId: number) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/leads/${leadId}/comments`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/${entityType}/${entityId}/comments`, { headers, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
-        throw new Error('Failed to fetch comments for lead');
+        throw new Error(`Failed to fetch comments for ${entityType}`);
     }
     return response.json();
 }
 
-export async function addCommentForLead(leadId: number, formData: FormData) {
+export async function getCommentsForLead(leadId: number) {
+  return getCommentsFor('leads', leadId);
+}
+export async function getCommentsForAccount(accountId: number) {
+  return getCommentsFor('accounts', accountId);
+}
+export async function getCommentsForContact(contactId: number) {
+  return getCommentsFor('contacts', contactId);
+}
+export async function getCommentsForOpportunity(opportunityId: number) {
+  return getCommentsFor('opportunities', opportunityId);
+}
+
+
+export async function addComment(
+    entityType: RelatedToType, 
+    entityId: number, 
+    formData: FormData
+) {
     const headers = await getAuthHeaders();
     const content = formData.get('content') as string;
+    const entityPath = {
+        'Lead': 'leads',
+        'Account': 'accounts',
+        'Contact': 'contacts',
+        'Opportunity': 'opportunities'
+    }[entityType];
 
-    if (!content) {
+    if (!content || !entityPath) {
         return; // Or throw an error
     }
 
     try {
-        const response = await fetch(`${API_URL}/leads/${leadId}/comments`, {
+        const response = await fetch(`${API_URL}/${entityPath}/${entityId}/comments`, {
             method: 'POST',
             headers,
             body: JSON.stringify({ content }),
@@ -770,10 +794,14 @@ export async function addCommentForLead(leadId: number, formData: FormData) {
             throw new Error(errorData.message || 'Failed to add comment');
         }
 
-        revalidatePath(`/leads/${leadId}`);
+        revalidatePath(`/${entityPath}/${entityId}`);
         return await response.json();
     } catch (error) {
         console.error(error);
         throw new Error('An unexpected error occurred while adding the comment.');
     }
+}
+
+export async function addCommentForLead(leadId: number, formData: FormData) {
+    return addComment('Lead', leadId, formData);
 }

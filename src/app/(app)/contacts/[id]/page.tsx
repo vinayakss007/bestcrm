@@ -4,18 +4,15 @@
 import { notFound } from "next/navigation"
 import {
   Activity,
-  Archive,
-  ChevronDown,
   ChevronLeft,
-  ChevronUp,
   Mail,
+  MessageSquare,
   Paperclip,
   Phone,
   Plus,
-  Trash2,
 } from "lucide-react"
 
-import { getContactById, getUsers, getAccounts } from "@/lib/actions"
+import { getContactById, getUsers, getAccounts, getCommentsForContact, addComment } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,16 +35,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Contact, User, Account } from "@/lib/types"
+import type { Contact, User, Account, Comment } from "@/lib/types"
 import { EditContactDialog } from "@/components/edit-contact-dialog"
 import { DeleteContactDialog } from "@/components/delete-contact-dialog"
 import { AddTaskDialog } from "@/components/add-task-dialog"
+import { Textarea } from "@/components/ui/textarea"
 
 export default async function ContactDetailPage({ params }: { params: { id: string } }) {
-  const [contact, users, accounts] = await Promise.all([
+  const contactId = parseInt(params.id, 10);
+  if (isNaN(contactId)) {
+    notFound();
+  }
+
+  const [contact, users, accounts, comments] = await Promise.all([
     getContactById(params.id) as Promise<Contact | null>,
     getUsers() as Promise<User[]>,
     getAccounts() as Promise<Account[]>,
+    getCommentsForContact(contactId) as Promise<Comment[]>,
   ]);
 
   if (!contact) {
@@ -56,6 +60,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
 
   // Assuming the first user is the creator for mock purposes.
   const administrator = users[0];
+  const addCommentAction = addComment.bind(null, 'Contact', contactId);
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -93,13 +98,9 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
               <Activity className="mr-2 h-4 w-4" />
               Activity
             </TabsTrigger>
-            <TabsTrigger value="emails">
-              <Mail className="mr-2 h-4 w-4" />
-              Emails
-            </TabsTrigger>
-             <TabsTrigger value="notes">
-              <Archive className="mr-2 h-4 w-4" />
-              Notes
+             <TabsTrigger value="comments">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Comments ({comments.length})
             </TabsTrigger>
             <TabsTrigger value="attachments">
               <Paperclip className="mr-2 h-4 w-4" />
@@ -127,8 +128,37 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                 </CardContent>
              </Card>
           </TabsContent>
-          <TabsContent value="emails">
-            <p className="text-muted-foreground text-center py-8">No emails yet.</p>
+          <TabsContent value="comments">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Comments</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <form action={addCommentAction}>
+                        <Textarea name="content" placeholder="Add a comment..."/>
+                        <Button className="mt-2">Save Comment</Button>
+                    </form>
+                    <Separator />
+                    <div className="space-y-6">
+                        {comments.map(comment => (
+                            <div key={comment.id} className="flex items-start gap-4">
+                                <Avatar>
+                                    <AvatarImage src={comment.user?.avatarUrl || undefined} />
+                                    <AvatarFallback>{comment.user?.name.charAt(0) || '?'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-sm font-medium">{comment.user?.name || 'Unknown User'}</p>
+                                        <p className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleString()}</p>
+                                    </div>
+                                    <p className="text-sm mt-1">{comment.content}</p>
+                                </div>
+                            </div>
+                        ))}
+                        {comments.length === 0 && <p className="text-muted-foreground text-center py-4">No comments yet.</p>}
+                    </div>
+                </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

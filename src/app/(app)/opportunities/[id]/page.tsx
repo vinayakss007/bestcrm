@@ -4,7 +4,6 @@
 import { notFound } from "next/navigation"
 import {
   Activity,
-  Archive,
   Briefcase,
   ChevronLeft,
   DollarSign,
@@ -12,9 +11,10 @@ import {
   Paperclip,
   Calendar,
   Plus,
+  MessageSquare,
 } from "lucide-react"
 
-import { getOpportunityById, getUsers, getAccounts } from "@/lib/actions"
+import { getOpportunityById, getUsers, getAccounts, getCommentsForOpportunity, addComment } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,7 +31,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import type { OpportunityStage, Opportunity, User, Account } from "@/lib/types"
+import type { OpportunityStage, Opportunity, User, Account, Comment } from "@/lib/types"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -42,6 +42,7 @@ import {
 import { EditOpportunityDialog } from "@/components/edit-opportunity-dialog"
 import { DeleteOpportunityDialog } from "@/components/delete-opportunity-dialog"
 import { AddTaskDialog } from "@/components/add-task-dialog"
+import { Textarea } from "@/components/ui/textarea"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -53,10 +54,16 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
 }
 
 export default async function OpportunityDetailPage({ params }: { params: { id: string } }) {
-  const [opportunity, users, accounts] = await Promise.all([
+  const opportunityId = parseInt(params.id, 10);
+  if (isNaN(opportunityId)) {
+    notFound();
+  }
+  
+  const [opportunity, users, accounts, comments] = await Promise.all([
     getOpportunityById(params.id) as Promise<Opportunity | null>,
     getUsers() as Promise<User[]>,
     getAccounts() as Promise<Account[]>,
+    getCommentsForOpportunity(opportunityId) as Promise<Comment[]>,
   ]);
 
   if (!opportunity) {
@@ -64,6 +71,8 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
   }
 
   const administrator = users[0];
+  const addCommentAction = addComment.bind(null, 'Opportunity', opportunityId);
+
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -100,13 +109,9 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
               <Activity className="mr-2 h-4 w-4" />
               Activity
             </TabsTrigger>
-            <TabsTrigger value="emails">
-              <Mail className="mr-2 h-4 w-4" />
-              Emails
-            </TabsTrigger>
-             <TabsTrigger value="notes">
-              <Archive className="mr-2 h-4 w-4" />
-              Notes
+            <TabsTrigger value="comments">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Comments ({comments.length})
             </TabsTrigger>
             <TabsTrigger value="attachments">
               <Paperclip className="mr-2 h-4 w-4" />
@@ -134,8 +139,37 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                 </CardContent>
              </Card>
           </TabsContent>
-          <TabsContent value="emails">
-            <p className="text-muted-foreground text-center py-8">No emails yet.</p>
+          <TabsContent value="comments">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Comments</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <form action={addCommentAction}>
+                        <Textarea name="content" placeholder="Add a comment..."/>
+                        <Button className="mt-2">Save Comment</Button>
+                    </form>
+                    <Separator />
+                    <div className="space-y-6">
+                        {comments.map(comment => (
+                            <div key={comment.id} className="flex items-start gap-4">
+                                <Avatar>
+                                    <AvatarImage src={comment.user?.avatarUrl || undefined} />
+                                    <AvatarFallback>{comment.user?.name.charAt(0) || '?'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-sm font-medium">{comment.user?.name || 'Unknown User'}</p>
+                                        <p className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleString()}</p>
+                                    </div>
+                                    <p className="text-sm mt-1">{comment.content}</p>
+                                </div>
+                            </div>
+                        ))}
+                        {comments.length === 0 && <p className="text-muted-foreground text-center py-4">No comments yet.</p>}
+                    </div>
+                </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

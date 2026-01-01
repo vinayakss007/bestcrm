@@ -374,6 +374,55 @@ paths:
                 items:
                   $ref: '#/components/schemas/Activity'
 
+  /accounts/{accountId}/comments:
+    get:
+      tags:
+        - Comments
+      summary: List comments for an account
+      operationId: getCommentsForAccount
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of comments for the specified account.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+    post:
+      tags:
+        - Comments
+      summary: Create a comment for an account
+      operationId: createCommentForAccount
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentDto'
+      responses:
+        '201':
+          description: Comment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
 
   /contacts:
     get:
@@ -491,6 +540,56 @@ paths:
           description: Contact deleted successfully.
         '404':
           description: Contact not found.
+  
+  /contacts/{contactId}/comments:
+    get:
+      tags:
+        - Comments
+      summary: List comments for a contact
+      operationId: getCommentsForContact
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of comments for the specified contact.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+    post:
+      tags:
+        - Comments
+      summary: Create a comment for a contact
+      operationId: createCommentForContact
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentDto'
+      responses:
+        '201':
+          description: Comment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
 
   /leads:
     get:
@@ -801,6 +900,55 @@ paths:
         '404':
           description: Opportunity not found.
 
+  /opportunities/{opportunityId}/comments:
+    get:
+      tags:
+        - Comments
+      summary: List comments for an opportunity
+      operationId: getCommentsForOpportunity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of comments for the specified opportunity.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+    post:
+      tags:
+        - Comments
+      summary: Create a comment for an opportunity
+      operationId: createCommentForOpportunity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentDto'
+      responses:
+        '201':
+          description: Comment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
   /invoices:
     get:
       tags:

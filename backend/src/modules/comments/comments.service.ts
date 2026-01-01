@@ -33,7 +33,15 @@ export class CommentsService {
       case 'Lead':
         entity = await this.db.query.crmLeads.findFirst({ where: commonWhere(schema.crmLeads) });
         break;
-      // ... other cases for Account, Contact, Opportunity
+      case 'Account':
+        entity = await this.db.query.crmAccounts.findFirst({ where: commonWhere(schema.crmAccounts) });
+        break;
+      case 'Contact':
+        entity = await this.db.query.crmContacts.findFirst({ where: commonWhere(schema.crmContacts) });
+        break;
+      case 'Opportunity':
+        entity = await this.db.query.crmOpportunities.findFirst({ where: commonWhere(schema.crmOpportunities) });
+        break;
       default:
         entity = null;
     }
