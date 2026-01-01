@@ -41,6 +41,11 @@ export class OpportunitiesController {
     return this.opportunitiesService.findAll(user.organizationId, undefined, query);
   }
 
+  @Get('opportunities/forecast')
+  getForecast(@GetUser() user: User) {
+    return this.opportunitiesService.getForecast(user.organizationId);
+  }
+
   @Get('accounts/:accountId/opportunities')
   findAllForAccount(
       @Param('accountId', ParseIntPipe) accountId: number,

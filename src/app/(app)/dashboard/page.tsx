@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Briefcase, DollarSign, Lightbulb, Users, Activity, Plus, Edit, CalendarDays } from "lucide-react"
-import { getAccounts, getLeads, getOpportunities } from "@/lib/actions"
+import { getAccounts, getLeads, getOpportunities, getOpportunityForecast } from "@/lib/actions"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -34,13 +34,12 @@ const chartConfig = {
   },
 }
 
-const openStages: OpportunityStage[] = ['Prospecting', 'Qualification', 'Proposal', 'Closing'];
-
 export default async function Dashboard() {
-    const [leads, opportunities, accounts]: [Lead[], Opportunity[], Account[]] = await Promise.all([
+    const [leads, opportunities, accounts, forecastData]: [Lead[], Opportunity[], Account[], Record<number, number>] = await Promise.all([
       getLeads(),
       getOpportunities(),
       getAccounts(),
+      getOpportunityForecast(),
     ]);
 
   const totalRevenue = opportunities
@@ -50,14 +49,6 @@ export default async function Dashboard() {
   const totalLeads = leads.length
   const totalOpportunities = opportunities.length
   const totalAccounts = accounts.length
-
-  const forecastData = opportunities
-    .filter(opp => opp.stage && openStages.includes(opp.stage) && opp.closeDate && opp.amount)
-    .reduce((acc, opp) => {
-        const month = getMonth(parseISO(opp.closeDate!));
-        acc[month] = (acc[month] || 0) + opp.amount!;
-        return acc;
-    }, {} as Record<number, number>);
 
   const chartData = Array.from({ length: 12 }, (_, i) => ({
     month: format(new Date(0, i), 'MMM'),

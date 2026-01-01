@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and, or, ilike, getTableColumns } from 'drizzle-orm';
+import { eq, and, or, ilike, getTableColumns, sql, inArray } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
@@ -160,6 +160,32 @@ export class OpportunitiesService {
       .where(eq(schema.crmOpportunities.id, id));
 
     return;
+  }
+
+  async getForecast(organizationId: number) {
+    const openStages: (typeof schema.opportunityStageEnum.enumValues) = ['Prospecting', 'Qualification', 'Proposal', 'Closing'];
+    
+    const monthlyForecast = await this.db
+      .select({
+        month: sql<number>`extract(month from ${schema.crmOpportunities.closeDate})`.as('month'),
+        total: sql<number>`sum(${schema.crmOpportunities.amount})`.mapWith(Number),
+      })
+      .from(schema.crmOpportunities)
+      .where(and(
+        eq(schema.crmOpportunities.organizationId, organizationId),
+        inArray(schema.crmOpportunities.stage, openStages),
+        sql`${schema.crmOpportunities.closeDate} IS NOT NULL`,
+        sql`${schema.crmOpportunities.amount} IS NOT NULL`
+      ))
+      .groupBy(sql`month`);
+      
+    // The query returns month numbers (1-12). We'll return an object mapping month number to total.
+    return monthlyForecast.reduce((acc, row) => {
+        if (row.month) {
+            acc[row.month -1] = row.total; // Convert 1-12 to 0-11 for JS Date object consistency
+        }
+        return acc;
+    }, {} as Record<number, number>);
   }
 }
 

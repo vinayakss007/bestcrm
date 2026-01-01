@@ -534,6 +534,18 @@ export async function deleteOpportunity(id: number) {
     }
 }
 
+export async function getOpportunityForecast() {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/opportunities/forecast`, { headers, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) {
+            redirect('/login');
+        }
+        throw new Error('Failed to fetch opportunity forecast');
+    }
+    return response.json();
+}
+
 export async function getInvoices() {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/invoices`, { headers, cache: 'no-store' });

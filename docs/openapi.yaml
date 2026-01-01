@@ -830,6 +830,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Opportunity'
+  
+  /opportunities/forecast:
+    get:
+      tags:
+        - Opportunities
+      summary: Get opportunity forecast data
+      operationId: getOpportunityForecast
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Monthly forecast data.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: number
 
   /opportunities/{opportunityId}:
     get:
