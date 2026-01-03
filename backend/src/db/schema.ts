@@ -381,5 +381,3 @@ export const crmAttachmentsRelations = relations(crmAttachments, ({ one }) => ({
     references: [crmUsers.id],
   }),
 }));
-
-      

@@ -1,6 +1,6 @@
 
 
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Filter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,16 +31,29 @@ import {
 
 import { getContacts, getAccounts } from "@/lib/actions"
 import { AddContactDialog } from "@/components/add-contact-dialog"
-// import { Pagination } from "@/components/pagination"
+import { Pagination } from "@/components/pagination"
 import type { Contact, Account } from "@/lib/types"
 import { EditContactDialog } from "@/components/edit-contact-dialog"
 import { DeleteContactDialog } from "@/components/delete-contact-dialog"
 import { SearchInput } from "@/components/search-input"
 
-export default async function ContactsPage({ searchParams }: { searchParams: { query?: string } }) {
-  const query = searchParams.query || '';
-  const [contacts, accounts]: [Contact[], Account[]] = await Promise.all([
-    getContacts(query),
+type SearchParams = { 
+  query?: string,
+  page?: string,
+  limit?: string,
+}
+
+export default async function ContactsPage({ searchParams }: { searchParams: SearchParams }) {
+  const { 
+    query = '', 
+    page = '1',
+    limit = '10',
+  } = searchParams;
+  const currentPage = parseInt(page, 10) || 1;
+  const currentLimit = parseInt(limit, 10) || 10;
+
+  const [{ data: contacts, total }, accounts]: [{ data: Contact[], total: number }, Account[]] = await Promise.all([
+    getContacts({ query, page: currentPage, limit: currentLimit }),
     getAccounts(),
   ]);
   
@@ -157,13 +170,11 @@ export default async function ContactsPage({ searchParams }: { searchParams: { q
           </Table>
         </CardContent>
         <CardFooter>
-            {/* <Pagination
-                page={page}
-                pageSize={pageSize}
+            <Pagination
+                page={currentPage}
+                limit={currentLimit}
                 total={total}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
-            /> */}
+            />
         </CardFooter>
       </Card>
     </div>
