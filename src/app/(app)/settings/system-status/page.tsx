@@ -9,10 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { CheckCircle2, AlertCircle, Cpu, Mail, Database, Server } from "lucide-react"
+import { CheckCircle2, AlertCircle, Cpu, Mail, Database, Server, RefreshCw } from "lucide-react"
 import { getHealthCheck } from "@/lib/actions"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
 
-type ServiceStatus = "Operational" | "Degraded Performance" | "Downtime";
+type ServiceStatus = "Operational" | "Degraded Performance" | "Downtime" | "Checking...";
 
 type Service = {
     name: string;
@@ -28,12 +30,17 @@ const getStatusVariant = (status: ServiceStatus) => {
                 icon: CheckCircle2,
                 color: "text-green-600",
             };
+        case "Checking...":
+             return {
+                icon: RefreshCw,
+                color: "text-muted-foreground animate-spin",
+            };
         case "Degraded Performance":
              return {
                 icon: AlertCircle,
                 color: "text-orange-500",
             };
-        default:
+        default: // Downtime
              return {
                 icon: AlertCircle,
                 color: "text-destructive",
@@ -44,42 +51,59 @@ const getStatusVariant = (status: ServiceStatus) => {
 
 export default function SystemStatusPage() {
   const [services, setServices] = React.useState<Service[]>([
-      { name: "Backend API", status: "Operational", description: "REST API Service.", icon: Server },
-      { name: "Database Connection", status: "Operational", description: "Primary PostgreSQL database.", icon: Database },
+      { name: "Backend API", status: "Checking...", description: "REST API Service.", icon: Server },
+      { name: "Database Connection", status: "Checking...", description: "Primary PostgreSQL database.", icon: Database },
       { name: "AI Agent Service", status: "Operational", description: "Genkit flow processing.", icon: Cpu },
       { name: "Email Service", status: "Degraded Performance", description: "Outbound email delivery (SendGrid).", icon: Mail },
   ]);
   const [loading, setLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    async function checkHealth() {
-        setLoading(true);
-        try {
-            const health = await getHealthCheck();
-            if (health.status === 'ok') {
-                setServices(prev => prev.map(s => s.name === 'Backend API' ? { ...s, status: 'Operational' } : s));
-            } else {
-                setServices(prev => prev.map(s => s.name === 'Backend API' ? { ...s, status: 'Downtime' } : s));
+  const checkHealth = React.useCallback(async () => {
+    setLoading(true);
+    setServices(prev => prev.map(s => (s.name === 'Backend API' || s.name === 'Database Connection') ? { ...s, status: 'Checking...' } : s));
+    try {
+        const health = await getHealthCheck();
+        setServices(prev => prev.map(s => {
+            if (s.name === 'Backend API') {
+                return { ...s, status: health.api === 'Operational' ? 'Operational' : 'Downtime' };
             }
-        } catch (error) {
-            setServices(prev => prev.map(s => s.name === 'Backend API' ? { ...s, status: 'Downtime' } : s));
-        } finally {
-            setLoading(false);
-        }
+            if (s.name === 'Database Connection') {
+                return { ...s, status: health.database === 'Operational' ? 'Operational' : 'Downtime' };
+            }
+            return s;
+        }));
+    } catch (error) {
+        setServices(prev => prev.map(s => {
+            if (s.name === 'Backend API' || s.name === 'Database Connection') {
+                return { ...s, status: 'Downtime' };
+            }
+            return s;
+        }));
+    } finally {
+        setLoading(false);
     }
-    checkHealth();
   }, []);
+
+  React.useEffect(() => {
+    checkHealth();
+  }, [checkHealth]);
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>System Status</CardTitle>
-        <CardDescription>
-          Monitor the health and uptime of all critical system services.
-        </CardDescription>
+      <CardHeader className="flex flex-row justify-between items-start">
+        <div>
+            <CardTitle>System Status</CardTitle>
+            <CardDescription>
+            Monitor the health and uptime of all critical system services.
+            </CardDescription>
+        </div>
+        <Button variant="outline" size="sm" onClick={checkHealth} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        {services.map((service) => {
+        {services.map((service, index) => {
             const StatusIcon = getStatusVariant(service.status).icon;
             const statusColor = getStatusVariant(service.status).color;
 
@@ -91,7 +115,7 @@ export default function SystemStatusPage() {
                     <p className="font-semibold">{service.name}</p>
                      <div className={`flex items-center gap-2 text-sm font-medium ${statusColor}`}>
                         <StatusIcon className="h-4 w-4" />
-                        {loading && service.name === 'Backend API' ? 'Checking...' : service.status}
+                        {service.status}
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">{service.description}</p>

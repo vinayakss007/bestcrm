@@ -1,3 +1,4 @@
+
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -11,8 +12,7 @@ export class AppController {
   }
 
   @Get('health')
-  getHealth(): { status: string } {
-    // In a real app, this would check DB connections, etc.
-    return { status: 'ok' };
+  async getHealth() {
+    return this.appService.getHealth();
   }
 }
