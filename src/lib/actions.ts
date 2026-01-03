@@ -1,11 +1,12 @@
 
+
 'use server'
 
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { jwtDecode } from 'jwt-decode'
-import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto, Attachment } from "@/lib/types"
+import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto, Attachment, CreateRoleDto, UpdateRoleDto } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -226,6 +227,7 @@ export async function deleteAccount(id: number) {
         }
         
         revalidatePath('/accounts');
+        revalidatePath(`/accounts/${id}`);
     } catch (error) {
         console.error(error);
         throw new Error('An unexpected error occurred while deleting the account.');
@@ -258,7 +260,7 @@ export async function getContacts(query?: string) {
     return response.json();
 }
 
-export async function getContactById(id: string) {
+export async function getContactById(id: number) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/contacts/${id}`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
@@ -344,6 +346,7 @@ export async function deleteContact(id: number) {
         }
         
         revalidatePath('/contacts');
+        revalidatePath(`/contacts/${id}`);
     } catch (error) {
         console.error(error);
         throw new Error('An unexpected error occurred while deleting the contact.');
@@ -370,7 +373,7 @@ export async function getLeads(query?: string, status?: string) {
     return response.json();
 }
 
-export async function getLeadById(id: string) {
+export async function getLeadById(id: number) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/leads/${id}`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
@@ -442,6 +445,7 @@ export async function deleteLead(id: number) {
         }
         
         revalidatePath('/leads');
+        revalidatePath(`/leads/${id}`);
     } catch (error) {
         console.error(error);
         throw new Error('An unexpected error occurred while deleting the lead.');
@@ -500,7 +504,7 @@ export async function getOpportunities(query?: string, sort?: string, order?: 'a
     return response.json();
 }
 
-export async function getOpportunityById(id: string) {
+export async function getOpportunityById(id: number) {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/opportunities/${id}`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
@@ -588,6 +592,7 @@ export async function deleteOpportunity(id: number) {
 
         revalidatePath('/opportunities');
         revalidatePath('/dashboard');
+        revalidatePath(`/opportunities/${id}`);
     } catch (error) {
         console.error(error);
         throw new Error('An unexpected error occurred while deleting the opportunity.');
@@ -733,6 +738,7 @@ export async function deleteTask(id: number) {
         }
 
         revalidatePath('/tasks');
+        revalidatePath(`/tasks/${id}`);
     } catch (error) {
         console.error(error);
         throw new Error('An unexpected error occurred while deleting the task.');
@@ -908,9 +914,6 @@ export async function addComment(
     }
 }
 
-export async function addCommentForLead(leadId: number, formData: FormData) {
-    return addComment('Lead', leadId, formData);
-}
 
 // Attachment Actions
 const getEntityPath = (entityType: RelatedToType) => {
@@ -982,4 +985,63 @@ export async function downloadAttachment(attachmentId: number): Promise<{blob: B
 
     const blob = await response.blob();
     return { blob, filename };
+}
+
+
+// Roles & Permissions Actions
+export async function getRoles() {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/roles`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
+    if (!response.ok) throw new Error('Failed to fetch roles');
+    return response.json();
+}
+
+export async function getPermissions() {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/roles/permissions`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
+    if (!response.ok) throw new Error('Failed to fetch permissions');
+    return response.json();
+}
+
+export async function createRole(roleData: CreateRoleDto) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/roles`, {
+        method: 'POST',
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: JSON.stringify(roleData),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create role');
+    }
+    revalidatePath('/settings/roles');
+    return response.json();
+}
+
+export async function updateRole(id: number, roleData: UpdateRoleDto) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/roles/${id}`, {
+        method: 'PATCH',
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: JSON.stringify(roleData),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update role');
+    }
+    revalidatePath('/settings/roles');
+    return response.json();
+}
+
+export async function deleteRole(id: number) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/roles/${id}`, {
+        method: 'DELETE',
+        headers,
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete role');
+    }
+    revalidatePath('/settings/roles');
 }

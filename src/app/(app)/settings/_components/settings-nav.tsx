@@ -1,10 +1,11 @@
 
+
 "use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { BarChart, Users, Star, User, Ban, Home, Blocks, ShieldCheck, Activity } from "lucide-react"
+import { BarChart, Users, Star, User, Ban, Home, Blocks, ShieldCheck, Activity, Shield } from "lucide-react"
 
 export function SettingsNav() {
   const pathname = usePathname()
@@ -21,6 +22,7 @@ export function SettingsNav() {
       title: "Team",
       links: [
         { title: "Users", href: "/settings/users", icon: Users },
+        { title: "Roles & Permissions", href: "/settings/roles", icon: Shield },
       ],
     },
     {
