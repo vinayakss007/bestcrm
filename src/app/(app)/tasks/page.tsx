@@ -1,7 +1,7 @@
 
 "use server"
 
-import { MoreHorizontal, ArrowUpDown, Filter, Upload, RefreshCw, Search, Ellipsis } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Filter, Upload, RefreshCw, Ellipsis } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -32,9 +32,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getTasks, getUsers, updateTask } from "@/lib/actions"
 import { Task, TaskStatus, User } from "@/lib/types"
 import { AddTaskDialog } from "@/components/add-task-dialog"
-import { Input } from "@/components/ui/input"
 import { EditTaskDialog } from "@/components/edit-task-dialog"
 import { DeleteTaskDialog } from "@/components/delete-task-dialog"
+import { SearchInput } from "@/components/search-input"
 
 const statusVariant: Record<TaskStatus, "default" | "secondary"> = {
     'Completed': 'default',
@@ -45,22 +45,15 @@ export default async function TasksPage() {
   const [tasks, users]: [Task[], User[]] = await Promise.all([getTasks(), getUsers()])
   
   const getOwnerById = (id: number | null) => {
-      return users.find(user => id !== null && parseInt(user.id) === id);
+      return users.find(user => id !== null && user.id === id);
   }
 
   return (
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-semibold tracking-tight">Tasks</h1>
-           <div className="relative ml-auto flex-1 md:grow-0">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search..."
-                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
-              />
-          </div>
-          <div className="flex items-center gap-2">
+          <SearchInput placeholder="Search tasks..." />
+          <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" size="icon" className="h-8 w-8">
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh</span>
