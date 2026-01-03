@@ -364,7 +364,7 @@ export async function deleteContact(id: number) {
 
         if (response.status !== 204) {
              const errorData = await response.text();
-             throw new Error(errorData || 'Failed to delete contact');
+             throw new Error(errorData.message || 'Failed to delete contact');
         }
         
         revalidatePath('/contacts');

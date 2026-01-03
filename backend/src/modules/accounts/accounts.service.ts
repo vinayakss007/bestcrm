@@ -165,6 +165,6 @@ export class AccountsService {
 
   async export(organizationId: number): Promise<string> {
     const job = await this.jobsProducerService.addAccountExportJob({ organizationId });
-    return job.id;
+    return job.id as string;
   }
 }
