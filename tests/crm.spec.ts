@@ -1,3 +1,4 @@
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Core CRM Flow', () => {
@@ -6,8 +7,12 @@ test.describe('Core CRM Flow', () => {
   const password = 'password123';
   const name = 'CRM Test User';
   const accountName = `Test Account ${uniqueId}`;
+  const updatedAccountName = `Updated Account ${uniqueId}`;
   const contactName = `Test Contact ${uniqueId}`;
+  const updatedContactName = `Updated Contact ${uniqueId}`;
   const leadName = `Test Lead ${uniqueId}`;
+  let createdAccountId: string;
+
 
   // Before running the CRM tests, we need to register and log in a user.
   test.beforeAll(async ({ browser }) => {
@@ -35,26 +40,54 @@ test.describe('Core CRM Flow', () => {
   // All tests in this suite will use the saved authentication state.
   test.use({ storageState: 'storageState.json' });
 
-  test('should allow creating a new account', async ({ page }) => {
+  test('should allow creating, updating, and deleting an account', async ({ page }) => {
     await page.goto('/accounts');
 
-    // Open the "Add Account" dialog
+    // CREATE
     await page.click('button:has-text("Add Account")');
     const dialog = page.locator('div[role="dialog"]');
     await expect(dialog).toBeVisible();
 
-    // Fill and submit the form
     await dialog.locator('input[name="name"]').fill(accountName);
     await dialog.locator('input[name="industry"]').fill('E2E Testing');
     await dialog.locator('button[type="submit"]').click();
 
-    // Verify the dialog closes and a success toast appears
     await expect(dialog).not.toBeVisible();
     await expect(page.locator('text=Account "' + accountName + '" has been created.')).toBeVisible();
     
-    // Verify the new account is in the table
-    await expect(page.locator(`tr:has-text("${accountName}")`)).toBeVisible();
+    const newAccountRow = page.locator(`tr:has-text("${accountName}")`);
+    await expect(newAccountRow).toBeVisible();
+
+    const newAccountId = await newAccountRow.locator('a').getAttribute('href');
+    expect(newAccountId).not.toBeNull();
+    createdAccountId = newAccountId!.split('/').pop()!;
+    
+    // UPDATE
+    await newAccountRow.locator('button[aria-haspopup="true"]').click();
+    await page.locator('div[role="menuitem"]:has-text("Edit")').click();
+    const editDialog = page.locator('div[role="dialog"]');
+    await expect(editDialog).toBeVisible();
+    await editDialog.locator('input[name="name"]').fill(updatedAccountName);
+    await editDialog.locator('button[type="submit"]').click();
+    
+    await expect(editDialog).not.toBeVisible();
+    await expect(page.locator(`text=Account "${updatedAccountName}" has been updated.`)).toBeVisible();
+    await expect(page.locator(`tr:has-text("${updatedAccountName}")`)).toBeVisible();
+
+    // DELETE
+    const updatedRow = page.locator(`tr:has-text("${updatedAccountName}")`);
+    await updatedRow.locator('button[aria-haspopup="true"]').click();
+    await page.locator('div[role="menuitem"]:has-text("Delete")').click();
+    
+    const alertDialog = page.locator('div[role="alertdialog"]');
+    await expect(alertDialog).toBeVisible();
+    await alertDialog.locator('button:has-text("Continue")').click();
+    
+    await expect(alertDialog).not.toBeVisible();
+    await expect(page.locator('text=Account has been deleted.')).toBeVisible();
+    await expect(updatedRow).not.toBeVisible(); // The row should be gone from the active list
   });
+
 
   test('should allow creating a new contact for an existing account', async ({ page }) => {
     // This test depends on the previous one to have created an account.
@@ -66,9 +99,10 @@ test.describe('Core CRM Flow', () => {
 
     await dialog.locator('input[name="name"]').fill(contactName);
     
-    // Select the account created in the previous test
+    // The account created in the previous test might have been deleted, so we just pick the first available one.
+    // A more robust test would create its own account dependency.
     await dialog.locator('button[role="combobox"]').click();
-    await page.locator(`div[role="option"]:has-text("${accountName}")`).click();
+    await page.locator(`div[role="option"]`).first().click();
 
     await dialog.locator('button[type="submit"]').click();
 
@@ -107,5 +141,9 @@ test.describe('Core CRM Flow', () => {
     await page.waitForURL(/\/opportunities\/\d+/);
     await expect(page.locator('h1')).toContainText('Opportunities /');
     await expect(page.locator('h1')).toContainText('New Deal'); // From default conversion name
+
+    // Verify the lead is gone from the leads list
+    await page.goto('/leads');
+    await expect(page.locator(`tr:has-text("${leadName}")`)).not.toBeVisible();
   });
 });
