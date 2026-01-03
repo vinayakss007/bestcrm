@@ -1,3 +1,4 @@
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
@@ -20,6 +21,13 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
+  it('/api/v1 (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/api/v1/')
+      .expect(200)
+      .expect('Hello World!');
+  });
+  
   it('/api/v1/health (GET)', () => {
     return request(app.getHttpServer())
       .get('/api/v1/health')
@@ -31,10 +39,4 @@ describe('AppController (e2e)', () => {
       });
   });
 
-   it('/api/v1 (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/api/v1')
-      .expect(200)
-      .expect('Hello World!');
-  });
 });
