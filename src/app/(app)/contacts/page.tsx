@@ -88,30 +88,6 @@ export default async function ContactsPage({ searchParams }: { searchParams: { q
                 <DropdownMenuItem>Account</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" size="sm" className="h-8 gap-1">
-                <Columns3 className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Columns
-                </span>
-            </Button>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-3.5 w-3.5" />
-                        <span className="sr-only">More</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                        <Upload className="mr-2 h-4 w-4" />
-                        Export
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        <ListFilter className="mr-2 h-4 w-4" />
-                        Customize quick filters
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
           <AddContactDialog accounts={accounts} />
         </div>
       </div>

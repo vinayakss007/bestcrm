@@ -40,6 +40,7 @@ import { EditLeadDialog } from "@/components/edit-lead-dialog"
 import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
 import { SearchInput } from "@/components/search-input"
 import { ConvertLeadDialog } from "@/components/convert-lead-dialog"
+import { leadStatus } from "@/lib/types"
 
 const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" | "outline"> = {
     'New': 'default',
@@ -48,9 +49,10 @@ const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" 
     'Lost': 'destructive'
 }
 
-export default async function LeadsPage({ searchParams }: { searchParams: { query?: string } }) {
+export default async function LeadsPage({ searchParams }: { searchParams: { query?: string, status?: string } }) {
   const query = searchParams.query || '';
-  const leads: Lead[] = await getLeads(query);
+  const status = searchParams.status || '';
+  const leads: Lead[] = await getLeads(query, status);
   const users: User[] = await getUsers();
 
   const getOwnerById = (id: number | null) => {
@@ -79,9 +81,13 @@ export default async function LeadsPage({ searchParams }: { searchParams: { quer
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem>New</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Contacted</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Qualified</DropdownMenuCheckboxItem>
+                {leadStatus.map(s => (
+                  <DropdownMenuCheckboxItem key={s} checked={status === s} asChild>
+                    <Link href={`/leads?status=${s}`}>{s}</Link>
+                  </DropdownMenuCheckboxItem>
+                ))}
+                 <DropdownMenuSeparator />
+                 <DropdownMenuItem asChild><Link href="/leads">Clear Filter</Link></DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>
@@ -98,30 +104,6 @@ export default async function LeadsPage({ searchParams }: { searchParams: { quer
                 <DropdownMenuItem>Source</DropdownMenuItem>
                 <DropdownMenuItem>Owner</DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
-            <Button variant="outline" size="sm" className="h-8 gap-1">
-                <Columns3 className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Columns
-                </span>
-            </Button>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-3.5 w-3.5" />
-                        <span className="sr-only">More</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                        <Upload className="mr-2 h-4 w-4" />
-                        Export
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        <ListFilter className="mr-2 h-4 w-4" />
-                        Customize quick filters
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
             </DropdownMenu>
           <AddLeadDialog users={users} />
         </div>

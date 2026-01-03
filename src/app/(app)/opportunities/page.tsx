@@ -1,4 +1,5 @@
 
+
 import { MoreHorizontal, ArrowUpDown, Columns3, Filter, Upload, ListFilter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -45,9 +46,12 @@ const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destruct
     'Lost': 'destructive'
 }
 
-export default async function OpportunitiesPage({ searchParams }: { searchParams: { query?: string } }) {
+export default async function OpportunitiesPage({ searchParams }: { searchParams: { query?: string, sort?: string, order?: 'asc' | 'desc' } }) {
   const query = searchParams.query || '';
-  const opportunities: Opportunity[] = await getOpportunities(query);
+  const sort = searchParams.sort || 'createdAt';
+  const order = searchParams.order || 'desc';
+
+  const opportunities: Opportunity[] = await getOpportunities(query, sort, order);
   const accounts: Account[] = await getAccounts();
   const users: User[] = await getUsers();
 
@@ -90,34 +94,12 @@ export default async function OpportunitiesPage({ searchParams }: { searchParams
                 </Button>
               </DropdownMenuTrigger>
                <DropdownMenuContent align="end">
-                <DropdownMenuItem>Name</DropdownMenuItem>
-                <DropdownMenuItem>Amount</DropdownMenuItem>
-                <DropdownMenuItem>Close Date</DropdownMenuItem>
+                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link href={`/opportunities?sort=name&order=asc`}>Name</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href={`/opportunities?sort=amount&order=desc`}>Amount</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href={`/opportunities?sort=closeDate&order=asc`}>Close Date</Link></DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
-            <Button variant="outline" size="sm" className="h-8 gap-1">
-                <Columns3 className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Columns
-                </span>
-            </Button>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-3.5 w-3.5" />
-                        <span className="sr-only">More</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                        <Upload className="mr-2 h-4 w-4" />
-                        Export
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        <ListFilter className="mr-2 h-4 w-4" />
-                        Customize quick filters
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
             </DropdownMenu>
           <AddOpportunityDialog accounts={accounts} users={users} />
         </div>
