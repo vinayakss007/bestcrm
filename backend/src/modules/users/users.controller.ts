@@ -5,13 +5,14 @@ import { JwtAuthGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/get-user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InviteUserDto } from './dto/invite-user.dto';
+import type { Role } from '@/lib/types';
 
 // This is the user type from the JWT payload, not the DB model
 type AuthenticatedUser = {
     userId: number;
     email: string;
     organizationId: number;
-    role: 'user' | 'company-admin' | 'super-admin';
+    role: Role;
 }
 
 @UseGuards(JwtAuthGuard)

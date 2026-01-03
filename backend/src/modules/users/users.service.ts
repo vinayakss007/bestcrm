@@ -12,11 +12,13 @@ import { InviteUserDto } from './dto/invite-user.dto';
 
 // This is a real user type inferred from your Drizzle schema.
 export type User = typeof schema.crmUsers.$inferSelect;
+type Role = typeof schema.crmRoles.$inferSelect;
+
 type AuthenticatedUser = {
     userId: number;
     email: string;
     organizationId: number;
-    role: { name: string }; // Role is now an object
+    role: Role;
 }
 
 
