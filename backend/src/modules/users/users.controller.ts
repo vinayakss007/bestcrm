@@ -44,6 +44,6 @@ export class UsersController {
     ) {
         // Add security check to ensure user can only update themselves (or has permissions)
         // For now, we'll just pass the organizationId for scoping
-        return this.usersService.update(id, updateUserDto, user.organizationId);
+        return this.usersService.update(id, updateUserDto, user);
     }
 }

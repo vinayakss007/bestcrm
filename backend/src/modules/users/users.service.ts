@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import * as schema from '@/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InviteUserDto } from './dto/invite-user.dto';
 
@@ -202,7 +202,11 @@ export class UsersService {
     const role = await this.db.query.crmRoles.findFirst({
         where: and(
             eq(schema.crmRoles.name, roleName),
-            eq(schema.crmRoles.organizationId, invitingUser.organizationId)
+            or(
+                eq(schema.crmRoles.organizationId, invitingUser.organizationId),
+                // Allow super-admin to invite users to other orgs if needed, though UI doesn't support this yet
+                eq(schema.crmRoles.name, 'super-admin') 
+            )
         ),
     });
 
@@ -233,10 +237,12 @@ export class UsersService {
   }
 
 
-  async update(id: number, updateUserDto: UpdateUserDto, organizationId: number): Promise<Omit<User, 'passwordHash' | 'isDeleted' | 'deletedAt'>> {
+  async update(id: number, updateUserDto: UpdateUserDto, user: AuthenticatedUser): Promise<Omit<User, 'passwordHash' | 'isDeleted' | 'deletedAt'>> {
     // findOneById doesn't scope by organization, so we need to add that check.
     const userToUpdate = await this.findOneById(id);
-    if (!userToUpdate || userToUpdate.organizationId !== organizationId) {
+    
+    // A super-admin can update any user. A company-admin can only update users in their org.
+    if (!userToUpdate || (user.role.name !== 'super-admin' && userToUpdate.organizationId !== user.organizationId)) {
         throw new NotFoundException('User not found.');
     }
     

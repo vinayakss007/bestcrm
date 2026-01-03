@@ -5,19 +5,22 @@ import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/get-user.decorator';
 import { AuthenticatedUser } from '../users/users.service';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { RequirePermission } from '../auth/permissions.decorator';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
   @Get()
+  @RequirePermission('super-admin:tenant:read')
   findAll(@GetUser() user: AuthenticatedUser) {
-    // The service will ensure only a super-admin can access this
     return this.organizationsService.findAll(user);
   }
 
   @Patch(':id')
+  @RequirePermission('setting:brand:update')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrganizationDto: UpdateOrganizationDto,

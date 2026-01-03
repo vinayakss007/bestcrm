@@ -16,11 +16,7 @@ export class OrganizationsService {
   ) {}
 
   async findAll(user: AuthenticatedUser) {
-    if (user.role.name !== 'super-admin') {
-      throw new ForbiddenException('You do not have permission to view all organizations.');
-    }
-
-    // This query is more complex. It needs to join organizations with users and count them.
+    // This permission check is now handled by the PermissionsGuard on the controller
     const organizationsWithUserCounts = await this.db
       .select({
         id: schema.organizations.id,
@@ -48,11 +44,12 @@ export class OrganizationsService {
 
   async update(id: number, updateOrganizationDto: UpdateOrganizationDto, user: AuthenticatedUser) {
     // Security check: ensure the user is an admin of the organization they're trying to update
+    // This is now handled by the PermissionsGuard on the controller.
+    // The service can trust that the user has the 'setting:brand:update' permission.
+    
+    // We still need to ensure they are updating their OWN organization unless they are a super-admin.
     if (user.role.name !== 'super-admin' && user.organizationId !== id) {
         throw new ForbiddenException('You are not authorized to update this organization.');
-    }
-    if (user.role.name === 'user') {
-        throw new ForbiddenException('You do not have permission to update organization settings.');
     }
 
     // Verify the organization exists
