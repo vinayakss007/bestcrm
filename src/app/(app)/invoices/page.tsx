@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -26,9 +27,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { getInvoices, getLeads } from "@/lib/actions"
-import type { Invoice, InvoiceStatus } from "@/lib/types"
+import type { Invoice, InvoiceStatus, Lead } from "@/lib/types"
 import { AddInvoiceDialog } from "@/components/add-invoice-dialog"
 import { DeleteInvoiceDialog } from "@/components/delete-invoice-dialog"
+import { Pagination } from "@/components/pagination"
 
 const statusVariant: Record<InvoiceStatus, "default" | "secondary" | "destructive" | "outline"> = {
     'Draft': 'secondary',
@@ -37,9 +39,20 @@ const statusVariant: Record<InvoiceStatus, "default" | "secondary" | "destructiv
     'Void': 'destructive'
 }
 
-export default async function InvoicesPage() {
-  const invoices: Invoice[] = await getInvoices()
-  const leads = await getLeads()
+type SearchParams = { 
+  page?: string,
+  limit?: string,
+}
+
+export default async function InvoicesPage({ searchParams }: { searchParams: SearchParams }) {
+  const { page = '1', limit = '10' } = searchParams;
+  const currentPage = parseInt(page, 10) || 1;
+  const currentLimit = parseInt(limit, 10) || 10;
+  
+  const [{ data: invoices, total }, leads]: [{ data: Invoice[], total: number }, Lead[]] = await Promise.all([
+    getInvoices({ page: currentPage, limit: currentLimit }),
+    getLeads(),
+  ]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -113,6 +126,13 @@ export default async function InvoicesPage() {
             </TableBody>
           </Table>
         </CardContent>
+         <CardFooter>
+            <Pagination
+                page={currentPage}
+                limit={currentLimit}
+                total={total}
+            />
+        </CardFooter>
       </Card>
     </div>
   )

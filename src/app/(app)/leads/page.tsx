@@ -35,7 +35,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getLeads, getUsers } from "@/lib/actions"
 import type { Lead, LeadStatus, User } from "@/lib/types"
 import { AddLeadDialog } from "@/components/add-lead-dialog"
-// import { Pagination } from "@/components/pagination"
+import { Pagination } from "@/components/pagination"
 import { EditLeadDialog } from "@/components/edit-lead-dialog"
 import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
 import { SearchInput } from "@/components/search-input"
@@ -49,11 +49,27 @@ const statusVariant: Record<LeadStatus, "default" | "secondary" | "destructive" 
     'Lost': 'destructive'
 }
 
-export default async function LeadsPage({ searchParams }: { searchParams: { query?: string, status?: string } }) {
-  const query = searchParams.query || '';
-  const status = searchParams.status || '';
-  const leads: Lead[] = await getLeads(query, status);
-  const users: User[] = await getUsers();
+type SearchParams = {
+  query?: string,
+  status?: string,
+  page?: string,
+  limit?: string,
+}
+
+export default async function LeadsPage({ searchParams }: { searchParams: SearchParams }) {
+  const { 
+    query = '', 
+    status = '',
+    page = '1',
+    limit = '10',
+  } = searchParams;
+  const currentPage = parseInt(page, 10) || 1;
+  const currentLimit = parseInt(limit, 10) || 10;
+  
+  const [{ data: leads, total }, users]: [{ data: Lead[], total: number }, User[]] = await Promise.all([
+    getLeads({ query, status, page: currentPage, limit: currentLimit }),
+    getUsers()
+  ]);
 
   const getOwnerById = (id: number | null) => {
       return users.find(user => id !== null && user.id === id);
@@ -193,13 +209,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: { quer
           </Table>
         </CardContent>
          <CardFooter>
-            {/* <Pagination
-                page={page}
-                pageSize={pageSize}
+            <Pagination
+                page={currentPage}
+                limit={currentLimit}
                 total={total}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
-            /> */}
+            />
         </CardFooter>
       </Card>
     </div>

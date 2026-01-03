@@ -136,7 +136,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
 export async function getAccounts(
   { query = '', status = 'active', sort = 'name', order = 'asc', page = 1, limit = 10 }:
-  { query?: string; status?: 'active' | 'archived'; sort?: 'name' | 'industry'; order?: 'asc' | 'desc'; page?: number; limit?: number; }
+  { query?: string; status?: 'active' | 'archived'; sort?: 'name' | 'industry'; order?: 'asc' | 'desc'; page?: number; limit?: number; } = {}
 ) {
   const headers = await getAuthHeaders()
   const url = new URL(`${API_URL}/accounts`);
@@ -254,12 +254,13 @@ export async function getJobStatus(jobId: string) {
 }
 
 
-export async function getContacts(query?: string) {
+export async function getContacts({ query = '', page = 1, limit = 10 }: { query?: string; page?: number, limit?: number } = {}) {
     const headers = await getAuthHeaders();
     const url = new URL(`${API_URL}/contacts`);
-    if (query) {
-        url.searchParams.append('query', query);
-    }
+    url.searchParams.append('query', query);
+    url.searchParams.append('page', String(page));
+    url.searchParams.append('limit', String(limit));
+
     const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
@@ -364,15 +365,14 @@ export async function deleteContact(id: number) {
 }
 
 
-export async function getLeads(query?: string, status?: string) {
+export async function getLeads({ query = '', status = '', page = 1, limit = 10 }: { query?: string, status?: string, page?: number, limit?: number } = {}) {
     const headers = await getAuthHeaders();
     const url = new URL(`${API_URL}/leads`);
-    if (query) {
-        url.searchParams.append('query', query);
-    }
-    if (status) {
-        url.searchParams.append('status', status);
-    }
+    url.searchParams.append('query', query);
+    url.searchParams.append('status', status);
+    url.searchParams.append('page', String(page));
+    url.searchParams.append('limit', String(limit));
+
     const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
@@ -621,9 +621,13 @@ export async function getOpportunityForecast() {
     return response.json();
 }
 
-export async function getInvoices() {
+export async function getInvoices({ page = 1, limit = 10 }: { page?: number; limit?: number } = {}) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/invoices`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
+    const url = new URL(`${API_URL}/invoices`);
+    url.searchParams.append('page', String(page));
+    url.searchParams.append('limit', String(limit));
+
+    const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) {
             redirect('/login');
