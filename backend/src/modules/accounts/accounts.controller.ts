@@ -15,6 +15,7 @@ import {
   Query,
   Res,
   Header,
+  Accepted,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -34,10 +35,11 @@ export class AccountsController {
     return this.accountsService.create(createAccountDto, user.organizationId, user.userId);
   }
 
-  @Get('export')
-  @Header('Content-Type', 'text/csv')
-  export(@GetUser() user: User) {
-    return this.accountsService.export(user.organizationId);
+  @Post('export')
+  @Accepted()
+  async export(@GetUser() user: User) {
+    const jobId = await this.accountsService.export(user.organizationId);
+    return { jobId };
   }
 
   @Get()

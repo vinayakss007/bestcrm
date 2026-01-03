@@ -1,5 +1,4 @@
 
-
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -234,13 +233,22 @@ export async function deleteAccount(id: number) {
     }
 }
 
-export async function exportAccountsToCsv(): Promise<string> {
+export async function exportAccountsToCsv(): Promise<{ jobId: string }> {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/accounts/export`, { headers, cache: 'no-store' });
+    const response = await fetch(`${API_URL}/accounts/export`, { method: 'POST', headers: {...headers, 'Content-Type': 'application/json'} });
     if (!response.ok) {
-        throw new Error('Failed to export accounts');
+        throw new Error('Failed to start account export job');
     }
-    return response.text();
+    return response.json();
+}
+
+export async function getJobStatus(jobId: string) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/jobs/${jobId}`, { headers: {...headers, 'Content-Type': 'application/json'} });
+    if (!response.ok) {
+        throw new Error('Failed to get job status');
+    }
+    return response.json();
 }
 
 

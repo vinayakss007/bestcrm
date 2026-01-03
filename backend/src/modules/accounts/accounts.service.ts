@@ -2,8 +2,7 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, and, or, ilike, asc, desc } from 'drizzle-orm';
-import { stringify } from 'csv-stringify/sync';
-
+import { JobsProducerService } from '../jobs/jobs.producer.service';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import * as schema from '@/db/schema';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -14,6 +13,7 @@ export class AccountsService {
   constructor(
     @Inject(DrizzleProvider)
     private db: PostgresJsDatabase<typeof schema>,
+    private readonly jobsProducerService: JobsProducerService,
   ) {}
 
   async create(createAccountDto: CreateAccountDto, organizationId: number, userId: number) {
@@ -151,30 +151,7 @@ export class AccountsService {
   }
 
   async export(organizationId: number): Promise<string> {
-    const accounts = await this.db.query.crmAccounts.findMany({
-        where: and(
-            eq(schema.crmAccounts.organizationId, organizationId),
-            eq(schema.crmAccounts.isDeleted, false),
-        ),
-        with: {
-            owner: {
-                columns: {
-                    name: true,
-                }
-            }
-        },
-        orderBy: (accounts, { asc }) => [asc(accounts.name)],
-    });
-
-    const data = accounts.map(acc => ({
-        id: acc.id,
-        name: acc.name,
-        industry: acc.industry,
-        owner: (acc as any).owner?.name || 'Unassigned',
-        createdAt: acc.createdAt.toISOString(),
-        updatedAt: acc.updatedAt.toISOString(),
-    }));
-
-    return stringify(data, { header: true });
+    const job = await this.jobsProducerService.addAccountExportJob({ organizationId });
+    return job.id;
   }
 }

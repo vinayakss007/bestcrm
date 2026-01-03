@@ -17,6 +17,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { CommentsModule } from './modules/comments/comments.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { RolesModule } from './modules/roles/roles.module';
     CommentsModule,
     AttachmentsModule,
     RolesModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
