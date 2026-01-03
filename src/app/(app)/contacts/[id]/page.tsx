@@ -12,7 +12,7 @@ import {
   Plus,
 } from "lucide-react"
 
-import { getContactById, getUsers, getAccounts, getCommentsForContact, addComment, getAttachments } from "@/lib/actions"
+import { getContactById, getUsers, getAccounts, getComments, addComment, getAttachments } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -52,8 +52,8 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
   const [contact, users, accounts, comments, attachments] = await Promise.all([
     getContactById(contactId),
     getUsers() as Promise<User[]>,
-    getAccounts() as Promise<Account[]>,
-    getCommentsForContact(contactId) as Promise<Comment[]>,
+    getAccounts() as Promise<{data: Account[]}>,
+    getComments('Contact', contactId) as Promise<Comment[]>,
     getAttachments('Contact', contactId) as Promise<Attachment[]>,
   ]);
 
@@ -89,7 +89,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                         <AddTaskDialog as="menuitem" relatedToType="Contact" relatedToId={contact.id} />
                     </DropdownMenuContent>
                 </DropdownMenu>
-                 <EditContactDialog contact={contact} accounts={accounts} as="button" />
+                 <EditContactDialog contact={contact} accounts={accounts.data} as="button" />
             </div>
         </div>
 

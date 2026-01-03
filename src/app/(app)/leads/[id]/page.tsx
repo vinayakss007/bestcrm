@@ -15,7 +15,7 @@ import {
   User,
 } from "lucide-react"
 
-import { getLeadById, getUsers, getCommentsForLead, addCommentForLead, getAttachments } from "@/lib/actions"
+import { getLeadById, getUsers, getComments, addComment, getAttachments } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -55,7 +55,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
   const [lead, users, comments, attachments] = await Promise.all([
     getLeadById(leadId),
     getUsers() as Promise<TUser[]>,
-    getCommentsForLead(leadId),
+    getComments('Lead', leadId),
     getAttachments('Lead', leadId) as Promise<Attachment[]>,
   ]);
 
@@ -64,7 +64,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
   }
 
   const owner = lead.owner;
-  const addCommentAction = addCommentForLead.bind(null, leadId);
+  const addCommentAction = addComment.bind(null, 'Lead', leadId);
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">

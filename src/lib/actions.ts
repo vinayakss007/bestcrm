@@ -124,10 +124,20 @@ export async function getCurrentUser(): Promise<User | null> {
         return null;
     }
     try {
-        const decodedToken: { sub: number, email: string } = jwtDecode(token);
-        const allUsers = await getUsers();
-        // The `sub` property in the JWT payload corresponds to the user's ID (`userId` in JWTStrategy).
-        return allUsers.find((user: User) => user.id === decodedToken.sub) || null;
+        const decodedToken: { sub: number; email: string; role: any } = jwtDecode(token);
+        // This is inefficient but works for now. A dedicated /users/me endpoint would be better.
+        const users = await getUsers();
+        const currentUser = users.find((user: User) => user.id === decodedToken.sub) || null;
+        
+        // The role in the JWT might be stale, so we use the role from the full user object
+        if (currentUser) {
+            return {
+                ...currentUser,
+                role: currentUser.role
+            };
+        }
+        return null;
+
     } catch (error) {
         console.error("Failed to decode token or fetch user:", error);
         return null;
@@ -683,7 +693,7 @@ export async function deleteInvoice(id: number) {
 
         if (response.status !== 204) {
             const errorData = await response.text();
-            throw new Error(errorData || 'Failed to delete invoice');
+            throw new Error(errorData.message || 'Failed to delete invoice');
         }
 
         revalidatePath('/invoices');
@@ -761,7 +771,7 @@ export async function deleteTask(id: number) {
 
         if (response.status !== 204) {
             const errorData = await response.text();
-            throw new Error(errorData || 'Failed to delete task');
+            throw new Error(errorData.message || 'Failed to delete task');
         }
 
         revalidatePath('/tasks');
@@ -890,29 +900,16 @@ export async function getOrganizations(): Promise<Organization[]> {
     return response.json();
 }
 
-async function getCommentsFor(entityType: string, entityId: number) {
+export async function getComments(entityType: RelatedToType, entityId: number) {
     const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/${entityType}/${entityId}/comments`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
+    const entityPath = entityType.toLowerCase() + 's';
+    const response = await fetch(`${API_URL}/${entityPath}/${entityId}/comments`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
         if (response.status === 401) redirect('/login');
         throw new Error(`Failed to fetch comments for ${entityType}`);
     }
     return response.json();
 }
-
-export async function getCommentsForLead(leadId: number) {
-  return getCommentsFor('leads', leadId);
-}
-export async function getCommentsForAccount(accountId: number) {
-  return getCommentsFor('accounts', accountId);
-}
-export async function getCommentsForContact(contactId: number) {
-  return getCommentsFor('contacts', contactId);
-}
-export async function getCommentsForOpportunity(opportunityId: number) {
-  return getCommentsFor('opportunities', opportunityId);
-}
-
 
 export async function addComment(
     entityType: RelatedToType, 
@@ -921,12 +918,7 @@ export async function addComment(
 ) {
     const headers = await getAuthHeaders();
     const content = formData.get('content') as string;
-    const entityPath = {
-        'Lead': 'leads',
-        'Account': 'accounts',
-        'Contact': 'contacts',
-        'Opportunity': 'opportunities'
-    }[entityType];
+    const entityPath = entityType.toLowerCase() + 's';
 
     if (!content || !entityPath) {
         return; // Or throw an error

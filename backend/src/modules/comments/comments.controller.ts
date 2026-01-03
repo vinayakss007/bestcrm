@@ -15,17 +15,43 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/users.service';
 import { relatedToTypeEnum } from '@/db/schema';
 
+const parseEntityType = (entity: string): (typeof relatedToTypeEnum.enumValues)[number] => {
+    const map: Record<string, (typeof relatedToTypeEnum.enumValues)[number]> = {
+        'leads': 'Lead',
+        'accounts': 'Account',
+        'contacts': 'Contact',
+        'opportunities': 'Opportunity',
+    };
+    const type = map[entity];
+    if (!type) {
+        throw new Error('Invalid entity type for comment');
+    }
+    return type;
+}
+
 @UseGuards(JwtAuthGuard)
 @Controller()
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  private createComment(
-    entityType: typeof relatedToTypeEnum.enumValues[number], 
-    entityId: number, 
-    createCommentDto: CreateCommentDto, 
-    user: User
-    ) {
+  @Get(':entityType/:entityId/comments')
+  findAll(
+    @Param('entityType') entityTypeString: string,
+    @Param('entityId', ParseIntPipe) entityId: number,
+    @GetUser() user: User,
+  ) {
+    const entityType = parseEntityType(entityTypeString);
+    return this.commentsService.findAllFor(entityType, entityId, user.organizationId);
+  }
+
+  @Post(':entityType/:entityId/comments')
+  create(
+    @Param('entityType') entityTypeString: string,
+    @Param('entityId', ParseIntPipe) entityId: number,
+    @Body() createCommentDto: CreateCommentDto,
+    @GetUser() user: User,
+  ) {
+    const entityType = parseEntityType(entityTypeString);
     return this.commentsService.create(
       createCommentDto,
       user.userId,
@@ -33,69 +59,5 @@ export class CommentsController {
       entityId,
       user.organizationId,
     );
-  }
-
-  private findComments(
-    entityType: typeof relatedToTypeEnum.enumValues[number],
-    entityId: number,
-    user: User,
-  ) {
-    return this.commentsService.findAllFor(entityType, entityId, user.organizationId);
-  }
-
-  @Get('leads/:id/comments')
-  findAllForLead(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
-    return this.findComments('Lead', id, user);
-  }
-
-  @Post('leads/:id/comments')
-  createForLead(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() createCommentDto: CreateCommentDto,
-    @GetUser() user: User,
-  ) {
-    return this.createComment('Lead', id, createCommentDto, user);
-  }
-
-  @Get('accounts/:id/comments')
-  findAllForAccount(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
-    return this.findComments('Account', id, user);
-  }
-
-  @Post('accounts/:id/comments')
-  createForAccount(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() createCommentDto: CreateCommentDto,
-    @GetUser() user: User,
-  ) {
-    return this.createComment('Account', id, createCommentDto, user);
-  }
-
-  @Get('contacts/:id/comments')
-  findAllForContact(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
-    return this.findComments('Contact', id, user);
-  }
-
-  @Post('contacts/:id/comments')
-  createForContact(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() createCommentDto: CreateCommentDto,
-    @GetUser() user: User,
-  ) {
-    return this.createComment('Contact', id, createCommentDto, user);
-  }
-
-  @Get('opportunities/:id/comments')
-  findAllForOpportunity(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
-    return this.findComments('Opportunity', id, user);
-  }
-
-  @Post('opportunities/:id/comments')
-  createForOpportunity(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() createCommentDto: CreateCommentDto,
-    @GetUser() user: User,
-  ) {
-    return this.createComment('Opportunity', id, createCommentDto, user);
   }
 }

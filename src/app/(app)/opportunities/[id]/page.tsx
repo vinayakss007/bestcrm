@@ -14,7 +14,7 @@ import {
   MessageSquare,
 } from "lucide-react"
 
-import { getOpportunityById, getUsers, getAccounts, getCommentsForOpportunity, addComment, getAttachments } from "@/lib/actions"
+import { getOpportunityById, getUsers, getAccounts, getComments, addComment, getAttachments } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -64,8 +64,8 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
   const [opportunity, users, accounts, comments, attachments] = await Promise.all([
     getOpportunityById(opportunityId),
     getUsers() as Promise<User[]>,
-    getAccounts() as Promise<Account[]>,
-    getCommentsForOpportunity(opportunityId) as Promise<Comment[]>,
+    getAccounts() as Promise<{data: Account[]}>,
+    getComments('Opportunity', opportunityId) as Promise<Comment[]>,
     getAttachments('Opportunity', opportunityId) as Promise<Attachment[]>,
   ]);
 
@@ -101,7 +101,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                         <DropdownMenuItem onSelect={() => console.log("Log a call")}>Log a Call</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                 <EditOpportunityDialog opportunity={opportunity} accounts={accounts} users={users} as="button" />
+                 <EditOpportunityDialog opportunity={opportunity} accounts={accounts.data} users={users} as="button" />
             </div>
         </div>
 

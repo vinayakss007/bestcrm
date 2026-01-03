@@ -20,7 +20,7 @@ import {
   Lightbulb
 } from "lucide-react"
 
-import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts, getCommentsForAccount, addComment, getCurrentUser, getAttachments } from "@/lib/actions"
+import { getAccountById, getContactsByAccountId, getOpportunitiesByAccountId, getUsers, getActivitiesForAccount, getAccounts, getComments, addComment, getCurrentUser, getAttachments } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -103,8 +103,8 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     getOpportunitiesByAccountId(accountId) as Promise<Opportunity[]>,
     getUsers() as Promise<User[]>,
     getActivitiesForAccount(accountId) as Promise<Activity[]>,
-    getAccounts() as Promise<Account[]>,
-    getCommentsForAccount(accountId) as Promise<Comment[]>,
+    getAccounts() as Promise<{ data: Account[] }>,
+    getComments('Account', accountId) as Promise<Comment[]>,
     getAttachments('Account', accountId) as Promise<Attachment[]>,
   ]);
 
@@ -136,8 +136,8 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <AddContactDialog accounts={allAccounts} accountId={account.id} as="menuitem" />
-                        <AddOpportunityDialog accounts={allAccounts} users={users} accountId={account.id} as="menuitem" />
+                        <AddContactDialog accounts={allAccounts.data} accountId={account.id} as="menuitem" />
+                        <AddOpportunityDialog accounts={allAccounts.data} users={users} accountId={account.id} as="menuitem" />
                         <AddTaskDialog as="menuitem" relatedToType="Account" relatedToId={account.id} />
                     </DropdownMenuContent>
                 </DropdownMenu>
