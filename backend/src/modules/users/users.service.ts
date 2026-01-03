@@ -16,7 +16,7 @@ type AuthenticatedUser = {
     userId: number;
     email: string;
     organizationId: number;
-    role: 'user' | 'company-admin' | 'super-admin';
+    role: { name: string }; // Role is now an object
 }
 
 
@@ -28,26 +28,30 @@ export class UsersService {
   ) {}
 
   async findOneById(id: number, organizationId: number): Promise<User | undefined> {
-    const users = await this.db
-        .select()
-        .from(schema.crmUsers)
-        .where(and(eq(schema.crmUsers.id, id), eq(schema.crmUsers.organizationId, organizationId)));
+    const users = await this.db.query.crmUsers.findMany({
+        where: and(eq(schema.crmUsers.id, id), eq(schema.crmUsers.organizationId, organizationId)),
+        with: {
+            role: true,
+        }
+    });
     return users[0];
   }
 
   async findOneByEmail(email: string): Promise<User | undefined> {
-    const users = await this.db
-      .select()
-      .from(schema.crmUsers)
-      .where(and(
+    const users = await this.db.query.crmUsers.findMany({
+      where: and(
           eq(schema.crmUsers.email, email),
           eq(schema.crmUsers.isDeleted, false) // Ensure only active users can be found
-      ));
+      ),
+      with: {
+          role: true,
+      }
+    });
     return users[0];
   }
 
   async findAll(requestingUser: AuthenticatedUser) {
-    if (requestingUser.role === 'super-admin') {
+    if (requestingUser.role.name === 'super-admin') {
         // Super admin can see all users from all organizations
         return await this.db.query.crmUsers.findMany({
             where: eq(schema.crmUsers.isDeleted, false),
@@ -56,15 +60,20 @@ export class UsersService {
                 name: true,
                 email: true,
                 avatarUrl: true,
-                role: true,
                 createdAt: true,
                 organizationId: true,
+                roleId: true,
             },
             with: {
                 organization: {
                     columns: {
                         name: true,
                     }
+                },
+                role: {
+                  columns: {
+                    name: true,
+                  }
                 }
             },
             orderBy: (users, { asc }) => [asc(users.name)],
@@ -82,10 +91,17 @@ export class UsersService {
         name: true,
         email: true,
         avatarUrl: true,
-        role: true,
         createdAt: true,
         organizationId: true,
+        roleId: true,
       },
+       with: {
+          role: {
+            columns: {
+              name: true,
+            }
+          }
+       },
       orderBy: (users, { asc }) => [asc(users.name)],
     });
   }
@@ -105,66 +121,73 @@ export class UsersService {
         // Check if it's the very first user in the system
         const anyOrg = await tx.query.organizations.findFirst();
         
+        let superAdminRoleId: number;
         if (!anyOrg) {
             // First time setup: create a Super Admin's Organization
-            const superAdminOrg = await tx
-                .insert(schema.organizations)
-                .values({ name: "Super Admin Workspace" })
-                .returning();
+            const superAdminOrg = await tx.insert(schema.organizations).values({ name: "Super Admin Workspace" }).returning();
             const superAdminOrgId = superAdminOrg[0].id;
 
-            // Create the Super Admin user with known credentials for development
+            // Create the global Super Admin role
+            const superAdminRole = await tx.insert(schema.crmRoles).values({ name: "super-admin", isSystemRole: true }).returning();
+            superAdminRoleId = superAdminRole[0].id;
+
+            // Create the Super Admin user
             const superAdminPasswordHash = await bcrypt.hash('password123', saltRounds);
             await tx.insert(schema.crmUsers).values({
                 email: 'super@admin.com',
                 name: 'Super Admin',
                 passwordHash: superAdminPasswordHash,
                 organizationId: superAdminOrgId,
-                role: 'super-admin',
-            }).returning();
+                roleId: superAdminRoleId,
+            });
         }
 
         // --- Create the actual user who signed up ---
 
         // For every new self-service sign-up, always create a new organization.
-        const newOrg = await tx
-            .insert(schema.organizations)
-            .values({ name: `${registerDto.name}'s Organization` })
-            .returning();
-        
+        const newOrg = await tx.insert(schema.organizations).values({ name: `${registerDto.name}'s Organization` }).returning();
         const organizationId = newOrg[0].id;
+
+        // Create the default 'Company Admin' and 'User' roles for the new organization
+        const [companyAdminRole] = await tx.insert(schema.crmRoles).values({ name: "company-admin", organizationId, isSystemRole: true }).returning();
+        await tx.insert(schema.crmRoles).values({ name: "user", organizationId, isSystemRole: true });
+
         // The first user of a new organization is always the company-admin.
-        const userRole: 'company-admin' = 'company-admin';
         const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
-
-
         const newUserInsert = {
             email: registerDto.email,
             name: registerDto.name,
             passwordHash,
             organizationId,
-            role: userRole,
+            roleId: companyAdminRole.id,
         };
 
-        const newUsers = await tx
-            .insert(schema.crmUsers)
-            .values(newUserInsert)
-            .returning();
-        
+        const newUsers = await tx.insert(schema.crmUsers).values(newUserInsert).returning();
         return newUsers[0];
     });
   }
 
   async invite(inviteUserDto: InviteUserDto, invitingUser: AuthenticatedUser): Promise<Omit<User, 'passwordHash' | 'isDeleted' | 'deletedAt'>> {
-    if (invitingUser.role === 'user') {
+    if (invitingUser.role.name === 'user') {
       throw new ForbiddenException('Only admins can invite new users.');
     }
 
-    const { email, name, password, role } = inviteUserDto;
+    const { email, name, password, roleName } = inviteUserDto;
     
     const existingUser = await this.findOneByEmail(email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists.');
+    }
+
+    const role = await this.db.query.crmRoles.findFirst({
+        where: and(
+            eq(schema.crmRoles.name, roleName),
+            eq(schema.crmRoles.organizationId, invitingUser.organizationId)
+        ),
+    });
+
+    if (!role) {
+        throw new NotFoundException(`Role '${roleName}' not found in your organization.`);
     }
     
     const saltRounds = 10;
@@ -174,14 +197,14 @@ export class UsersService {
         email,
         name,
         passwordHash,
-        role,
+        roleId: role.id,
         organizationId: invitingUser.organizationId, // Assign to the inviter's organization
     }).returning({
         id: schema.crmUsers.id,
         name: schema.crmUsers.name,
         email: schema.crmUsers.email,
         avatarUrl: schema.crmUsers.avatarUrl,
-        role: schema.crmUsers.role,
+        roleId: schema.crmUsers.roleId,
         createdAt: schema.crmUsers.createdAt,
         organizationId: schema.crmUsers.organizationId,
     });
@@ -209,7 +232,7 @@ export class UsersService {
           name: schema.crmUsers.name,
           email: schema.crmUsers.email,
           avatarUrl: schema.crmUsers.avatarUrl,
-          role: schema.crmUsers.role,
+          roleId: schema.crmUsers.roleId,
           createdAt: schema.crmUsers.createdAt,
           organizationId: schema.crmUsers.organizationId,
         });
@@ -217,3 +240,5 @@ export class UsersService {
     return updatedUser[0];
   }
 }
+
+      

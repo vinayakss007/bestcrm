@@ -40,7 +40,7 @@ const inviteSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["user", "company-admin"]),
+  roleName: z.enum(["user", "company-admin"]),
 })
 
 type InviteFormValues = z.infer<typeof inviteSchema>
@@ -55,7 +55,7 @@ export function InviteUserDialog() {
       name: "",
       email: "",
       password: "",
-      role: "user",
+      roleName: "user",
     },
   })
 
@@ -138,7 +138,7 @@ export function InviteUserDialog() {
               />
               <FormField
                 control={form.control}
-                name="role"
+                name="roleName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Role</FormLabel>
@@ -171,3 +171,5 @@ export function InviteUserDialog() {
     </Dialog>
   )
 }
+
+      

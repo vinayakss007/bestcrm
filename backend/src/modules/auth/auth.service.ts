@@ -27,7 +27,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       organizationId: user.organizationId,
-      role: user.role,
+      role: (user as any).role, // role is now a nested object
     };
     return {
       access_token: await this.jwtService.signAsync(payload),
@@ -44,3 +44,5 @@ export class AuthService {
     return result;
   }
 }
+
+      

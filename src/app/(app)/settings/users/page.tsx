@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getUsers } from "@/lib/actions"
-import type { User } from "@/lib/types"
+import type { User, Role } from "@/lib/types"
 import { InviteUserDialog } from "@/components/invite-user-dialog"
 import { Button } from "@/components/ui/button"
 
@@ -36,7 +36,7 @@ type AuthenticatedUser = {
     userId: number;
     email: string;
     organizationId: number;
-    role: 'user' | 'company-admin' | 'super-admin';
+    role: Role;
 }
 
 export default async function UsersSettingsPage() {
@@ -47,7 +47,7 @@ export default async function UsersSettingsPage() {
   }
 
   const users: User[] = await getUsers();
-  const isSuperAdmin = currentUser?.role === 'super-admin';
+  const isSuperAdmin = currentUser?.role?.name === 'super-admin';
 
   return (
     <Card>
@@ -81,7 +81,7 @@ export default async function UsersSettingsPage() {
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9">
-                        <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="person face" />
+                        <AvatarImage src={user.avatarUrl ?? undefined} alt={user.name} data-ai-hint="person face" />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="grid gap-0.5">
@@ -90,7 +90,7 @@ export default async function UsersSettingsPage() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{user.role}</TableCell>
+                <TableCell>{(user as any).role.name}</TableCell>
                 {isSuperAdmin && <TableCell>{(user as any).organization?.name || 'N/A'}</TableCell>}
                 <TableCell className="hidden md:table-cell">
                   {new Date(user.createdAt).toLocaleDateString()}
@@ -122,3 +122,5 @@ export default async function UsersSettingsPage() {
     </Card>
   )
 }
+
+      

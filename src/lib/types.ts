@@ -1,11 +1,17 @@
 
 
+export type Role = {
+  id: number;
+  name: string;
+}
+
 export type User = {
   id: number;
   name: string;
   email: string;
   avatarUrl: string | null;
-  role: 'user' | 'company-admin' | 'super-admin';
+  roleId: number;
+  role: Role;
   createdAt: string;
   organizationId?: number;
   organization?: {
@@ -23,7 +29,7 @@ export type InviteUserDto = {
   name: string;
   email: string;
   password?: string;
-  role: 'user' | 'company-admin';
+  roleName: 'user' | 'company-admin';
 };
 
 
@@ -311,3 +317,5 @@ export type Attachment = {
     avatarUrl: string | null;
   }
 }
+
+      

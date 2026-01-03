@@ -1,7 +1,5 @@
 
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum } from 'class-validator';
-import { userRoleEnum } from '@/db/schema';
-
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class InviteUserDto {
   @IsString()
@@ -17,7 +15,9 @@ export class InviteUserDto {
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   password: string;
 
-  @IsEnum(userRoleEnum.enumValues)
+  @IsString()
   @IsNotEmpty()
-  role: 'user' | 'company-admin';
+  roleName: string;
 }
+
+      

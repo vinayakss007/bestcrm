@@ -81,10 +81,9 @@ export const organizations = pgTable("organizations", {
 
 export const organizationsRelations = relations(organizations, ({ many }) => ({
 	users: many(crmUsers),
+  roles: many(crmRoles),
 }));
 
-
-export const userRoleEnum = pgEnum('user_role', ['user', 'company-admin', 'super-admin']);
 
 // Users within the CRM system, scoped to an organization.
 export const crmUsers = pgTable("crm_users", {
@@ -95,7 +94,9 @@ export const crmUsers = pgTable("crm_users", {
   avatarUrl: text("avatar_url"),
   // Every user belongs to one organization.
   organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  role: userRoleEnum("role").default("user").notNull(),
+  roleId: integer("role_id").notNull().references(() => crmRoles.id),
+  isDeleted: boolean("is_deleted").default(false).notNull(),
+  deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -104,7 +105,58 @@ export const crmUsersRelations = relations(crmUsers, ({ one }) => ({
 		fields: [crmUsers.organizationId],
 		references: [organizations.id],
 	}),
+  role: one(crmRoles, {
+    fields: [crmUsers.roleId],
+    references: [crmRoles.id],
+  }),
 }));
+
+// Stores custom roles created by Company Admins for their organization.
+export const crmRoles = pgTable("crm_roles", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  // 'super-admin' is a global role, so organizationId can be null.
+  organizationId: integer("organization_id").references(() => organizations.id, { onDelete: 'cascade' }),
+  // is_system_role prevents deletion/modification of foundational roles.
+  isSystemRole: boolean("is_system_role").default(false).notNull(),
+});
+
+export const crmRolesRelations = relations(crmRoles, ({ many }) => ({
+	permissions: many(crmRolePermissions),
+}));
+
+// A dictionary of all possible permissions in the system.
+export const crmPermissions = pgTable("crm_permissions", {
+  id: serial("id").primaryKey(),
+  // e.g., 'account:create', 'lead:delete'
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  description: text("description"),
+});
+
+export const crmPermissionsRelations = relations(crmPermissions, ({ many }) => ({
+	roles: many(crmRolePermissions),
+}));
+
+// Join table for the many-to-many relationship between roles and permissions.
+export const crmRolePermissions = pgTable("crm_role_permissions", {
+  roleId: integer("role_id").notNull().references(() => crmRoles.id, { onDelete: 'cascade' }),
+  permissionId: integer("permission_id").notNull().references(() => crmPermissions.id, { onDelete: 'cascade' }),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.roleId, t.permissionId] }),
+}));
+
+export const crmRolePermissionsRelations = relations(crmRolePermissions, ({ one }) => ({
+  role: one(crmRoles, {
+    fields: [crmRolePermissions.roleId],
+    references: [crmRoles.id],
+  }),
+  permission: one(crmPermissions, {
+    fields: [crmRolePermissions.permissionId],
+    references: [crmPermissions.id],
+  }),
+}));
+
 
 // Accounts represent customer companies or organizations, scoped to an organization.
 export const crmAccounts = pgTable("crm_accounts", {
@@ -329,3 +381,5 @@ export const crmAttachmentsRelations = relations(crmAttachments, ({ one }) => ({
     references: [crmUsers.id],
   }),
 }));
+
+      
