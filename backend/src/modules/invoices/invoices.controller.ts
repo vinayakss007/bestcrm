@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -30,8 +31,12 @@ export class InvoicesController {
   }
 
   @Get()
-  findAll(@GetUser() user: User) {
-    return this.invoicesService.findAll(user.organizationId);
+  findAll(
+    @GetUser() user: User,
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+    ) {
+    return this.invoicesService.findAll(user.organizationId, page, limit);
   }
 
   @Get(':id')

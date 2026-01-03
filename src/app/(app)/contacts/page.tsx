@@ -52,13 +52,10 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
   const currentPage = parseInt(page, 10) || 1;
   const currentLimit = parseInt(limit, 10) || 10;
 
-  const [{ data: contacts, total }, accounts]: [{ data: Contact[], total: number }, Account[]] = await Promise.all([
+  const [{ data: contacts, total }, { data: accounts}]: [{ data: Contact[], total: number }, {data: Account[]}] = await Promise.all([
     getContacts({ query, page: currentPage, limit: currentLimit }),
     getAccounts(),
   ]);
-  
-  const accountMap = new Map(accounts.map(acc => [acc.id, acc.name]));
-
 
   return (
     <div className="flex flex-col gap-4">

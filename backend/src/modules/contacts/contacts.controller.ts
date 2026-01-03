@@ -35,8 +35,10 @@ export class ContactsController {
     @GetUser() user: User,
     @Query('accountId', new ParseIntPipe({ optional: true })) accountId?: number,
     @Query('query') query?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
     ) {
-    return this.contactsService.findAll(user.organizationId, accountId, query);
+    return this.contactsService.findAll(user.organizationId, accountId, query, page, limit);
   }
 
   @Get('accounts/:accountId/contacts')
@@ -44,8 +46,10 @@ export class ContactsController {
       @Param('accountId', ParseIntPipe) accountId: number,
       @GetUser() user: User,
       @Query('query') query?: string,
+      @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+      @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
   ) {
-      return this.contactsService.findAll(user.organizationId, accountId, query);
+      return this.contactsService.findAll(user.organizationId, accountId, query, page, limit);
   }
 
   @Get('contacts/:id')

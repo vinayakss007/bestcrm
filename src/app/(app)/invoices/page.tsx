@@ -49,7 +49,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   const currentPage = parseInt(page, 10) || 1;
   const currentLimit = parseInt(limit, 10) || 10;
   
-  const [{ data: invoices, total }, leads]: [{ data: Invoice[], total: number }, Lead[]] = await Promise.all([
+  const [{ data: invoices, total }, {data: leads}]: [{ data: Invoice[], total: number }, {data: Lead[]}] = await Promise.all([
     getInvoices({ page: currentPage, limit: currentLimit }),
     getLeads(),
   ]);

@@ -32,8 +32,13 @@ export class LeadsController {
   }
 
   @Get()
-  findAll(@GetUser() user: User, @Query('query') query?: string) {
-    return this.leadsService.findAll(user.organizationId, query);
+  findAll(
+    @GetUser() user: User,
+    @Query('query') query?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+    ) {
+    return this.leadsService.findAll(user.organizationId, query, page, limit);
   }
 
   @Get(':id')
