@@ -130,7 +130,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                 <CardContent className="space-y-4">
                      <div className="flex items-start gap-4">
                         <Avatar>
-                            <AvatarImage src={administrator.avatarUrl} />
+                            <AvatarImage src={administrator.avatarUrl || ''} />
                             <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -177,6 +177,15 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
           </TabsContent>
            <TabsContent value="emails">
             <p className="text-muted-foreground text-center py-8">No emails yet.</p>
+          </TabsContent>
+          <TabsContent value="tasks">
+            <p className="text-muted-foreground text-center py-8">No tasks yet.</p>
+          </TabsContent>
+           <TabsContent value="notes">
+            <p className="text-muted-foreground text-center py-8">No notes yet.</p>
+          </TabsContent>
+           <TabsContent value="attachments">
+            <p className="text-muted-foreground text-center py-8">No attachments yet.</p>
           </TabsContent>
         </Tabs>
       </div>

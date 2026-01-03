@@ -5,7 +5,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { CirclePlus } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -89,7 +89,7 @@ export function AddLeadDialog({ users }: { users: User[] }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="h-8 gap-1">
-          <CirclePlus className="h-3.5 w-3.5" />
+          <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
             Add Lead
           </span>
