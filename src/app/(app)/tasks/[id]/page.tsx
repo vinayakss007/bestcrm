@@ -58,6 +58,11 @@ const getRelatedLink = (task: Task, relatedEntity: RelatedEntity | undefined) =>
 }
 
 export default async function TaskDetailPage({ params }: { params: { id: string } }) {
+  const taskId = parseInt(params.id, 10);
+  if (isNaN(taskId)) {
+    notFound();
+  }
+
   const [
     allTasks, 
     allUsers, 
@@ -74,7 +79,7 @@ export default async function TaskDetailPage({ params }: { params: { id: string 
     getOpportunities(),
   ]);
 
-  const task = allTasks.find((t: Task) => t.id === parseInt(params.id))
+  const task = allTasks.find((t: Task) => t.id === taskId);
   
   if (!task) {
     notFound()

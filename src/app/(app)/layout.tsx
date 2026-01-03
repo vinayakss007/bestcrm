@@ -58,7 +58,7 @@ export default async function AppLayout({
                     <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user.name}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                        {user.role}
+                        {user.email}
                         </p>
                     </div>
                     </DropdownMenuLabel>
@@ -72,7 +72,7 @@ export default async function AppLayout({
                     </Avatar>
                     {user?.organization?.name || 'My Workspace'}
                 </DropdownMenuItem>
-                 <DropdownMenuItem>
+                 <DropdownMenuItem disabled>
                    <Avatar className="h-8 w-8 mr-2">
                       <AvatarImage src="https://picsum.photos/seed/2/32/32" data-ai-hint="logo" />
                       <AvatarFallback>B</AvatarFallback>
