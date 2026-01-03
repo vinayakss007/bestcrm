@@ -1,5 +1,6 @@
 
 
+
 export type Permission = {
   id: number;
   key: string;
@@ -27,8 +28,15 @@ export type User = {
   organizationId?: number;
   organization: {
       name: string;
-  }
+  };
 };
+
+export type Organization = {
+    id: number;
+    name: string;
+    createdAt: string;
+    userCount: number;
+}
 
 export type RegisterDto = {
   name: string;

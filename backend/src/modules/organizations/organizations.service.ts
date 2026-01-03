@@ -1,16 +1,12 @@
 
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import type { AuthenticatedUser } from '../users/users.service';
 
-type AuthenticatedUser = {
-    userId: number;
-    organizationId: number;
-    role: 'user' | 'company-admin' | 'super-admin';
-}
 
 @Injectable()
 export class OrganizationsService {
@@ -18,6 +14,27 @@ export class OrganizationsService {
     @Inject(DrizzleProvider)
     private db: PostgresJsDatabase<typeof schema>
   ) {}
+
+  async findAll(user: AuthenticatedUser) {
+    if (user.role.name !== 'super-admin') {
+      throw new ForbiddenException('You do not have permission to view all organizations.');
+    }
+
+    // This query is more complex. It needs to join organizations with users and count them.
+    const organizationsWithUserCounts = await this.db
+      .select({
+        id: schema.organizations.id,
+        name: schema.organizations.name,
+        createdAt: schema.organizations.createdAt,
+        userCount: sql<number>`count(${schema.crmUsers.id})`.mapWith(Number),
+      })
+      .from(schema.organizations)
+      .leftJoin(schema.crmUsers, eq(schema.organizations.id, schema.crmUsers.organizationId))
+      .groupBy(schema.organizations.id)
+      .orderBy(schema.organizations.name);
+      
+    return organizationsWithUserCounts;
+  }
 
   async findOne(id: number) {
     const org = await this.db.query.organizations.findFirst({
@@ -31,10 +48,10 @@ export class OrganizationsService {
 
   async update(id: number, updateOrganizationDto: UpdateOrganizationDto, user: AuthenticatedUser) {
     // Security check: ensure the user is an admin of the organization they're trying to update
-    if (user.role !== 'super-admin' && user.organizationId !== id) {
+    if (user.role.name !== 'super-admin' && user.organizationId !== id) {
         throw new ForbiddenException('You are not authorized to update this organization.');
     }
-    if (user.role === 'user') {
+    if (user.role.name === 'user') {
         throw new ForbiddenException('You do not have permission to update organization settings.');
     }
 

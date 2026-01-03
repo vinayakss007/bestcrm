@@ -5,10 +5,20 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { BarChart, Users, Star, User, Ban, Home, Blocks, ShieldCheck, Activity, Shield } from "lucide-react"
+import { BarChart, Users, Star, User, Ban, Home, Blocks, ShieldCheck, Activity, Shield, Building } from "lucide-react"
+import { getCurrentUser } from "@/lib/actions"
+import * as React from "react"
+import { User as TUser } from "@/lib/types"
 
 export function SettingsNav() {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const [user, setUser] = React.useState<TUser | null>(null);
+
+  React.useEffect(() => {
+    getCurrentUser().then(setUser);
+  }, []);
+
+  const isSuperAdmin = user?.role.name === 'super-admin';
 
   const navItems = [
     {
@@ -37,6 +47,7 @@ export function SettingsNav() {
     {
       title: "System",
       links: [
+        ...(isSuperAdmin ? [{ title: "Tenants", href: "/settings/tenants", icon: Building }] : []),
         { title: "System Status", href: "/settings/system-status", icon: ShieldCheck },
         { title: "Audit Log", href: "/settings/audit-log", icon: Activity },
       ],

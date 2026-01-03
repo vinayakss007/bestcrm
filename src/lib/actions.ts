@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { jwtDecode } from 'jwt-decode'
-import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto, Attachment, CreateRoleDto, UpdateRoleDto } from "@/lib/types"
+import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto, Attachment, CreateRoleDto, UpdateRoleDto, Organization } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -864,6 +864,17 @@ export async function updateOrganization(id: number, orgData: UpdateOrganization
         console.error(error);
         throw new Error('An unexpected error occurred while updating the organization.');
     }
+}
+
+export async function getOrganizations(): Promise<Organization[]> {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/organizations`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
+    if (!response.ok) {
+        if (response.status === 401) redirect('/login');
+        if (response.status === 403) return []; // Non-super-admins will get a 403
+        throw new Error('Failed to fetch organizations');
+    }
+    return response.json();
 }
 
 async function getCommentsFor(entityType: string, entityId: number) {
