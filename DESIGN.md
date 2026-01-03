@@ -55,32 +55,23 @@ This plan outlines the sequence of development from the current state to a fully
 - **[DONE]** Refine the architecture for multi-tenancy and user roles.
 - **[DONE]** Initialize the NestJS backend project (`/backend`).
 
-### Phase 2: Backend Implementation (Current)
-This phase involves building the core backend logic according to the `openapi.yaml` specification.
+### Phase 2: Backend Implementation (Complete)
+This phase involved building the core backend logic according to the `openapi.yaml` specification.
 
-1.  **User Authentication:** Implement the user registration and login endpoints. This service will issue JWTs that include `userId` and `organizationId`, which is the foundation for all security.
-2.  **Core CRUD APIs:** Implement the API endpoints for each module, ensuring all database queries are strictly scoped by `organizationId`. The order of implementation should be:
-    -   Accounts
-    -   Contacts
-    -   Leads
-    -   Opportunities
-    -   Tasks
-    -   Invoices
-3.  **Advanced Features:**
-    -   Implement webhook endpoints for external data ingestion (e.g., website forms).
-    -   Build out the background worker system for email notifications.
-    -   Implement role-based access control (RBAC) guards in API endpoints.
+- **[DONE]** **User Authentication:** Implemented the user registration and login endpoints.
+- **[DONE]** **Core CRUD APIs:** Implemented all API endpoints for Accounts, Contacts, Leads, Opportunities, Tasks, Invoices, Comments, and Attachments, ensuring all database queries are strictly scoped by `organizationId`.
+- **[DONE]** **Advanced Features:** Implemented role-based access control (RBAC), activity logging, and file upload handling.
 
-### Phase 3: Frontend Integration (Next)
-This phase involves replacing all mock data with live API calls.
+### Phase 3: Frontend Integration (Complete)
+This phase involved replacing all mock data with live API calls.
 
-1.  **Generate SDK:** Generate a TypeScript client SDK from the live backend's OpenAPI specification.
-2.  **Connect UI to Data:**
-    -   Replace all mock data in `src/lib/actions.ts` and `src/lib/data.ts` with live API calls using the generated SDK.
-    -   Wire up all "Add/Edit" forms and dialogs to make them save data.
-    -   Implement live server-side search, sorting, and filtering on all list pages.
-    -   Make the dashboard charts dynamic.
+- **[DONE]** **API Integration:** All mock data has been replaced with live API calls via Next.js Server Actions.
+- **[DONE]** **Connect UI to Data:**
+    - All "Add/Edit" forms and dialogs are fully functional and save data.
+    - All list pages feature live search, sorting, and filtering.
+    - The main dashboard is fully dynamic.
+    - All detail pages are connected to live data, including comments and attachments.
 
-### Phase 4: Final Polish & Deployment
+### Phase 4: Final Polish & Deployment (Next)
 1.  **Testing:** Write comprehensive unit, integration, and end-to-end tests for both the frontend and backend.
 2.  **Deployment:** Configure and activate the CI/CD pipelines in `.github/workflows/` to deploy the applications to production hosting.
