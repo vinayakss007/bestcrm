@@ -90,8 +90,8 @@ export default async function UsersSettingsPage() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{(user as any).role.name}</TableCell>
-                {isSuperAdmin && <TableCell>{(user as any).organization?.name || 'N/A'}</TableCell>}
+                <TableCell>{user.role.name}</TableCell>
+                {isSuperAdmin && <TableCell>{user.organization?.name || 'N/A'}</TableCell>}
                 <TableCell className="hidden md:table-cell">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </TableCell>

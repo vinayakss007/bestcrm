@@ -1,8 +1,19 @@
 
 
+export type Permission = {
+  id: number;
+  key: string;
+  description: string;
+}
+
 export type Role = {
   id: number;
   name: string;
+  isSystemRole: boolean;
+  permissions?: {
+    permissionId: number;
+    permission: Permission;
+  }[];
 }
 
 export type User = {
@@ -14,7 +25,7 @@ export type User = {
   role: Role;
   createdAt: string;
   organizationId?: number;
-  organization?: {
+  organization: {
       name: string;
   }
 };
@@ -316,4 +327,16 @@ export type Attachment = {
     name: string;
     avatarUrl: string | null;
   }
+}
+
+export type CreateRoleDto = {
+    name: string;
+    description?: string;
+    permissionIds?: number[];
+}
+
+export type UpdateRoleDto = {
+    name?: string;
+    description?: string;
+    permissionIds?: number[];
 }
