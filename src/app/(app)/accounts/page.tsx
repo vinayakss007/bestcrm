@@ -36,11 +36,25 @@ import { EditAccountDialog } from "@/components/edit-account-dialog"
 import { DeleteAccountDialog } from "@/components/delete-account-dialog"
 import { SearchInput } from "@/components/search-input"
 import { ExportAccountsButton } from "@/components/export-accounts-button"
+import { Badge } from "@/components/ui/badge"
 
-export default async function AccountsPage({ searchParams }: { searchParams: { query?: string } }) {
-  const query = searchParams.query || '';
+type SearchParams = { 
+  query?: string, 
+  status?: 'active' | 'archived',
+  sort?: 'name' | 'industry',
+  order?: 'asc' | 'desc',
+}
+
+export default async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
+  const { 
+    query = '', 
+    status = 'active', 
+    sort = 'name', 
+    order = 'asc' 
+  } = searchParams;
+
   const [accounts, users]: [Account[], User[]] = await Promise.all([
-    getAccounts(query),
+    getAccounts({query, status, sort, order}),
     getUsers(),
   ]);
 
@@ -66,11 +80,11 @@ export default async function AccountsPage({ searchParams }: { searchParams: { q
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem checked>
-                  Active
+                 <DropdownMenuCheckboxItem checked={status === 'active'} asChild>
+                    <Link href={`/accounts?status=active`}>Active</Link>
                 </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>
-                  Inactive
+                <DropdownMenuCheckboxItem checked={status === 'archived'} asChild>
+                    <Link href={`/accounts?status=archived`}>Archived</Link>
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -84,9 +98,15 @@ export default async function AccountsPage({ searchParams }: { searchParams: { q
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>Name</DropdownMenuItem>
-                <DropdownMenuItem>Industry</DropdownMenuItem>
-                <DropdownMenuItem>Owner</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href={`/accounts?sort=name&order=asc`}>Name (A-Z)</Link>
+                </DropdownMenuItem>
+                 <DropdownMenuItem asChild>
+                    <Link href={`/accounts?sort=name&order=desc`}>Name (Z-A)</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href={`/accounts?sort=industry&order=asc`}>Industry</Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           <ExportAccountsButton />
@@ -121,11 +141,12 @@ export default async function AccountsPage({ searchParams }: { searchParams: { q
               {accounts.map((account) => {
                 const owner = account.owner;
                 return (
-                    <TableRow key={account.id}>
+                    <TableRow key={account.id} className={account.isDeleted ? "bg-muted/50" : ""}>
                     <TableCell className="font-medium">
                         <Link href={`/accounts/${account.id}`} className="hover:underline">
                         {account.name}
                         </Link>
+                        {account.isDeleted && <Badge variant="destructive" className="ml-2">Archived</Badge>}
                     </TableCell>
                     <TableCell>{account.industry}</TableCell>
                     <TableCell className="hidden md:table-cell">
@@ -159,7 +180,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: { q
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <EditAccountDialog account={account} users={users} />
-                            <DeleteAccountDialog accountId={account.id} />
+                            {!account.isDeleted && <DeleteAccountDialog accountId={account.id} />}
                         </DropdownMenuContent>
                         </DropdownMenu>
                     </TableCell>

@@ -134,12 +134,17 @@ export async function getCurrentUser(): Promise<User | null> {
 }
 
 
-export async function getAccounts(query?: string) {
+export async function getAccounts(
+  { query = '', status = 'active', sort = 'name', order = 'asc' }:
+  { query?: string; status?: 'active' | 'archived'; sort?: 'name' | 'industry'; order?: 'asc' | 'desc'; }
+) {
   const headers = await getAuthHeaders()
   const url = new URL(`${API_URL}/accounts`);
-  if (query) {
-      url.searchParams.append('query', query);
-  }
+  url.searchParams.append('query', query);
+  url.searchParams.append('status', status);
+  url.searchParams.append('sort', sort);
+  url.searchParams.append('order', order);
+
   const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' })
   if (!response.ok) {
     if (response.status === 401) {
@@ -346,11 +351,14 @@ export async function deleteContact(id: number) {
 }
 
 
-export async function getLeads(query?: string) {
+export async function getLeads(query?: string, status?: string) {
     const headers = await getAuthHeaders();
     const url = new URL(`${API_URL}/leads`);
     if (query) {
         url.searchParams.append('query', query);
+    }
+    if (status) {
+        url.searchParams.append('status', status);
     }
     const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {
@@ -470,11 +478,17 @@ export async function convertLead(leadId: number, convertData: ConvertLeadDto) {
 }
 
 
-export async function getOpportunities(query?: string) {
+export async function getOpportunities(query?: string, sort?: string, order?: 'asc' | 'desc') {
     const headers = await getAuthHeaders();
     const url = new URL(`${API_URL}/opportunities`);
     if (query) {
       url.searchParams.append('query', query);
+    }
+    if (sort) {
+      url.searchParams.append('sort', sort);
+    }
+    if (order) {
+        url.searchParams.append('order', order);
     }
     const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
     if (!response.ok) {

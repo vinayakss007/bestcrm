@@ -41,9 +41,15 @@ export class AccountsController {
   }
 
   @Get()
-  findAll(@GetUser() user: User, @Query('query') query?: string) {
+  findAll(
+    @GetUser() user: User,
+    @Query('query') query?: string,
+    @Query('status') status?: 'active' | 'archived',
+    @Query('sort') sort?: 'name' | 'industry',
+    @Query('order') order?: 'asc' | 'desc',
+    ) {
     // Pass organizationId and optional query to scope the query
-    return this.accountsService.findAll(user.organizationId, query);
+    return this.accountsService.findAll(user.organizationId, query, status, sort, order);
   }
 
   @Get(':id')

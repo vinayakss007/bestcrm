@@ -1,7 +1,7 @@
 
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and, or, ilike } from 'drizzle-orm';
+import { eq, and, or, ilike, asc, desc } from 'drizzle-orm';
 import { stringify } from 'csv-stringify/sync';
 
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
@@ -42,11 +42,22 @@ export class AccountsService {
     });
   }
 
-  async findAll(organizationId: number, query?: string) {
+  async findAll(
+    organizationId: number,
+    query?: string,
+    status?: 'active' | 'archived',
+    sort?: 'name' | 'industry',
+    order?: 'asc' | 'desc',
+    ) {
     const conditions = [
         eq(schema.crmAccounts.organizationId, organizationId),
-        eq(schema.crmAccounts.isDeleted, false),
     ];
+
+    if (status === 'archived') {
+        conditions.push(eq(schema.crmAccounts.isDeleted, true));
+    } else {
+        conditions.push(eq(schema.crmAccounts.isDeleted, false));
+    }
 
     if (query) {
         conditions.push(
@@ -56,6 +67,15 @@ export class AccountsService {
             )
         )
     }
+
+    const orderBy = [];
+    const direction = order === 'desc' ? desc : asc;
+    if (sort === 'industry') {
+        orderBy.push(direction(schema.crmAccounts.industry));
+    } else { // Default to sorting by name
+        orderBy.push(direction(schema.crmAccounts.name));
+    }
+
 
     return await this.db.query.crmAccounts.findMany({
         where: and(...conditions),
@@ -67,7 +87,7 @@ export class AccountsService {
                 }
             }
         },
-        orderBy: (accounts, { asc }) => [asc(accounts.name)],
+        orderBy: orderBy,
     });
   }
 
@@ -77,7 +97,7 @@ export class AccountsService {
         and(
           eq(schema.crmAccounts.id, id),
           eq(schema.crmAccounts.organizationId, organizationId), // Security check
-          eq(schema.crmAccounts.isDeleted, false),
+          // eq(schema.crmAccounts.isDeleted, false), // Allow viewing of soft-deleted items by ID
         ),
         with: {
             owner: {
