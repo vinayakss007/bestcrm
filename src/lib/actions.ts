@@ -1099,3 +1099,40 @@ export async function deleteRole(id: number) {
     }
     revalidatePath('/settings/roles');
 }
+
+
+// Assignment Rules
+export async function getAssignmentRules() {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/assignment-rules`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
+    if (!response.ok) throw new Error('Failed to fetch assignment rules');
+    return response.json();
+}
+
+export async function createAssignmentRule(ruleData: any) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/assignment-rules`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify(ruleData),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create assignment rule');
+    }
+    revalidatePath('/settings/assignment-rules');
+    return response.json();
+}
+
+export async function deleteAssignmentRule(id: number) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/assignment-rules/${id}`, {
+        method: 'DELETE',
+        headers,
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete assignment rule');
+    }
+    revalidatePath('/settings/assignment-rules');
+}
