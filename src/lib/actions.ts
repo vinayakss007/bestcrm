@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { jwtDecode } from 'jwt-decode'
-import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto, Attachment, CreateRoleDto, UpdateRoleDto, Organization, Activity } from "@/lib/types"
+import type { User, RegisterDto, CreateAccountDto, CreateContactDto, CreateLeadDto, CreateOpportunityDto, CreateInvoiceDto, CreateTaskDto, UpdateAccountDto, UpdateContactDto, UpdateLeadDto, UpdateOpportunityDto, UpdateTaskDto, UpdateUserDto, ConvertLeadDto, UpdateOrganizationDto, CreateCommentDto, RelatedToType, InviteUserDto, Attachment, CreateRoleDto, UpdateRoleDto, Organization, Activity, OpportunityStats } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 
@@ -620,6 +620,18 @@ export async function getOpportunityForecast() {
         throw new Error('Failed to fetch opportunity forecast');
     }
     return response.json();
+}
+
+export async function getOpportunityStats(): Promise<OpportunityStats> {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${API_URL}/opportunities/stats`, { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' });
+  if (!response.ok) {
+    if (response.status === 401) {
+      redirect('/login');
+    }
+    throw new Error('Failed to fetch opportunity stats');
+  }
+  return response.json();
 }
 
 export async function getInvoices({ page = 1, limit = 10 }: { page?: number; limit?: number } = {}) {

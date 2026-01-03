@@ -204,4 +204,43 @@ export class OpportunitiesService {
         return acc;
     }, {} as Record<number, number>);
   }
+
+  async getStats(organizationId: number) {
+    const wonResult = await this.db
+      .select({
+        totalRevenue: sql<number>`sum(${schema.crmOpportunities.amount})`.mapWith(Number),
+      })
+      .from(schema.crmOpportunities)
+      .where(and(
+        eq(schema.crmOpportunities.organizationId, organizationId),
+        eq(schema.crmOpportunities.stage, 'Won')
+      ));
+    
+    const pipelineStages: (typeof schema.opportunityStageEnum.enumValues) = ['Prospecting', 'Qualification', 'Proposal', 'Closing'];
+    const activeAndPipelineResult = await this.db
+        .select({
+            count: sql<number>`count(*)`.mapWith(Number),
+        })
+        .from(schema.crmOpportunities)
+        .where(and(
+            eq(schema.crmOpportunities.organizationId, organizationId),
+            inArray(schema.crmOpportunities.stage, pipelineStages)
+        ));
+
+    const totalResult = await this.db
+        .select({
+            count: sql<number>`count(*)`.mapWith(Number),
+        })
+        .from(schema.crmOpportunities)
+        .where(and(
+            eq(schema.crmOpportunities.organizationId, organizationId),
+            eq(schema.crmOpportunities.isDeleted, false)
+        ));
+
+    return {
+        totalRevenue: wonResult[0].totalRevenue || 0,
+        totalOpportunities: totalResult[0].count || 0,
+        pipelineOpportunities: activeAndPipelineResult[0].count || 0,
+    }
+  }
 }

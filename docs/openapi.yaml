@@ -949,6 +949,22 @@ paths:
                 additionalProperties:
                   type: number
 
+  /opportunities/stats:
+    get:
+      tags:
+        - Opportunities
+      summary: Get key opportunity statistics
+      operationId: getOpportunityStats
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Aggregated opportunity statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityStats'
+
   /opportunities/{opportunityId}:
     get:
       tags:
@@ -1536,6 +1552,16 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    OpportunityStats:
+      type: object
+      properties:
+        totalRevenue:
+          type: number
+        totalOpportunities:
+          type: number
+        pipelineOpportunities:
+          type: number
 
     CreateOpportunityDto:
       type: object

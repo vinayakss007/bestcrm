@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Briefcase, DollarSign, Lightbulb, Users, Activity, Plus, Edit, CalendarDays } from "lucide-react"
-import { getAccounts, getLeads, getOpportunities, getOpportunityForecast, getActivities } from "@/lib/actions"
+import { getAccounts, getLeads, getOpportunityStats, getOpportunityForecast, getActivities } from "@/lib/actions"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,8 +23,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Lead, Opportunity, Account, OpportunityStage, Activity as TActivity } from "@/lib/types"
-import { format, getMonth, parseISO } from "date-fns"
+import type { Lead, Account, OpportunityStats, Activity as TActivity } from "@/lib/types"
+import { format } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 
@@ -51,21 +51,29 @@ function getActivityDescription(activity: TActivity) {
 }
 
 export default async function Dashboard() {
-    const [leads, opportunities, accounts, forecastData, activities]: [Lead[], Opportunity[], Account[], Record<number, number>, TActivity[]] = await Promise.all([
-      getLeads(),
-      getOpportunities(),
-      getAccounts(),
+    const [
+        { data: leads, total: totalLeads }, 
+        { data: accounts, total: totalAccounts }, 
+        opportunityStats, 
+        forecastData, 
+        activities
+    ]: [
+        { data: Lead[], total: number }, 
+        { data: Account[], total: number }, 
+        OpportunityStats, 
+        Record<number, number>, 
+        TActivity[]
+    ] = await Promise.all([
+      getLeads({limit: 5}), // Fetch a small number for "new this month"
+      getAccounts({limit: 1}), // Only need the total count
+      getOpportunityStats(),
       getOpportunityForecast(),
       getActivities(),
     ]);
 
-  const totalRevenue = opportunities
-    .filter((opp: Opportunity) => opp.stage === 'Won')
-    .reduce((sum: number, opp: Opportunity) => sum + (opp.amount || 0), 0)
-  
-  const totalLeads = leads.length
-  const totalOpportunities = opportunities.length
-  const totalAccounts = accounts.length
+  const totalRevenue = opportunityStats.totalRevenue;
+  const totalOpportunities = opportunityStats.totalOpportunities;
+  const pipelineOpportunities = opportunityStats.pipelineOpportunities;
 
   const chartData = Array.from({ length: 12 }, (_, i) => ({
     month: format(new Date(0, i), 'MMM'),
@@ -139,7 +147,7 @@ export default async function Dashboard() {
                 <CardContent>
                     <div className="text-2xl font-bold">{totalOpportunities}</div>
                     <p className="text-xs text-muted-foreground">
-                    {opportunities.filter((o: Opportunity) => o.stage === 'Proposal' || o.stage === 'Closing').length} in pipeline
+                    {pipelineOpportunities} in pipeline
                     </p>
                 </CardContent>
                 </Card>

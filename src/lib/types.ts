@@ -2,6 +2,7 @@
 
 
 
+
 export type Permission = {
   id: number;
   key: string;
@@ -196,6 +197,12 @@ export type Opportunity = {
     avatarUrl: string | null;
   } | null;
 };
+
+export type OpportunityStats = {
+  totalRevenue: number;
+  totalOpportunities: number;
+  pipelineOpportunities: number;
+}
 
 export type CreateOpportunityDto = {
   name: string;
