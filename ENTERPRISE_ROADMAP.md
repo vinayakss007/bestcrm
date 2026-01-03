@@ -58,7 +58,7 @@ To run this as a business, the Super Admin needs tools to manage tenants and mon
 ### 3.1. Tenant Management Dashboard
 - **Problem:** The Super Admin has no central place to view or manage customer organizations (tenants).
 - **Solution:**
-    1.  **New Frontend Module:** Create a "Super Admin" section in the UI, visible only to users with the `super-admin` role.
+    1.  **New Frontend Module:** Create a "Super Admin" section in the UI, visible only to users with the super-admin role.
     2.  **Backend API:** Build endpoints for the Super Admin to:
         - List all organizations with key metrics (user count, data usage).
         - Impersonate a user within a tenant for support purposes.
