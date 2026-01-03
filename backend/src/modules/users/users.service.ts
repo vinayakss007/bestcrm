@@ -2,6 +2,7 @@
 import { Injectable, Inject, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 import { RegisterDto } from '../auth/dto/register.dto';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
@@ -27,6 +28,7 @@ export class UsersService {
   constructor(
     @Inject(DrizzleProvider)
     private db: PostgresJsDatabase<typeof schema>,
+    private configService: ConfigService,
   ) {}
 
   async findOneById(id: number, organizationId: number): Promise<User | undefined> {
@@ -146,7 +148,7 @@ export class UsersService {
             const [superAdminRole] = await tx.insert(schema.crmRoles).values({ name: "super-admin", isSystemRole: true }).returning();
 
             // Create the Super Admin user
-            const superAdminPasswordHash = await bcrypt.hash(process.env.SUPER_ADMIN_PASSWORD || 'password123', saltRounds);
+            const superAdminPasswordHash = await bcrypt.hash(this.configService.get<string>('superAdmin.password'), saltRounds);
             await tx.insert(schema.crmUsers).values({
                 email: 'super@admin.com',
                 name: 'Super Admin',

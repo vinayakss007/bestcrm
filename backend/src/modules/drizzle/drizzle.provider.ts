@@ -14,8 +14,8 @@ export const drizzleProvider: FactoryProvider<
 > = {
   provide: DrizzleProvider,
   inject: [ConfigService],
-  useFactory: async (configService: ConfigService) => {
-    const connectionString = configService.get<string>('DATABASE_URL');
+  useFactory: (configService: ConfigService) => {
+    const connectionString = configService.get<string>('database.url');
     if (!connectionString) {
       throw new Error('DATABASE_URL environment variable is not set');
     }

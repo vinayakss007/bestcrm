@@ -15,8 +15,8 @@ import { AccountExportProcessor } from './jobs.processor';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connection: {
-          host: configService.get<string>('REDIS_HOST', 'localhost'),
-          port: configService.get<number>('REDIS_PORT', 6379),
+          host: configService.get<string>('redis.host'),
+          port: configService.get<number>('redis.port'),
         },
       }),
     }),

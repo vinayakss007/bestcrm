@@ -6,14 +6,19 @@ import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'YOUR_DEFAULT_SECRET_KEY', // Use environment variables in production
-      signOptions: { expiresIn: '60m' },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('jwt.secret'),
+        signOptions: { expiresIn: configService.get<string>('jwt.expiresIn') },
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
