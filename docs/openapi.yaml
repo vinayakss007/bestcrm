@@ -1,4 +1,3 @@
-
 openapi: 3.0.3
 info:
   title: abetworks crm API
@@ -38,6 +37,8 @@ tags:
     description: Operations related to file attachments.
   - name: Roles
     description: Operations related to user roles and permissions.
+  - name: Jobs
+    description: Operations related to background jobs.
 
 paths:
   /health:
@@ -1380,6 +1381,40 @@ paths:
           description: Role deleted successfully.
         '404':
           description: Role not found.
+
+  /jobs/{jobId}:
+    get:
+      tags:
+        - Jobs
+      summary: Get the status of a background job
+      operationId: getJobStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current status of the job.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [completed, failed, processing]
+                  data:
+                    type: string
+                    description: The CSV data if the job is completed.
+                  reason:
+                    type: string
+                    description: The reason for failure if the job failed.
+        '404':
+          description: Job not found.
 
 components:
   schemas:
