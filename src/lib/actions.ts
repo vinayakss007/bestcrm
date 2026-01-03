@@ -462,7 +462,7 @@ export async function deleteLead(id: number) {
 
         if (response.status !== 204) {
              const errorData = await response.text();
-             throw new Error(errorData || 'Failed to delete lead');
+             throw new Error(errorData.message || 'Failed to delete lead');
         }
         
         revalidatePath('/leads');
@@ -842,6 +842,30 @@ export async function updateUser(id: number, userData: UpdateUserDto) {
         console.error(error);
         throw new Error('An unexpected error occurred while updating the user profile.');
     }
+}
+
+export async function impersonateUser(userId: number) {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_URL}/users/${userId}/impersonate`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+    });
+    
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Impersonation failed.');
+    }
+
+    cookies().set('token', data.access_token, {
+        maxAge: 30 * 24 * 60 * 60,
+        path: '/',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+    });
+
+    redirect('/dashboard');
 }
 
 export async function getActivities(): Promise<Activity[]> {

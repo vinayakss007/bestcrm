@@ -34,6 +34,10 @@ tags:
     description: Operations related to activity feeds.
   - name: Comments
     description: Operations related to comments and notes.
+  - name: Attachments
+    description: Operations related to file attachments.
+  - name: Roles
+    description: Operations related to user roles and permissions.
 
 paths:
   /health:
@@ -174,6 +178,35 @@ paths:
         '404':
           description: User not found
 
+  /users/{userId}/impersonate:
+    post:
+      tags:
+        - Users
+      summary: Impersonate a user (Super Admin only)
+      operationId: impersonateUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Impersonation successful, returns a new JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '403':
+          description: Forbidden
+        '404':
+          description: User not found
+
   /organizations:
     get:
       tags:
@@ -290,20 +323,24 @@ paths:
           description: Unauthorized
 
   /accounts/export:
-    get:
+    post:
       tags:
         - Accounts
       summary: Export accounts to CSV
+      description: Starts a background job to export accounts to a CSV file.
       operationId: exportAccounts
       security:
         - bearerAuth: []
       responses:
-        '200':
-          description: A CSV file of accounts.
+        '202':
+          description: Job accepted for processing. Returns a jobId.
           content:
-            text/csv:
+            application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  jobId:
+                    type: string
 
   /accounts/{accountId}:
     get:
@@ -474,23 +511,29 @@ paths:
                 items:
                   $ref: '#/components/schemas/Activity'
 
-  /accounts/{accountId}/comments:
+  /{entityType}/{entityId}/comments:
     get:
       tags:
         - Comments
-      summary: List comments for an account
-      operationId: getCommentsForAccount
+      summary: List comments for a given entity
+      operationId: getCommentsForEntity
       security:
         - bearerAuth: []
       parameters:
-        - name: accountId
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [accounts, contacts, leads, opportunities]
+        - name: entityId
           in: path
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: A list of comments for the specified account.
+          description: A list of comments for the specified entity.
           content:
             application/json:
               schema:
@@ -500,12 +543,18 @@ paths:
     post:
       tags:
         - Comments
-      summary: Create a comment for an account
-      operationId: createCommentForAccount
+      summary: Create a comment for a given entity
+      operationId: createCommentForEntity
       security:
         - bearerAuth: []
       parameters:
-        - name: accountId
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [accounts, contacts, leads, opportunities]
+        - name: entityId
           in: path
           required: true
           schema:
@@ -523,6 +572,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
+  
+  /{entityType}/{entityId}/attachments:
+    get:
+      tags:
+        - Attachments
+      summary: List attachments for a given entity
+      operationId: getAttachmentsForEntity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [accounts, contacts, leads, opportunities]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of attachments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Attachment'
+    post:
+      tags:
+        - Attachments
+      summary: Upload an attachment for a given entity
+      operationId: createAttachmentForEntity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [accounts, contacts, leads, opportunities]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Attachment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+
+  /attachments/{attachmentId}/download:
+    get:
+      tags:
+        - Attachments
+      summary: Download an attachment
+      operationId: downloadAttachment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: attachmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The file to download.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Attachment not found.
 
   /contacts:
     get:
@@ -641,56 +781,6 @@ paths:
         '404':
           description: Contact not found.
   
-  /contacts/{contactId}/comments:
-    get:
-      tags:
-        - Comments
-      summary: List comments for a contact
-      operationId: getCommentsForContact
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: contactId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: A list of comments for the specified contact.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Comment'
-    post:
-      tags:
-        - Comments
-      summary: Create a comment for a contact
-      operationId: createCommentForContact
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: contactId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateCommentDto'
-      responses:
-        '201':
-          description: Comment created successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comment'
-
   /leads:
     get:
       tags:
@@ -837,56 +927,6 @@ paths:
         '409':
           description: Lead is already deleted/converted
   
-  /leads/{leadId}/comments:
-    get:
-      tags:
-        - Comments
-      summary: List comments for a lead
-      operationId: getCommentsForLead
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: leadId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: A list of comments for the specified lead.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Comment'
-    post:
-      tags:
-        - Comments
-      summary: Create a comment for a lead
-      operationId: createCommentForLead
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: leadId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateCommentDto'
-      responses:
-        '201':
-          description: Comment created successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comment'
-
   /opportunities:
     get:
       tags:
@@ -1034,55 +1074,6 @@ paths:
         '404':
           description: Opportunity not found.
 
-  /opportunities/{opportunityId}/comments:
-    get:
-      tags:
-        - Comments
-      summary: List comments for an opportunity
-      operationId: getCommentsForOpportunity
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: opportunityId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: A list of comments for the specified opportunity.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Comment'
-    post:
-      tags:
-        - Comments
-      summary: Create a comment for an opportunity
-      operationId: createCommentForOpportunity
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: opportunityId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateCommentDto'
-      responses:
-        '201':
-          description: Comment created successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comment'
   /invoices:
     get:
       tags:
@@ -1264,6 +1255,131 @@ paths:
           description: Task deleted successfully.
         '404':
           description: Task not found.
+  
+  /roles:
+    get:
+      tags:
+        - Roles
+      summary: List all roles in the organization
+      operationId: getRoles
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of roles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+    post:
+      tags:
+        - Roles
+      summary: Create a new role
+      operationId: createRole
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleDto'
+      responses:
+        '201':
+          description: Role created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+
+  /roles/permissions:
+    get:
+      tags:
+        - Roles
+      summary: List all available permissions
+      operationId: getPermissions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of all system permissions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+
+  /roles/{roleId}:
+    get:
+      tags:
+        - Roles
+      summary: Get a role by ID
+      operationId: getRoleById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: Role not found.
+    patch:
+      tags:
+        - Roles
+      summary: Update a role
+      operationId: updateRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleDto'
+      responses:
+        '200':
+          description: Role updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: Role not found.
+    delete:
+      tags:
+        - Roles
+      summary: Delete a role
+      operationId: deleteRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Role deleted successfully.
+        '404':
+          description: Role not found.
 
 components:
   schemas:
@@ -1280,8 +1396,7 @@ components:
           type: string
           format: email
         role:
-          type: string
-          enum: [user, company-admin, super-admin]
+          $ref: '#/components/schemas/Role'
         avatarUrl:
           type: string
           format: uri
@@ -1298,7 +1413,7 @@ components:
         - name
         - email
         - password
-        - role
+        - roleName
       properties:
         name:
           type: string
@@ -1308,7 +1423,7 @@ components:
         password:
           type: string
           minLength: 8
-        role:
+        roleName:
           type: string
           enum: [user, company-admin]
 
@@ -1783,13 +1898,86 @@ components:
       properties:
         content:
           type: string
+    
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: integer
+        originalName:
+          type: string
+        fileName:
+          type: string
+        fileType:
+          type: string
+        fileSize:
+          type: integer
+        userId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/CrmUser'
 
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        isSystemRole:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+
+    Permission:
+      type: object
+      properties:
+        id:
+          type: integer
+        key:
+          type: string
+        description:
+          type: string
+
+    CreateRoleDto:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        permissionIds:
+          type: array
+          items:
+            type: integer
+    
+    UpdateRoleDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        permissionIds:
+          type: array
+          items:
+            type: integer
+
+
+securitySchemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
 
 security:
   - bearerAuth: []

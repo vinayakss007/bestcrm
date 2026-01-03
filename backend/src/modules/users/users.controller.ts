@@ -1,5 +1,5 @@
 
-import { Controller, Get, UseGuards, Patch, Param, ParseIntPipe, Body, Post } from '@nestjs/common';
+import { Controller, Get, UseGuards, Patch, Param, ParseIntPipe, Body, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { UsersService, AuthenticatedUser } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/get-user.decorator';
@@ -26,6 +26,13 @@ export class UsersController {
     invite(@Body() inviteUserDto: InviteUserDto, @GetUser() user: AuthenticatedUser) {
         // The service will use the inviting user's organizationId
         return this.usersService.invite(inviteUserDto, user);
+    }
+
+    @Post(':id/impersonate')
+    @HttpCode(HttpStatus.OK)
+    @RequirePermission('super-admin:tenant:impersonate')
+    impersonate(@Param('id', ParseIntPipe) id: number, @GetUser() user: AuthenticatedUser) {
+        return this.usersService.impersonate(id, user);
     }
 
     @Patch(':id')

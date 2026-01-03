@@ -1,8 +1,9 @@
 
 
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, KeyRound } from "lucide-react"
 import { cookies } from "next/headers"
 import { jwtDecode } from "jwt-decode"
+import { impersonateUser } from "@/lib/actions"
 
 import {
   Card,
@@ -91,7 +92,7 @@ export default async function UsersSettingsPage() {
                   </div>
                 </TableCell>
                 <TableCell>{user.role.name}</TableCell>
-                {isSuperAdmin && <TableCell>{user.organization?.name || 'N/A'}</TableCell>}
+                {isSuperAdmin && <TableCell>{user.organization.name || 'N/A'}</TableCell>}
                 <TableCell className="hidden md:table-cell">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </TableCell>
@@ -110,6 +111,16 @@ export default async function UsersSettingsPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem>Edit Role</DropdownMenuItem>
+                      {isSuperAdmin && user.id !== currentUser?.userId && (
+                        <form action={impersonateUser.bind(null, user.id)}>
+                            <button type="submit" className="w-full">
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <KeyRound className="mr-2 h-4 w-4" />
+                                    Impersonate
+                                </DropdownMenuItem>
+                            </button>
+                        </form>
+                      )}
                       <DropdownMenuItem>Deactivate User</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

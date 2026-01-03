@@ -3,6 +3,7 @@ import { Injectable, Inject, ConflictException, NotFoundException, ForbiddenExce
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 import { RegisterDto } from '../auth/dto/register.dto';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
@@ -29,11 +30,12 @@ export class UsersService {
     @Inject(DrizzleProvider)
     private db: PostgresJsDatabase<typeof schema>,
     private configService: ConfigService,
+    private jwtService: JwtService,
   ) {}
 
-  async findOneById(id: number, organizationId: number): Promise<User | undefined> {
+  async findOneById(id: number): Promise<User | undefined> {
     const users = await this.db.query.crmUsers.findMany({
-        where: and(eq(schema.crmUsers.id, id), eq(schema.crmUsers.organizationId, organizationId)),
+        where: eq(schema.crmUsers.id, id),
         with: {
             role: {
                 with: {
@@ -116,6 +118,11 @@ export class UsersService {
         roleId: true,
       },
        with: {
+          organization: {
+            columns: {
+                name: true,
+            }
+          },
           role: {
             columns: {
               name: true,
@@ -227,8 +234,9 @@ export class UsersService {
 
 
   async update(id: number, updateUserDto: UpdateUserDto, organizationId: number): Promise<Omit<User, 'passwordHash' | 'isDeleted' | 'deletedAt'>> {
-    const userToUpdate = await this.findOneById(id, organizationId);
-    if (!userToUpdate) {
+    // findOneById doesn't scope by organization, so we need to add that check.
+    const userToUpdate = await this.findOneById(id);
+    if (!userToUpdate || userToUpdate.organizationId !== organizationId) {
         throw new NotFoundException('User not found.');
     }
     
@@ -247,5 +255,47 @@ export class UsersService {
         });
 
     return updatedUser;
+  }
+
+  async impersonate(userId: number, requestingUser: AuthenticatedUser) {
+    // This action is already protected by the PermissionsGuard, so we know the requester is a super-admin.
+    const targetUser = await this.findOneById(userId);
+
+    if (!targetUser) {
+      throw new NotFoundException('Target user not found.');
+    }
+    
+    // We fetch the full role with permissions for the token payload
+    const userWithRole = await this.db.query.crmUsers.findFirst({
+      where: eq(schema.crmUsers.id, userId),
+      with: {
+        role: {
+          with: {
+            permissions: {
+              with: {
+                permission: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!userWithRole) {
+         throw new NotFoundException('Target user not found.');
+    }
+
+    const payload = {
+      sub: userWithRole.id,
+      email: userWithRole.email,
+      organizationId: userWithRole.organizationId,
+      role: userWithRole.role,
+      isImpersonating: true,
+      originalUserId: requestingUser.userId,
+    };
+
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    };
   }
 }
