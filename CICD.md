@@ -77,14 +77,14 @@ This document outlines the Continuous Integration and Continuous Deployment (CI/
 2.  **Setup Node.js:** (As above)
 
 3.  **Authenticate to Google Cloud:**
-    *   Uses Workload Identity Federation to securely log in without service account keys.
+    *   Uses Workload Identity Federation to securely log in without service account keys. This step is ready to be configured with your specific project details.
     ```yaml
     - id: 'auth'
       name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v2'
       with:
-        workload_identity_provider: '...'
-        service_account: '...'
+        workload_identity_provider: 'projects/YOUR_PROJECT_ID/...'
+        service_account: 'your-service-account@...'
     ```
 
 4.  **Lint & Test (Multi-Layer Strategy):**
@@ -101,15 +101,17 @@ This document outlines the Continuous Integration and Continuous Deployment (CI/
     ```
 
 5.  **Build and Push Docker Image:**
+    *   This step is now **active**. It will build the Docker image and push it to your container registry. You must replace `PROJECT_ID` with your actual Google Cloud Project ID.
     ```yaml
     - name: Build and Push Docker Image
-      if: success() # Only run if all tests pass
+      if: success()
       run: |-
         docker build --tag="gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA" ./backend
         docker push "gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA"
     ```
 
 6.  **Deploy to Cloud Run:**
+    *   This step is now **active**. It deploys the newly built image to Google Cloud Run. You must replace `PROJECT_ID` and other service details.
     ```yaml
     - name: Deploy to Cloud Run
       if: success()

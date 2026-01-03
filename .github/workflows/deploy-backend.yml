@@ -1,3 +1,4 @@
+
 # CI/CD Pipeline for the abetworks crm Backend (NestJS)
 # This workflow is triggered on pushes to the main branch that affect the /backend directory.
 
@@ -26,12 +27,12 @@ jobs:
 
       # In a real-world scenario, you would replace these placeholders with your actual
       # project ID, service account, and workload identity provider from your cloud provider.
-      # - name: Authenticate to Google Cloud
-      #   id: 'auth'
-      #   uses: 'google-github-actions/auth@v2'
-      #   with:
-      #     workload_identity_provider: 'projects/YOUR_PROJECT_ID/locations/global/workloadIdentityPools/YOUR_POOL/providers/YOUR_PROVIDER'
-      #     service_account: 'your-service-account@your-project-id.iam.gserviceaccount.com'
+      - name: Authenticate to Google Cloud
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: 'projects/YOUR_PROJECT_ID/locations/global/workloadIdentityPools/YOUR_POOL/providers/YOUR_PROVIDER'
+          service_account: 'your-service-account@your-project-id.iam.gserviceaccount.com'
 
       - name: Install Backend Dependencies
         run: |
@@ -54,16 +55,14 @@ jobs:
       - name: Build and Push Docker Image
         if: success()
         run: |
-          echo "Skipping Docker build and push for now..."
-          # docker build --tag="gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA" ./backend
-          # docker push "gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA"
+          docker build --tag="gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA" ./backend
+          docker push "gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA"
       
       - name: Deploy to Cloud Run
         if: success()
-        run: |
-          echo "Skipping deployment to Cloud Run for now..."
-          # uses: 'google-github-actions/deploy-cloudrun@v2'
-          # with:
-          #   service: 'abetworks-crm-backend'
-          #   region: 'us-central1'
-          #   image: 'gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA'
+        uses: 'google-github-actions/deploy-cloudrun@v2'
+        with:
+          service: 'abetworks-crm-backend'
+          region: 'us-central1'
+          image: 'gcr.io/PROJECT_ID/abetworks-crm-backend:$GITHUB_SHA'
+          # Add other configurations like environment variables from secrets
