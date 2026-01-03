@@ -49,9 +49,11 @@ export class AccountsController {
     @Query('status') status?: 'active' | 'archived',
     @Query('sort') sort?: 'name' | 'industry',
     @Query('order') order?: 'asc' | 'desc',
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
     ) {
     // Pass organizationId and optional query to scope the query
-    return this.accountsService.findAll(user.organizationId, query, status, sort, order);
+    return this.accountsService.findAll(user.organizationId, query, status, sort, order, page, limit);
   }
 
   @Get(':id')

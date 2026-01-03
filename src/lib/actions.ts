@@ -135,8 +135,8 @@ export async function getCurrentUser(): Promise<User | null> {
 
 
 export async function getAccounts(
-  { query = '', status = 'active', sort = 'name', order = 'asc' }:
-  { query?: string; status?: 'active' | 'archived'; sort?: 'name' | 'industry'; order?: 'asc' | 'desc'; }
+  { query = '', status = 'active', sort = 'name', order = 'asc', page = 1, limit = 10 }:
+  { query?: string; status?: 'active' | 'archived'; sort?: 'name' | 'industry'; order?: 'asc' | 'desc'; page?: number; limit?: number; }
 ) {
   const headers = await getAuthHeaders()
   const url = new URL(`${API_URL}/accounts`);
@@ -144,6 +144,8 @@ export async function getAccounts(
   url.searchParams.append('status', status);
   url.searchParams.append('sort', sort);
   url.searchParams.append('order', order);
+  url.searchParams.append('page', String(page));
+  url.searchParams.append('limit', String(limit));
 
   const response = await fetch(url.toString(), { headers: {...headers, 'Content-Type': 'application/json'}, cache: 'no-store' })
   if (!response.ok) {

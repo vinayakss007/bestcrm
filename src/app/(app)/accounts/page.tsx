@@ -1,5 +1,5 @@
 
-import { MoreHorizontal, ArrowUpDown, Columns3, Filter, ListFilter, RefreshCw } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Filter, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,7 +30,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AddAccountDialog } from "@/components/add-account-dialog"
 import { getAccounts, getUsers } from "@/lib/actions"
-// import { Pagination } from "@/components/pagination"
+import { Pagination } from "@/components/pagination"
 import type { Account, User } from "@/lib/types"
 import { EditAccountDialog } from "@/components/edit-account-dialog"
 import { DeleteAccountDialog } from "@/components/delete-account-dialog"
@@ -43,6 +43,8 @@ type SearchParams = {
   status?: 'active' | 'archived',
   sort?: 'name' | 'industry',
   order?: 'asc' | 'desc',
+  page?: string,
+  limit?: string,
 }
 
 export default async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
@@ -50,11 +52,16 @@ export default async function AccountsPage({ searchParams }: { searchParams: Sea
     query = '', 
     status = 'active', 
     sort = 'name', 
-    order = 'asc' 
+    order = 'asc',
+    page = '1',
+    limit = '10',
   } = searchParams;
+  
+  const currentPage = parseInt(page, 10) || 1;
+  const currentLimit = parseInt(limit, 10) || 10;
 
-  const [accounts, users]: [Account[], User[]] = await Promise.all([
-    getAccounts({query, status, sort, order}),
+  const [{ data: accounts, total }, users]: [{ data: Account[], total: number }, User[]] = await Promise.all([
+    getAccounts({query, status, sort, order, page: currentPage, limit: currentLimit}),
     getUsers(),
   ]);
 
@@ -191,13 +198,11 @@ export default async function AccountsPage({ searchParams }: { searchParams: Sea
           </Table>
         </CardContent>
         <CardFooter>
-            {/* <Pagination
-                page={page}
-                pageSize={pageSize}
+            <Pagination
+                page={currentPage}
+                limit={currentLimit}
                 total={total}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
-            /> */}
+            />
         </CardFooter>
       </Card>
     </div>

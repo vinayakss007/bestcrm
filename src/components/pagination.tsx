@@ -1,6 +1,7 @@
 
 "use client"
 
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,27 +20,40 @@ import {
 
 interface PaginationProps {
   page: number
-  pageSize: number
+  limit: number
   total: number
-  onPageChange: (page: number) => void
-  onPageSizeChange: (pageSize: number) => void
 }
 
 export function Pagination({
   page,
-  pageSize,
+  limit,
   total,
-  onPageChange,
-  onPageSizeChange,
 }: PaginationProps) {
-  const pageCount = Math.ceil(total / pageSize)
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const pageCount = Math.ceil(total / limit);
+
+  const onPageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', String(newPage));
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  const onPageSizeChange = (newLimit: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('limit', newLimit);
+    params.set('page', '1'); // Reset to first page
+    router.push(`${pathname}?${params.toString()}`);
+  }
 
   return (
     <div className="flex w-full items-center justify-between">
         <div className="text-sm text-muted-foreground">
             Showing{' '}
             <strong>
-                {Math.min((page - 1) * pageSize + 1, total)}-{Math.min(page * pageSize, total)}
+                {Math.min((page - 1) * limit + 1, total)}-{Math.min(page * limit, total)}
             </strong>{' '}
             of <strong>{total}</strong> records
         </div>
@@ -48,17 +62,14 @@ export function Pagination({
             <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium">Rows per page</p>
                 <Select
-                value={`${pageSize}`}
-                onValueChange={(value) => {
-                    onPageSizeChange(Number(value))
-                    onPageChange(1) // Reset to first page
-                }}
+                value={`${limit}`}
+                onValueChange={onPageSizeChange}
                 >
                 <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue placeholder={pageSize} />
+                    <SelectValue placeholder={limit} />
                 </SelectTrigger>
                 <SelectContent side="top">
-                    {[5, 10, 20, 30, 40, 50].map((size) => (
+                    {[10, 20, 30, 40, 50].map((size) => (
                     <SelectItem key={size} value={`${size}`}>
                         {size}
                     </SelectItem>

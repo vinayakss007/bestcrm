@@ -1,7 +1,7 @@
 
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and, or, ilike, asc, desc } from 'drizzle-orm';
+import { eq, and, or, ilike, asc, desc, sql } from 'drizzle-orm';
 import { JobsProducerService } from '../jobs/jobs.producer.service';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import * as schema from '@/db/schema';
@@ -48,6 +48,8 @@ export class AccountsService {
     status?: 'active' | 'archived',
     sort?: 'name' | 'industry',
     order?: 'asc' | 'desc',
+    page: number = 1,
+    limit: number = 10,
     ) {
     const conditions = [
         eq(schema.crmAccounts.organizationId, organizationId),
@@ -76,19 +78,30 @@ export class AccountsService {
         orderBy.push(direction(schema.crmAccounts.name));
     }
 
+    const offset = (page - 1) * limit;
 
-    return await this.db.query.crmAccounts.findMany({
-        where: and(...conditions),
-        with: {
-            owner: {
-                columns: {
-                    name: true,
-                    avatarUrl: true
+    const [data, totalResult] = await Promise.all([
+        this.db.query.crmAccounts.findMany({
+            where: and(...conditions),
+            with: {
+                owner: {
+                    columns: {
+                        name: true,
+                        avatarUrl: true
+                    }
                 }
-            }
-        },
-        orderBy: orderBy,
-    });
+            },
+            orderBy: orderBy,
+            limit: limit,
+            offset: offset,
+        }),
+        this.db.select({ count: sql<number>`count(*)` }).from(schema.crmAccounts).where(and(...conditions))
+    ]);
+
+    return {
+        data,
+        total: totalResult[0].count,
+    };
   }
 
   async findOne(id: number, organizationId: number) {
