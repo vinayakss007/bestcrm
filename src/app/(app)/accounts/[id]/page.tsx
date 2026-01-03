@@ -114,6 +114,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
 
   const owner = account.owner;
   const addCommentAction = addComment.bind(null, 'Account', accountId);
+  const primaryContact = accountContacts.length > 0 ? accountContacts[0] : null;
 
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -308,11 +309,11 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" size="icon" onClick={() => console.log('Email account')}>
-                <Mail className="h-4 w-4" />
+              <Button variant="outline" size="icon" asChild>
+                <a href={`mailto:${primaryContact?.email || ''}`}><Mail className="h-4 w-4" /></a>
               </Button>
-              <Button variant="outline" size="icon" onClick={() => console.log('Call account')}>
-                <Phone className="h-4 w-4" />
+              <Button variant="outline" size="icon" asChild>
+                <a href={`tel:${primaryContact?.phone || ''}`}><Phone className="h-4 w-4" /></a>
               </Button>
               <DeleteAccountDialog accountId={account.id} as="button" />
             </div>

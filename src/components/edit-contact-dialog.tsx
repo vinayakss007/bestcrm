@@ -64,6 +64,18 @@ export function EditContactDialog({ contact, accounts, as = "menuitem" }: EditCo
       accountId: String(contact.accountId),
     },
   })
+  
+  React.useEffect(() => {
+    if(open) {
+      form.reset({
+        name: contact.name,
+        email: contact.email || "",
+        phone: contact.phone || "",
+        accountId: String(contact.accountId),
+      });
+    }
+  }, [open, contact, form]);
+
 
   async function onSubmit(data: ContactFormValues) {
     const contactData = {

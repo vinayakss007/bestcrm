@@ -87,8 +87,8 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem onSelect={() => console.log("Email")}>Email</DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => console.log("Call")}>Call</DropdownMenuItem>
+                        <DropdownMenuItem asChild><a href={`mailto:${lead.email || ''}`}>Email</a></DropdownMenuItem>
+                        <DropdownMenuItem asChild><a href={`tel:${lead.email || ''}`}>Call</a></DropdownMenuItem>
                         <AddTaskDialog as="menuitem" relatedToType="Lead" relatedToId={lead.id} />
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -206,11 +206,11 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" size="icon" onClick={() => console.log('Email lead')}>
-                <Mail className="h-4 w-4" />
+              <Button variant="outline" size="icon" asChild>
+                <a href={`mailto:${lead.email || ''}`}><Mail className="h-4 w-4" /></a>
               </Button>
-              <Button variant="outline" size="icon" onClick={() => console.log('Call lead')}>
-                <Phone className="h-4 w-4" />
+              <Button variant="outline" size="icon" asChild>
+                <a href={`tel:${lead.email || ''}`}><Phone className="h-4 w-4" /></a>
               </Button>
               <div className="ml-auto">
                 <DeleteLeadDialog leadId={lead.id} as="button" />

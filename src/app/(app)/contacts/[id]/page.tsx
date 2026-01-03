@@ -84,8 +84,8 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem onSelect={() => console.log("Email")}>Email</DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => console.log("Call")}>Call</DropdownMenuItem>
+                        <DropdownMenuItem asChild><a href={`mailto:${contact.email || ''}`}>Email</a></DropdownMenuItem>
+                        <DropdownMenuItem asChild><a href={`tel:${contact.phone || ''}`}>Call</a></DropdownMenuItem>
                         <AddTaskDialog as="menuitem" relatedToType="Contact" relatedToId={contact.id} />
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -181,11 +181,11 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" size="icon" onClick={() => console.log('Email contact')}>
-                <Mail className="h-4 w-4" />
+              <Button variant="outline" size="icon" asChild>
+                <a href={`mailto:${contact.email || ''}`}><Mail className="h-4 w-4" /></a>
               </Button>
-              <Button variant="outline" size="icon" onClick={() => console.log('Call contact')}>
-                <Phone className="h-4 w-4" />
+              <Button variant="outline" size="icon" asChild>
+                <a href={`tel:${contact.phone || ''}`}><Phone className="h-4 w-4" /></a>
               </Button>
               <DeleteContactDialog contactId={contact.id} as="button" />
             </div>

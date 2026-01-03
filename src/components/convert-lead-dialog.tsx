@@ -54,6 +54,15 @@ export function ConvertLeadDialog({ lead, as = "button" }: ConvertLeadDialogProp
     },
   })
 
+  React.useEffect(() => {
+    if (open) {
+      form.reset({
+        accountName: `${lead.name}'s Company`,
+        opportunityName: `${lead.name} - New Deal`,
+      });
+    }
+  }, [open, lead, form]);
+
   async function onSubmit(data: ConvertLeadFormValues) {
     try {
       await convertLead(lead.id, data)

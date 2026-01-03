@@ -98,7 +98,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <AddTaskDialog as="menuitem" relatedToType="Opportunity" relatedToId={opportunity.id} />
-                        <DropdownMenuItem onSelect={() => console.log("Log a call")}>Log a Call</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Log a Call</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
                  <EditOpportunityDialog opportunity={opportunity} accounts={accounts.data} users={users} as="button" />
@@ -193,8 +193,8 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" size="icon" onClick={() => console.log('Email')}>
-                <Mail className="h-4 w-4" />
+              <Button variant="outline" size="icon" asChild>
+                <a href={`mailto:`}><Mail className="h-4 w-4" /></a>
               </Button>
               <DeleteOpportunityDialog opportunityId={opportunity.id} as="button" />
             </div>

@@ -68,10 +68,15 @@ export function AddContactDialog({ accounts, accountId, as = "button" }: AddCont
   })
   
   React.useEffect(() => {
-    if (accountId) {
-      form.setValue("accountId", String(accountId));
+    if (open) {
+        form.reset({
+            name: "",
+            email: "",
+            phone: "",
+            accountId: accountId ? String(accountId) : undefined,
+        });
     }
-  }, [accountId, form]);
+  }, [open, accountId, form]);
 
 
   async function onSubmit(data: ContactFormValues) {
