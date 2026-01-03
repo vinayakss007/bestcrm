@@ -1,4 +1,3 @@
-
 # Comprehensive Guide: Building a Multi-Tenant CRM System
 
 ## I. Core Architecture & User Roles

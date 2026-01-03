@@ -1,5 +1,5 @@
-# Firebase Studio
+# abetworks crm
 
-This is a NextJS starter in Firebase Studio.
+This is a comprehensive, multi-tenant CRM application built with a Next.js frontend and a NestJS backend.
 
-To get started, take a look at src/app/page.tsx.
+For a complete guide to the project architecture, features, and setup, please see the **[Project Overview](./PROJECT_OVERVIEW.md)**.
