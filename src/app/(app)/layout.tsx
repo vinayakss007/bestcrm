@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
 import { Nav } from "@/components/nav"
-import { Bot, Settings, ChevronsUpDown } from "lucide-react"
+import { Bot, Settings, ChevronsUpDown, LogOut, Info } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,8 +23,32 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getCurrentUser } from "@/lib/actions"
+import { getCurrentUser, logout } from "@/lib/actions"
 import type { User } from "@/lib/types"
+import { cookies } from "next/headers"
+import { jwtDecode } from "jwt-decode"
+import Link from "next/link"
+
+type ImpersonationToken = {
+    isImpersonating?: boolean;
+    originalUserId?: number;
+    email: string;
+}
+
+function ImpersonationBanner({ userName }: { userName: string }) {
+    return (
+        <div className="bg-yellow-500 text-yellow-900 text-sm font-medium p-2 text-center w-full flex items-center justify-center gap-4">
+            <Info className="h-4 w-4" />
+            <p>You are currently impersonating <span className="font-bold">{userName}</span>.</p>
+            <form action={logout}>
+                 <button type="submit" className="flex items-center gap-1 underline hover:no-underline">
+                    <LogOut className="h-4 w-4" /> End Session
+                </button>
+            </form>
+        </div>
+    )
+}
+
 
 export default async function AppLayout({
   children,
@@ -32,6 +56,15 @@ export default async function AppLayout({
   children: React.ReactNode;
 }>) {
   const user: User | null = await getCurrentUser();
+  const token = cookies().get('token')?.value;
+  let impersonationInfo: ImpersonationToken | null = null;
+
+  if (token) {
+      const decoded: ImpersonationToken = jwtDecode(token);
+      if (decoded.isImpersonating) {
+          impersonationInfo = decoded;
+      }
+  }
   
   return (
     <SidebarProvider>
@@ -88,14 +121,15 @@ export default async function AppLayout({
         <SidebarFooter>
           <Separator className="my-2" />
            <Button variant="ghost" className="w-full justify-start gap-2 px-2" asChild>
-            <a href="/settings">
+            <Link href="/settings">
                 <Settings />
                 <span className="group-data-[collapsible=icon]:hidden">Settings</span>
-            </a>
+            </Link>
           </Button>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
+         {impersonationInfo && user && <ImpersonationBanner userName={user.name} />}
         <Header />
         <main className="flex flex-1 flex-col overflow-y-auto p-4 sm:px-6 sm:py-4 min-w-0">
             {children}
@@ -104,5 +138,3 @@ export default async function AppLayout({
     </SidebarProvider>
   )
 }
-
-      
