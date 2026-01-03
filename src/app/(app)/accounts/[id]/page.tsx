@@ -308,10 +308,10 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Email account')}>
                 <Mail className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Call account')}>
                 <Phone className="h-4 w-4" />
               </Button>
               <DeleteAccountDialog accountId={account.id} as="button" />

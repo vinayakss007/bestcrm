@@ -96,7 +96,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <AddTaskDialog as="menuitem" relatedToType="Opportunity" relatedToId={opportunity.id} />
-                        <DropdownMenuItem>Log a Call</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => console.log("Log a call")}>Log a Call</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
                  <EditOpportunityDialog opportunity={opportunity} accounts={accounts} users={users} as="button" />
@@ -126,12 +126,12 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                 <CardContent className="space-y-4">
                      <div className="flex items-start gap-4">
                         <Avatar>
-                            <AvatarImage src={administrator.avatarUrl || undefined} />
-                            <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={administrator?.avatarUrl || undefined} />
+                            <AvatarFallback>{administrator?.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                             <div className="flex justify-between items-center">
-                                <p className="text-sm font-medium">{administrator.name} created this opportunity</p>
+                                <p className="text-sm font-medium">{administrator?.name} created this opportunity</p>
                                 <p className="text-xs text-muted-foreground">{new Date(opportunity.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
@@ -188,7 +188,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Email')}>
                 <Mail className="h-4 w-4" />
               </Button>
               <DeleteOpportunityDialog opportunityId={opportunity.id} as="button" />

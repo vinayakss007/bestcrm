@@ -108,7 +108,10 @@ export function UserNav() {
             </DropdownMenuPortal>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleLogout}>
+        <DropdownMenuItem onSelect={(e) => {
+          e.preventDefault();
+          handleLogout();
+        }}>
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -83,8 +83,8 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem>Email</DropdownMenuItem>
-                        <DropdownMenuItem>Call</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => console.log("Email")}>Email</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => console.log("Call")}>Call</DropdownMenuItem>
                         <AddTaskDialog as="menuitem" relatedToType="Contact" relatedToId={contact.id} />
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -115,12 +115,12 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                 <CardContent className="space-y-4">
                      <div className="flex items-start gap-4">
                         <Avatar>
-                            <AvatarImage src={administrator.avatarUrl || undefined} />
-                            <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={administrator?.avatarUrl || undefined} />
+                            <AvatarFallback>{administrator?.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                             <div className="flex justify-between items-center">
-                                <p className="text-sm font-medium">{administrator.name} created this contact</p>
+                                <p className="text-sm font-medium">{administrator?.name} created this contact</p>
                                 <p className="text-xs text-muted-foreground">{new Date(contact.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
@@ -177,10 +177,10 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Email contact')}>
                 <Mail className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Call contact')}>
                 <Phone className="h-4 w-4" />
               </Button>
               <DeleteContactDialog contactId={contact.id} as="button" />

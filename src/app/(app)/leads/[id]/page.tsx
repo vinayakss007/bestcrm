@@ -85,8 +85,8 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem>Email</DropdownMenuItem>
-                        <DropdownMenuItem>Call</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => console.log("Email")}>Email</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => console.log("Call")}>Call</DropdownMenuItem>
                         <AddTaskDialog as="menuitem" relatedToType="Lead" relatedToId={lead.id} />
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -130,12 +130,12 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                 <CardContent className="space-y-4">
                      <div className="flex items-start gap-4">
                         <Avatar>
-                            <AvatarImage src={administrator.avatarUrl || ''} />
-                            <AvatarFallback>{administrator.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={administrator?.avatarUrl || ''} />
+                            <AvatarFallback>{administrator?.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                             <div className="flex justify-between items-center">
-                                <p className="text-sm font-medium">{administrator.name} created this lead</p>
+                                <p className="text-sm font-medium">{administrator?.name} created this lead</p>
                                 <p className="text-xs text-muted-foreground">{new Date(lead.createdAt).toLocaleDateString()}</p>
                             </div>
                         </div>
@@ -204,10 +204,10 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               </div>
             </div>
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Email lead')}>
                 <Mail className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Call lead')}>
                 <Phone className="h-4 w-4" />
               </Button>
               <div className="ml-auto">
