@@ -17,4 +17,5 @@ export default defineConfig({
   },
   verbose: true,
   strict: true,
+  seed: './src/db/seed.ts'
 });

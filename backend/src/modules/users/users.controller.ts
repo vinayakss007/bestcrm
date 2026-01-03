@@ -1,19 +1,13 @@
 
 import { Controller, Get, UseGuards, Patch, Param, ParseIntPipe, Body, Post } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UsersService, AuthenticatedUser } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/get-user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InviteUserDto } from './dto/invite-user.dto';
-import type { Role } from '@/lib/types';
+import { PermissionsGuard } from '../auth/permissions.guard';
+import { RequirePermission } from '../auth/permissions.decorator';
 
-// This is the user type from the JWT payload, not the DB model
-type AuthenticatedUser = {
-    userId: number;
-    email: string;
-    organizationId: number;
-    role: Role;
-}
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -21,18 +15,24 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
     @Get()
+    @UseGuards(PermissionsGuard)
+    @RequirePermission('user:read')
     findAll(@GetUser() user: AuthenticatedUser) {
         // Pass the whole user object to the service
         return this.usersService.findAll(user);
     }
 
     @Post('invite')
+    @UseGuards(PermissionsGuard)
+    @RequirePermission('user:create')
     invite(@Body() inviteUserDto: InviteUserDto, @GetUser() user: AuthenticatedUser) {
         // The service will use the inviting user's organizationId
         return this.usersService.invite(inviteUserDto, user);
     }
 
     @Patch(':id')
+    @UseGuards(PermissionsGuard)
+    @RequirePermission('user:update')
     update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateUserDto: UpdateUserDto,

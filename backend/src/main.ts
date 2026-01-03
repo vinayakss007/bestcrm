@@ -26,5 +26,7 @@ async function bootstrap() {
   }));
   
   await app.listen(process.env.PORT || 3001); // Use port 3001 to avoid conflict with Next.js
+  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log('IMPORTANT: If this is the first run, or if you have new permissions, please run "npm run db:seed" to populate the permissions table.');
 }
 bootstrap();

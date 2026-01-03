@@ -14,11 +14,11 @@ import { InviteUserDto } from './dto/invite-user.dto';
 export type User = typeof schema.crmUsers.$inferSelect;
 type Role = typeof schema.crmRoles.$inferSelect;
 
-type AuthenticatedUser = {
+export type AuthenticatedUser = {
     userId: number;
     email: string;
     organizationId: number;
-    role: Role;
+    role: Role & { permissions: { permission: { key: string } }[] };
 }
 
 
@@ -33,7 +33,15 @@ export class UsersService {
     const users = await this.db.query.crmUsers.findMany({
         where: and(eq(schema.crmUsers.id, id), eq(schema.crmUsers.organizationId, organizationId)),
         with: {
-            role: true,
+            role: {
+                with: {
+                    permissions: {
+                        with: {
+                            permission: true,
+                        }
+                    }
+                }
+            },
         }
     });
     return users[0];
@@ -46,7 +54,15 @@ export class UsersService {
           eq(schema.crmUsers.isDeleted, false) // Ensure only active users can be found
       ),
       with: {
-          role: true,
+          role: {
+            with: {
+                permissions: {
+                    with: {
+                        permission: true,
+                    }
+                }
+            }
+        },
       }
     });
     return users[0];
@@ -123,34 +139,31 @@ export class UsersService {
         // Check if it's the very first user in the system
         const anyOrg = await tx.query.organizations.findFirst();
         
-        let superAdminRoleId: number;
         if (!anyOrg) {
-            // First time setup: create a Super Admin's Organization
-            const superAdminOrg = await tx.insert(schema.organizations).values({ name: "Super Admin Workspace" }).returning();
-            const superAdminOrgId = superAdminOrg[0].id;
-
-            // Create the global Super Admin role
-            const superAdminRole = await tx.insert(schema.crmRoles).values({ name: "super-admin", isSystemRole: true }).returning();
-            superAdminRoleId = superAdminRole[0].id;
+            // First time setup: create a Super Admin's Organization and the role
+            console.log('First run detected, creating Super Admin and system roles...');
+            const [superAdminOrg] = await tx.insert(schema.organizations).values({ name: "Super Admin Workspace" }).returning();
+            const [superAdminRole] = await tx.insert(schema.crmRoles).values({ name: "super-admin", isSystemRole: true }).returning();
 
             // Create the Super Admin user
-            const superAdminPasswordHash = await bcrypt.hash('password123', saltRounds);
+            const superAdminPasswordHash = await bcrypt.hash(process.env.SUPER_ADMIN_PASSWORD || 'password123', saltRounds);
             await tx.insert(schema.crmUsers).values({
                 email: 'super@admin.com',
                 name: 'Super Admin',
                 passwordHash: superAdminPasswordHash,
-                organizationId: superAdminOrgId,
-                roleId: superAdminRoleId,
+                organizationId: superAdminOrg.id,
+                roleId: superAdminRole.id,
             });
+            console.log('Super Admin user created.');
         }
 
         // --- Create the actual user who signed up ---
 
         // For every new self-service sign-up, always create a new organization.
-        const newOrg = await tx.insert(schema.organizations).values({ name: `${registerDto.name}'s Organization` }).returning();
-        const organizationId = newOrg[0].id;
+        const [newOrg] = await tx.insert(schema.organizations).values({ name: `${registerDto.name}'s Organization` }).returning();
+        const organizationId = newOrg.id;
 
-        // Create the default 'Company Admin' and 'User' roles for the new organization
+        // Create the default 'company-admin' and 'user' roles for the new organization
         const [companyAdminRole] = await tx.insert(schema.crmRoles).values({ name: "company-admin", organizationId, isSystemRole: true }).returning();
         await tx.insert(schema.crmRoles).values({ name: "user", organizationId, isSystemRole: true });
 
@@ -164,16 +177,12 @@ export class UsersService {
             roleId: companyAdminRole.id,
         };
 
-        const newUsers = await tx.insert(schema.crmUsers).values(newUserInsert).returning();
-        return newUsers[0];
+        const [newUser] = await tx.insert(schema.crmUsers).values(newUserInsert).returning();
+        return newUser;
     });
   }
 
   async invite(inviteUserDto: InviteUserDto, invitingUser: AuthenticatedUser): Promise<Omit<User, 'passwordHash' | 'isDeleted' | 'deletedAt'>> {
-    if (invitingUser.role.name === 'user') {
-      throw new ForbiddenException('Only admins can invite new users.');
-    }
-
     const { email, name, password, roleName } = inviteUserDto;
     
     const existingUser = await this.findOneByEmail(email);
@@ -195,7 +204,7 @@ export class UsersService {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    const newUser = await this.db.insert(schema.crmUsers).values({
+    const [newUser] = await this.db.insert(schema.crmUsers).values({
         email,
         name,
         passwordHash,
@@ -211,7 +220,7 @@ export class UsersService {
         organizationId: schema.crmUsers.organizationId,
     });
 
-    return newUser[0];
+    return newUser;
   }
 
 
@@ -221,11 +230,7 @@ export class UsersService {
         throw new NotFoundException('User not found.');
     }
     
-    // In a real RBAC system, you'd check if the requesting user has permission.
-    // For now, we assume users can update their own info.
-    // A check like `if (requestingUserId !== id && requestingUserRole !== 'admin')` would be here.
-
-    const updatedUser = await this.db
+    const [updatedUser] = await this.db
         .update(schema.crmUsers)
         .set(updateUserDto)
         .where(eq(schema.crmUsers.id, id))
@@ -239,8 +244,6 @@ export class UsersService {
           organizationId: schema.crmUsers.organizationId,
         });
 
-    return updatedUser[0];
+    return updatedUser;
   }
 }
-
-      

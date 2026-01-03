@@ -17,7 +17,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    // In a real app, you'd use a password hashing library like bcrypt
+    
     const isMatch = await bcrypt.compare(pass, user.passwordHash);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
@@ -27,7 +27,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       organizationId: user.organizationId,
-      role: (user as any).role, // role is now a nested object
+      role: (user as any).role, // role is now a rich object with permissions
     };
     return {
       access_token: await this.jwtService.signAsync(payload),
@@ -44,5 +44,3 @@ export class AuthService {
     return result;
   }
 }
-
-      
