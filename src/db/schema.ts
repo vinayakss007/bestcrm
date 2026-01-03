@@ -25,7 +25,11 @@ export const organizations = pgTable("organizations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const userRoleEnum = pgEnum('user_role', ['user', 'company-admin', 'super-admin']);
+export const organizationsRelations = relations(organizations, ({ many }) => ({
+	users: many(crmUsers),
+  roles: many(crmRoles),
+}));
+
 
 // Users within the CRM system, scoped to an organization.
 export const crmUsers = pgTable("crm_users", {
@@ -36,7 +40,9 @@ export const crmUsers = pgTable("crm_users", {
   avatarUrl: text("avatar_url"),
   // Every user belongs to one organization.
   organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  role: userRoleEnum("role").default("user").notNull(),
+  roleId: integer("role_id").notNull().references(() => crmRoles.id),
+  isDeleted: boolean("is_deleted").default(false).notNull(),
+  deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -45,7 +51,58 @@ export const crmUsersRelations = relations(crmUsers, ({ one }) => ({
 		fields: [crmUsers.organizationId],
 		references: [organizations.id],
 	}),
+  role: one(crmRoles, {
+    fields: [crmUsers.roleId],
+    references: [crmRoles.id],
+  }),
 }));
+
+// Stores custom roles created by Company Admins for their organization.
+export const crmRoles = pgTable("crm_roles", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  // 'super-admin' is a global role, so organizationId can be null.
+  organizationId: integer("organization_id").references(() => organizations.id, { onDelete: 'cascade' }),
+  // is_system_role prevents deletion/modification of foundational roles.
+  isSystemRole: boolean("is_system_role").default(false).notNull(),
+});
+
+export const crmRolesRelations = relations(crmRoles, ({ many }) => ({
+	permissions: many(crmRolePermissions),
+}));
+
+// A dictionary of all possible permissions in the system.
+export const crmPermissions = pgTable("crm_permissions", {
+  id: serial("id").primaryKey(),
+  // e.g., 'account:create', 'lead:delete'
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  description: text("description"),
+});
+
+export const crmPermissionsRelations = relations(crmPermissions, ({ many }) => ({
+	roles: many(crmRolePermissions),
+}));
+
+// Join table for the many-to-many relationship between roles and permissions.
+export const crmRolePermissions = pgTable("crm_role_permissions", {
+  roleId: integer("role_id").notNull().references(() => crmRoles.id, { onDelete: 'cascade' }),
+  permissionId: integer("permission_id").notNull().references(() => crmPermissions.id, { onDelete: 'cascade' }),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.roleId, t.permissionId] }),
+}));
+
+export const crmRolePermissionsRelations = relations(crmRolePermissions, ({ one }) => ({
+  role: one(crmRoles, {
+    fields: [crmRolePermissions.roleId],
+    references: [crmRoles.id],
+  }),
+  permission: one(crmPermissions, {
+    fields: [crmRolePermissions.permissionId],
+    references: [crmPermissions.id],
+  }),
+}));
+
 
 // Accounts represent customer companies or organizations, scoped to an organization.
 export const crmAccounts = pgTable("crm_accounts", {
@@ -64,6 +121,16 @@ export const crmAccounts = pgTable("crm_accounts", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmAccountsRelations = relations(crmAccounts, ({ one, many }) => ({
+  owner: one(crmUsers, {
+    fields: [crmAccounts.ownerId],
+    references: [crmUsers.id],
+  }),
+  contacts: many(crmContacts),
+  opportunities: many(crmOpportunities),
+}));
+
+
 // Contacts are individuals associated with an Account, scoped to an organization.
 export const crmContacts = pgTable("crm_contacts", {
   id: serial("id").primaryKey(),
@@ -80,6 +147,14 @@ export const crmContacts = pgTable("crm_contacts", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const crmContactsRelations = relations(crmContacts, ({ one }) => ({
+  account: one(crmAccounts, {
+    fields: [crmContacts.accountId],
+    references: [crmAccounts.id],
+  }),
+}));
+
 
 // Enums provide a fixed set of values for specific fields, ensuring data integrity.
 export const leadStatusEnum = pgEnum('lead_status', ['New', 'Contacted', 'Qualified', 'Lost']);
@@ -100,6 +175,13 @@ export const crmLeads = pgTable("crm_leads", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmLeadsRelations = relations(crmLeads, ({ one }) => ({
+  owner: one(crmUsers, {
+    fields: [crmLeads.ownerId],
+    references: [crmUsers.id],
+  }),
+}));
+
 export const opportunityStageEnum = pgEnum('opportunity_stage', ['Prospecting', 'Qualification', 'Proposal', 'Closing', 'Won', 'Lost']);
 
 // Opportunities are qualified leads, scoped to an organization.
@@ -119,6 +201,18 @@ export const crmOpportunities = pgTable("crm_opportunities", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmOpportunitiesRelations = relations(crmOpportunities, ({ one }) => ({
+  account: one(crmAccounts, {
+    fields: [crmOpportunities.accountId],
+    references: [crmAccounts.id],
+  }),
+  owner: one(crmUsers, {
+    fields: [crmOpportunities.ownerId],
+    references: [crmUsers.id],
+  }),
+}));
+
+
 export const taskStatusEnum = pgEnum('task_status', ['Pending', 'Completed']);
 export const relatedToTypeEnum = pgEnum('related_to_type', ['Account', 'Contact', 'Opportunity', 'Lead']);
 
@@ -136,6 +230,14 @@ export const crmTasks = pgTable("crm_tasks", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const crmTasksRelations = relations(crmTasks, ({ one }) => ({
+  assignedTo: one(crmUsers, {
+    fields: [crmTasks.assignedToId],
+    references: [crmUsers.id],
+  }),
+}));
+
+
 export const invoiceStatusEnum = pgEnum('invoice_status', ['Draft', 'Sent', 'Paid', 'Void']);
 
 // Invoices are created for leads, scoped to an organization.
@@ -150,3 +252,98 @@ export const crmInvoices = pgTable("crm_invoices", {
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const crmInvoicesRelations = relations(crmInvoices, ({ one }) => ({
+  lead: one(crmLeads, {
+    fields: [crmInvoices.leadId],
+    references: [crmLeads.id],
+  }),
+}));
+
+
+// Comments can be attached to various CRM records.
+export const crmComments = pgTable("crm_comments", {
+  id: serial("id").primaryKey(),
+  content: text("content").notNull(),
+  userId: integer("user_id").notNull().references(() => crmUsers.id),
+  relatedToType: relatedToTypeEnum("related_to_type").notNull(),
+  relatedToId: integer("related_to_id").notNull(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const crmCommentsRelations = relations(crmComments, ({ one }) => ({
+  user: one(crmUsers, {
+    fields: [crmComments.userId],
+    references: [crmUsers.id],
+  }),
+}));
+
+// A log of all significant actions taken within an organization.
+export const activityTypeEnum = pgEnum('activity_type', [
+    'account_created',
+    'contact_created',
+    'lead_created',
+    'opportunity_created'
+]);
+
+export const crmActivities = pgTable("crm_activities", {
+    id: serial("id").primaryKey(),
+    type: activityTypeEnum("type").notNull(),
+    details: jsonb("details").notNull(),
+    // The user who performed the action.
+    userId: integer("user_id").notNull().references(() => crmUsers.id),
+    // All activities are scoped to an organization for security and filtering.
+    organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    // Polymorphic association to the primary record (e.g., the account that was created).
+    relatedToType: relatedToTypeEnum("related_to_type"),
+    relatedToId: integer("related_to_id"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const crmActivitiesRelations = relations(crmActivities, ({ one }) => ({
+    user: one(crmUsers, {
+        fields: [crmActivities.userId],
+        references: [crmUsers.id],
+    }),
+}));
+
+export const crmAttachments = pgTable("crm_attachments", {
+  id: serial("id").primaryKey(),
+  originalName: varchar("original_name", { length: 255 }).notNull(),
+  fileName: varchar("file_name", { length: 255 }).notNull().unique(),
+  fileType: varchar("file_type", { length: 100 }).notNull(),
+  fileSize: integer("file_size").notNull(),
+  userId: integer("user_id").notNull().references(() => crmUsers.id),
+  relatedToType: relatedToTypeEnum("related_to_type").notNull(),
+  relatedToId: integer("related_to_id").notNull(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const crmAttachmentsRelations = relations(crmAttachments, ({ one }) => ({
+  user: one(crmUsers, {
+    fields: [crmAttachments.userId],
+    references: [crmUsers.id],
+  }),
+}));
+
+// Table for storing assignment rules.
+export const assignmentRuleObjectEnum = pgEnum('assignment_rule_object', ['Lead', 'Opportunity']);
+
+export const crmAssignmentRules = pgTable("crm_assignment_rules", {
+  id: serial("id").primaryKey(),
+  object: assignmentRuleObjectEnum("object").notNull(),
+  conditionField: varchar("condition_field", { length: 255 }).notNull(),
+  conditionValue: text("condition_value").notNull(),
+  assignToId: integer("assign_to_id").notNull().references(() => crmUsers.id),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const crmAssignmentRulesRelations = relations(crmAssignmentRules, ({ one }) => ({
+  assignTo: one(crmUsers, {
+    fields: [crmAssignmentRules.assignToId],
+    references: [crmUsers.id],
+  }),
+}));
