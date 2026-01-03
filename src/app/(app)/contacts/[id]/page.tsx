@@ -12,7 +12,7 @@ import {
   Plus,
 } from "lucide-react"
 
-import { getContactById, getUsers, getAccounts, getCommentsForContact, addComment } from "@/lib/actions"
+import { getContactById, getUsers, getAccounts, getCommentsForContact, addComment, getAttachments } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,11 +35,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Contact, User, Account, Comment } from "@/lib/types"
+import type { Contact, User, Account, Comment, Attachment } from "@/lib/types"
 import { EditContactDialog } from "@/components/edit-contact-dialog"
 import { DeleteContactDialog } from "@/components/delete-contact-dialog"
 import { AddTaskDialog } from "@/components/add-task-dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { FileUploader } from "@/components/file-uploader"
+import { AttachmentsList } from "@/components/attachments-list"
 
 export default async function ContactDetailPage({ params }: { params: { id: string } }) {
   const contactId = parseInt(params.id, 10);
@@ -47,19 +49,18 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
     notFound();
   }
 
-  const [contact, users, accounts, comments] = await Promise.all([
-    getContactById(params.id) as Promise<Contact | null>,
+  const [contact, users, accounts, comments, attachments] = await Promise.all([
+    getContactById(contactId),
     getUsers() as Promise<User[]>,
     getAccounts() as Promise<Account[]>,
     getCommentsForContact(contactId) as Promise<Comment[]>,
+    getAttachments('Contact', contactId) as Promise<Attachment[]>,
   ]);
 
   if (!contact) {
     notFound()
   }
 
-  // Assuming the first user is the creator for mock purposes.
-  const administrator = users[0];
   const addCommentAction = addComment.bind(null, 'Contact', contactId);
 
   return (
@@ -104,7 +105,7 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
             </TabsTrigger>
             <TabsTrigger value="attachments">
               <Paperclip className="mr-2 h-4 w-4" />
-              Attachments
+              Attachments ({attachments.length})
             </TabsTrigger>
           </TabsList>
           <TabsContent value="activity">
@@ -113,17 +114,8 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                     <CardTitle>Activity</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                     <div className="flex items-start gap-4">
-                        <Avatar>
-                            <AvatarImage src={administrator?.avatarUrl || undefined} />
-                            <AvatarFallback>{administrator?.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                            <div className="flex justify-between items-center">
-                                <p className="text-sm font-medium">{administrator?.name} created this contact</p>
-                                <p className="text-xs text-muted-foreground">{new Date(contact.createdAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
+                     <div className="text-center text-muted-foreground py-10">
+                        No activity to display for this contact.
                     </div>
                 </CardContent>
              </Card>
@@ -157,6 +149,18 @@ export default async function ContactDetailPage({ params }: { params: { id: stri
                         ))}
                         {comments.length === 0 && <p className="text-muted-foreground text-center py-4">No comments yet.</p>}
                     </div>
+                </CardContent>
+            </Card>
+          </TabsContent>
+           <TabsContent value="attachments">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Attachments</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FileUploader entityType="Contact" entityId={contactId} />
+                    <Separator />
+                    <AttachmentsList attachments={attachments} />
                 </CardContent>
             </Card>
           </TabsContent>

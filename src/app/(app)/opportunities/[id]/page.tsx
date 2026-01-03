@@ -14,7 +14,7 @@ import {
   MessageSquare,
 } from "lucide-react"
 
-import { getOpportunityById, getUsers, getAccounts, getCommentsForOpportunity, addComment } from "@/lib/actions"
+import { getOpportunityById, getUsers, getAccounts, getCommentsForOpportunity, addComment, getAttachments } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,7 +31,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import type { OpportunityStage, Opportunity, User, Account, Comment } from "@/lib/types"
+import type { OpportunityStage, Opportunity, User, Account, Comment, Attachment } from "@/lib/types"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -43,6 +43,8 @@ import { EditOpportunityDialog } from "@/components/edit-opportunity-dialog"
 import { DeleteOpportunityDialog } from "@/components/delete-opportunity-dialog"
 import { AddTaskDialog } from "@/components/add-task-dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { FileUploader } from "@/components/file-uploader"
+import { AttachmentsList } from "@/components/attachments-list"
 
 const stageVariant: Record<OpportunityStage, "default" | "secondary" | "destructive" | "outline"> = {
     'Prospecting': 'secondary',
@@ -59,18 +61,18 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
     notFound();
   }
   
-  const [opportunity, users, accounts, comments] = await Promise.all([
-    getOpportunityById(params.id) as Promise<Opportunity | null>,
+  const [opportunity, users, accounts, comments, attachments] = await Promise.all([
+    getOpportunityById(opportunityId),
     getUsers() as Promise<User[]>,
     getAccounts() as Promise<Account[]>,
     getCommentsForOpportunity(opportunityId) as Promise<Comment[]>,
+    getAttachments('Opportunity', opportunityId) as Promise<Attachment[]>,
   ]);
 
   if (!opportunity) {
     notFound()
   }
 
-  const administrator = users[0];
   const addCommentAction = addComment.bind(null, 'Opportunity', opportunityId);
 
 
@@ -115,7 +117,7 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
             </TabsTrigger>
             <TabsTrigger value="attachments">
               <Paperclip className="mr-2 h-4 w-4" />
-              Attachments
+              Attachments ({attachments.length})
             </TabsTrigger>
           </TabsList>
           <TabsContent value="activity">
@@ -123,18 +125,9 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                 <CardHeader>
                     <CardTitle>Activity</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="flex items-start gap-4">
-                        <Avatar>
-                            <AvatarImage src={administrator?.avatarUrl || undefined} />
-                            <AvatarFallback>{administrator?.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                            <div className="flex justify-between items-center">
-                                <p className="text-sm font-medium">{administrator?.name} created this opportunity</p>
-                                <p className="text-xs text-muted-foreground">{new Date(opportunity.createdAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
+                 <CardContent className="space-y-4">
+                     <div className="text-center text-muted-foreground py-10">
+                        No activity to display for this opportunity.
                     </div>
                 </CardContent>
              </Card>
@@ -168,6 +161,18 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
                         ))}
                         {comments.length === 0 && <p className="text-muted-foreground text-center py-4">No comments yet.</p>}
                     </div>
+                </CardContent>
+            </Card>
+          </TabsContent>
+           <TabsContent value="attachments">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Attachments</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FileUploader entityType="Opportunity" entityId={opportunityId} />
+                    <Separator />
+                    <AttachmentsList attachments={attachments} />
                 </CardContent>
             </Card>
           </TabsContent>

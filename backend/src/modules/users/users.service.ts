@@ -39,7 +39,10 @@ export class UsersService {
     const users = await this.db
       .select()
       .from(schema.crmUsers)
-      .where(eq(schema.crmUsers.email, email));
+      .where(and(
+          eq(schema.crmUsers.email, email),
+          eq(schema.crmUsers.isDeleted, false) // Ensure only active users can be found
+      ));
     return users[0];
   }
 
@@ -47,6 +50,7 @@ export class UsersService {
     if (requestingUser.role === 'super-admin') {
         // Super admin can see all users from all organizations
         return await this.db.query.crmUsers.findMany({
+            where: eq(schema.crmUsers.isDeleted, false),
             columns: {
                 id: true,
                 name: true,
@@ -69,7 +73,10 @@ export class UsersService {
 
     // Regular users and company admins only see users in their own organization
     return await this.db.query.crmUsers.findMany({
-      where: eq(schema.crmUsers.organizationId, requestingUser.organizationId),
+      where: and(
+          eq(schema.crmUsers.organizationId, requestingUser.organizationId),
+          eq(schema.crmUsers.isDeleted, false)
+      ),
       columns: {
         id: true,
         name: true,
@@ -99,15 +106,14 @@ export class UsersService {
         const anyOrg = await tx.query.organizations.findFirst();
         
         if (!anyOrg) {
-            // First time setup: create a Super Admin and then create the actual user's org.
-            // 1. Create Super Admin's Organization
+            // First time setup: create a Super Admin's Organization
             const superAdminOrg = await tx
                 .insert(schema.organizations)
                 .values({ name: "Super Admin Workspace" })
                 .returning();
             const superAdminOrgId = superAdminOrg[0].id;
 
-            // 2. Create the Super Admin user with known credentials for development
+            // Create the Super Admin user with known credentials for development
             const superAdminPasswordHash = await bcrypt.hash('password123', saltRounds);
             await tx.insert(schema.crmUsers).values({
                 email: 'super@admin.com',
@@ -118,8 +124,9 @@ export class UsersService {
             }).returning();
         }
 
+        // --- Create the actual user who signed up ---
+
         // For every new self-service sign-up, always create a new organization.
-        const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
         const newOrg = await tx
             .insert(schema.organizations)
             .values({ name: `${registerDto.name}'s Organization` })
@@ -128,6 +135,8 @@ export class UsersService {
         const organizationId = newOrg[0].id;
         // The first user of a new organization is always the company-admin.
         const userRole: 'company-admin' = 'company-admin';
+        const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
+
 
         const newUserInsert = {
             email: registerDto.email,
@@ -146,7 +155,7 @@ export class UsersService {
     });
   }
 
-  async invite(inviteUserDto: InviteUserDto, invitingUser: AuthenticatedUser): Promise<Omit<User, 'passwordHash'>> {
+  async invite(inviteUserDto: InviteUserDto, invitingUser: AuthenticatedUser): Promise<Omit<User, 'passwordHash' | 'isDeleted' | 'deletedAt'>> {
     if (invitingUser.role === 'user') {
       throw new ForbiddenException('Only admins can invite new users.');
     }
@@ -181,7 +190,7 @@ export class UsersService {
   }
 
 
-  async update(id: number, updateUserDto: UpdateUserDto, organizationId: number): Promise<Omit<User, 'passwordHash'>> {
+  async update(id: number, updateUserDto: UpdateUserDto, organizationId: number): Promise<Omit<User, 'passwordHash' | 'isDeleted' | 'deletedAt'>> {
     const userToUpdate = await this.findOneById(id, organizationId);
     if (!userToUpdate) {
         throw new NotFoundException('User not found.');

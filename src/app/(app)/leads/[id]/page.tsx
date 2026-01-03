@@ -15,7 +15,7 @@ import {
   User,
 } from "lucide-react"
 
-import { getLeadById, getUsers, getCommentsForLead, addCommentForLead } from "@/lib/actions"
+import { getLeadById, getUsers, getCommentsForLead, addCommentForLead, getAttachments } from "@/lib/actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,11 +38,13 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import type { Lead, User as TUser, Comment } from "@/lib/types"
+import type { Lead, User as TUser, Comment, Attachment } from "@/lib/types"
 import { ConvertLeadDialog } from "@/components/convert-lead-dialog"
 import { DeleteLeadDialog } from "@/components/delete-lead-dialog"
 import { EditLeadDialog } from "@/components/edit-lead-dialog"
 import { AddTaskDialog } from "@/components/add-task-dialog"
+import { FileUploader } from "@/components/file-uploader"
+import { AttachmentsList } from "@/components/attachments-list"
 
 export default async function LeadDetailPage({ params }: { params: { id: string } }) {
   const leadId = parseInt(params.id, 10);
@@ -50,17 +52,17 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
     notFound();
   }
 
-  const [lead, users, comments] = await Promise.all([
-    getLeadById(params.id) as Promise<Lead>,
+  const [lead, users, comments, attachments] = await Promise.all([
+    getLeadById(leadId),
     getUsers() as Promise<TUser[]>,
     getCommentsForLead(leadId),
+    getAttachments('Lead', leadId) as Promise<Attachment[]>,
   ]);
 
   if (!lead) {
     notFound()
   }
 
-  const administrator = users[0];
   const owner = lead.owner;
   const addCommentAction = addCommentForLead.bind(null, leadId);
 
@@ -119,7 +121,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
             </TabsTrigger>
             <TabsTrigger value="attachments">
               <Paperclip className="mr-2 h-4 w-4" />
-              Attachments
+              Attachments ({attachments.length})
             </TabsTrigger>
           </TabsList>
           <TabsContent value="activity">
@@ -127,18 +129,9 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                 <CardHeader>
                     <CardTitle>Activity</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="flex items-start gap-4">
-                        <Avatar>
-                            <AvatarImage src={administrator?.avatarUrl || ''} />
-                            <AvatarFallback>{administrator?.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                            <div className="flex justify-between items-center">
-                                <p className="text-sm font-medium">{administrator?.name} created this lead</p>
-                                <p className="text-xs text-muted-foreground">{new Date(lead.createdAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
+                 <CardContent className="space-y-4">
+                     <div className="text-center text-muted-foreground py-10">
+                        No activity to display for this lead.
                     </div>
                 </CardContent>
              </Card>
@@ -185,7 +178,16 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
             <p className="text-muted-foreground text-center py-8">No notes yet.</p>
           </TabsContent>
            <TabsContent value="attachments">
-            <p className="text-muted-foreground text-center py-8">No attachments yet.</p>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Attachments</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FileUploader entityType="Lead" entityId={leadId} />
+                    <Separator />
+                    <AttachmentsList attachments={attachments} />
+                </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
