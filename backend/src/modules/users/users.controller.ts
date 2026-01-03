@@ -9,13 +9,12 @@ import { PermissionsGuard } from '../auth/permissions.guard';
 import { RequirePermission } from '../auth/permissions.decorator';
 
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
     @Get()
-    @UseGuards(PermissionsGuard)
     @RequirePermission('user:read')
     findAll(@GetUser() user: AuthenticatedUser) {
         // Pass the whole user object to the service
@@ -23,7 +22,6 @@ export class UsersController {
     }
 
     @Post('invite')
-    @UseGuards(PermissionsGuard)
     @RequirePermission('user:create')
     invite(@Body() inviteUserDto: InviteUserDto, @GetUser() user: AuthenticatedUser) {
         // The service will use the inviting user's organizationId
@@ -31,7 +29,6 @@ export class UsersController {
     }
 
     @Patch(':id')
-    @UseGuards(PermissionsGuard)
     @RequirePermission('user:update')
     update(
         @Param('id', ParseIntPipe) id: number,

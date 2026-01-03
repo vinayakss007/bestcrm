@@ -27,7 +27,7 @@ const permissions = [
 
     { key: 'account:create', description: 'Can create accounts' },
     { key: 'account:read', description: 'Can read accounts' },
-    { key: 'account:update', description 'Can update accounts' },
+    { key: 'account:update', description: 'Can update accounts' },
     { key: 'account:delete', description: 'Can delete accounts' },
     { key: 'account:export', description: 'Can export accounts to CSV' },
     

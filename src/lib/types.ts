@@ -317,5 +317,3 @@ export type Attachment = {
     avatarUrl: string | null;
   }
 }
-
-      
