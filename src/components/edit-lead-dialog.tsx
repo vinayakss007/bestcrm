@@ -190,7 +190,7 @@ export function EditLeadDialog({ lead, users, as = "menuitem" }: EditLeadDialogP
                             </FormControl>
                             <SelectContent>
                             {users.map((user) => (
-                                <SelectItem key={user.id} value={user.id}>
+                                <SelectItem key={user.id} value={String(user.id)}>
                                 {user.name}
                                 </SelectItem>
                             ))}

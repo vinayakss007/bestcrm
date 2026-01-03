@@ -268,7 +268,7 @@ export function AddOpportunityDialog({ accounts, users, accountId, as = "button"
                             </FormControl>
                             <SelectContent>
                             {users.map((user) => (
-                                <SelectItem key={user.id} value={user.id}>
+                                <SelectItem key={user.id} value={String(user.id)}>
                                 {user.name}
                                 </SelectItem>
                             ))}

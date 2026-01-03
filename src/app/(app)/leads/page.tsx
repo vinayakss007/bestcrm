@@ -54,8 +54,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: { quer
   const users: User[] = await getUsers();
 
   const getOwnerById = (id: number | null) => {
-      // The user ID from the backend is a number, but the mock user ID is a string.
-      return users.find(user => id !== null && parseInt(user.id) === id);
+      return users.find(user => id !== null && user.id === id);
   }
 
   return (

@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -31,10 +32,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PlusCircle } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 const objects = [
   { value: "lead", label: "Lead" },
@@ -43,28 +46,35 @@ const objects = [
   { value: "opportunity", label: "Opportunity" },
 ];
 
-const standardFields: Record<string, { label: string; name: string; type: string }[]> = {
+type Field = {
+  label: string;
+  name: string;
+  type: string;
+  isCustom: boolean;
+};
+
+const standardFields: Record<string, Field[]> = {
   lead: [
-    { label: "Lead Name", name: "name", type: "Text" },
-    { label: "Email", name: "email", type: "Email" },
-    { label: "Status", name: "status", type: "Picklist" },
-    { label: "Source", name: "source", type: "Text" },
+    { label: "Lead Name", name: "name", type: "Text", isCustom: false },
+    { label: "Email", name: "email", type: "Email", isCustom: false },
+    { label: "Status", name: "status", type: "Picklist", isCustom: false },
+    { label: "Source", name: "source", type: "Text", isCustom: false },
   ],
   account: [
-    { label: "Account Name", name: "name", type: "Text" },
-    { label: "Industry", name: "industry", type: "Text" },
-    { label: "Created At", name: "createdAt", type: "Date" },
+    { label: "Account Name", name: "name", type: "Text", isCustom: false },
+    { label: "Industry", name: "industry", type: "Text", isCustom: false },
+    { label: "Created At", name: "createdAt", type: "Date", isCustom: false },
   ],
   contact: [
-      { label: "Contact Name", name: "name", type: "Text" },
-      { label: "Email", name: "email", type: "Email" },
-      { label: "Phone", name: "phone", type: "Phone" },
+      { label: "Contact Name", name: "name", type: "Text", isCustom: false },
+      { label: "Email", name: "email", type: "Email", isCustom: false },
+      { label: "Phone", name: "phone", type: "Phone", isCustom: false },
   ],
   opportunity: [
-      { label: "Opportunity Name", name: "name", type: "Text" },
-      { label: "Stage", name: "stage", type: "Picklist" },
-      { label: "Amount", name: "amount", type: "Currency" },
-      { label: "Close Date", name: "closeDate", type: "Date" },
+      { label: "Opportunity Name", name: "name", type: "Text", isCustom: false },
+      { label: "Stage", name: "stage", type: "Picklist", isCustom: false },
+      { label: "Amount", name: "amount", type: "Currency", isCustom: false },
+      { label: "Close Date", name: "closeDate", type: "Date", isCustom: false },
   ]
 };
 
@@ -73,6 +83,26 @@ const dataTypes = ["Text", "Number", "Date", "Picklist", "Checkbox"];
 export default function CustomFieldsPage() {
   const [selectedObject, setSelectedObject] = React.useState("lead");
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [customFields, setCustomFields] = React.useState<Record<string, Field[]>>({});
+  const [newField, setNewField] = React.useState({ label: '', name: '', type: '' });
+  const { toast } = useToast();
+
+  const handleAddField = () => {
+    if (!newField.label || !newField.name || !newField.type) {
+        toast({ variant: 'destructive', title: 'Error', description: 'All field details are required.' });
+        return;
+    }
+    const fieldToAdd: Field = { ...newField, isCustom: true };
+    setCustomFields(prev => ({
+        ...prev,
+        [selectedObject]: [...(prev[selectedObject] || []), fieldToAdd]
+    }));
+    toast({ title: 'Success', description: 'Custom field added successfully.' });
+    setIsDialogOpen(false);
+    setNewField({ label: '', name: '', type: '' });
+  }
+
+  const allFields = [...(standardFields[selectedObject] || []), ...(customFields[selectedObject] || [])];
 
   return (
     <Card>
@@ -102,33 +132,34 @@ export default function CustomFieldsPage() {
                 <Label htmlFor="field-label" className="text-right">
                   Field Label
                 </Label>
-                <Input id="field-label" placeholder="e.g. Priority" className="col-span-3" />
+                <Input id="field-label" placeholder="e.g. Priority" className="col-span-3" value={newField.label} onChange={(e) => setNewField({...newField, label: e.target.value})} />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="field-name" className="text-right">
                   Field Name
                 </Label>
-                <Input id="field-name" placeholder="e.g. priority__c" className="col-span-3" />
+                <Input id="field-name" placeholder="e.g. priority__c" className="col-span-3" value={newField.name} onChange={(e) => setNewField({...newField, name: e.target.value})}/>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="data-type" className="text-right">
                   Data Type
                 </Label>
-                <Select>
+                <Select onValueChange={(value) => setNewField({...newField, type: value})}>
                     <SelectTrigger className="col-span-3">
                         <SelectValue placeholder="Select a data type" />
                     </SelectTrigger>
                     <SelectContent>
                         {dataTypes.map((type) => (
-                            <SelectItem key={type} value={type.toLowerCase()}>{type}</SelectItem>
+                            <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
               </div>
             </div>
-             <div className="flex justify-end">
-                <Button onClick={() => setIsDialogOpen(false)}>Save Field</Button>
-             </div>
+            <DialogFooter>
+                <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                <Button onClick={handleAddField}>Save Field</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardHeader>
@@ -158,18 +189,20 @@ export default function CustomFieldsPage() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {standardFields[selectedObject]?.map((field) => (
+                {allFields.map((field) => (
                     <TableRow key={field.name}>
-                        <TableCell className="font-medium">{field.label}</TableCell>
+                        <TableCell className="font-medium">{field.label} {!field.isCustom && <span className="text-muted-foreground text-xs">(Standard)</span>}</TableCell>
                         <TableCell>{field.name}</TableCell>
                         <TableCell>{field.type}</TableCell>
                     </TableRow>
                 ))}
-                 <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground py-4">
-                        No custom fields yet.
-                    </TableCell>
-                </TableRow>
+                 {(customFields[selectedObject] || []).length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={3} className="text-center text-muted-foreground py-4">
+                            No custom fields yet for {objects.find(o => o.value === selectedObject)?.label}.
+                        </TableCell>
+                    </TableRow>
+                 )}
             </TableBody>
             </Table>
         </div>

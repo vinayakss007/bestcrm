@@ -80,6 +80,7 @@ export type Contact = {
   createdAt: string;
   updatedAt: string;
   account?: {
+    id: number;
     name: string;
   }
 }
@@ -161,6 +162,7 @@ export type Opportunity = {
   createdAt: string;
   updatedAt: string;
   account: {
+    id: number;
     name: string;
   };
   owner: {
