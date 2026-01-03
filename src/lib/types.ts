@@ -1,7 +1,5 @@
 
-
-
-
+import type { AdapterAccount } from "next-auth/adapters"
 
 export type Permission = {
   id: number;
@@ -356,3 +354,5 @@ export type UpdateRoleDto = {
     description?: string;
     permissionIds?: number[];
 }
+
+    

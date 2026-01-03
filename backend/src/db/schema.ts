@@ -13,7 +13,7 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
-import type { AdapterAccount } from "@auth/core/adapters"
+import type { AdapterAccount } from "next-auth/adapters"
 
 // This section defines tables for NextAuth.js if you integrate it directly.
 // These are standard and should not be modified unless you are customizing Auth.js behavior.
@@ -43,7 +43,7 @@ export const accounts = pgTable(
     session_state: text("session_state"),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({ columns: [account.provider, account.providerAccountId] }),
   })
 );
 
@@ -63,7 +63,7 @@ export const verificationTokens = pgTable(
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );
 
@@ -381,3 +381,5 @@ export const crmAttachmentsRelations = relations(crmAttachments, ({ one }) => ({
     references: [crmUsers.id],
   }),
 }));
+
+    
