@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and, or, ilike } from 'drizzle-orm';
+import { eq, and, or, ilike, sql } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -59,7 +59,13 @@ export class ContactsService {
     });
   }
 
-  async findAll(organizationId: number, accountId?: number, query?: string) {
+  async findAll(
+    organizationId: number,
+    accountId?: number,
+    query?: string,
+    page: number = 1,
+    limit: number = 10
+    ) {
     const conditions = [
         eq(schema.crmContacts.organizationId, organizationId),
         eq(schema.crmContacts.isDeleted, false),
@@ -88,18 +94,30 @@ export class ContactsService {
         )
     }
 
-    return await this.db.query.crmContacts.findMany({
-      where: and(...conditions),
-      with: {
-        account: {
-            columns: {
-                id: true,
-                name: true,
-            }
-        }
-      },
-      orderBy: (contacts, { asc }) => [asc(contacts.name)],
-    });
+    const offset = (page - 1) * limit;
+
+    const [data, totalResult] = await Promise.all([
+        this.db.query.crmContacts.findMany({
+            where: and(...conditions),
+            with: {
+                account: {
+                    columns: {
+                        id: true,
+                        name: true,
+                    }
+                }
+            },
+            orderBy: (contacts, { asc }) => [asc(contacts.name)],
+            limit: limit,
+            offset: offset,
+        }),
+        this.db.select({ count: sql<number>`count(*)` }).from(schema.crmContacts).where(and(...conditions))
+    ]);
+    
+    return {
+        data,
+        total: totalResult[0].count,
+    };
   }
 
   async findOne(id: number, organizationId: number) {

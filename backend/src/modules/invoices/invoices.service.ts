@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -36,11 +36,12 @@ export class InvoicesService {
 
     // Generate a unique invoice number (simplified for now)
     const invoiceCount = await this.db
-      .select()
+      .select({ count: sql<number>`count(*)` })
       .from(schema.crmInvoices)
       .where(eq(schema.crmInvoices.organizationId, organizationId));
+      
     const invoiceNumber = `INV-${new Date().getFullYear()}-${(
-      invoiceCount.length + 1
+      invoiceCount[0].count + 1
     )
       .toString()
       .padStart(4, '0')}`;
@@ -57,18 +58,31 @@ export class InvoicesService {
     return newInvoice[0];
   }
 
-  async findAll(organizationId: number) {
-    return await this.db.query.crmInvoices.findMany({
-      where: eq(schema.crmInvoices.organizationId, organizationId),
-      with: {
-        lead: {
-          columns: {
-            name: true,
+  async findAll(organizationId: number, page: number = 1, limit: number = 10) {
+    const conditions = [eq(schema.crmInvoices.organizationId, organizationId)];
+    const offset = (page - 1) * limit;
+
+    const [data, totalResult] = await Promise.all([
+      this.db.query.crmInvoices.findMany({
+        where: and(...conditions),
+        with: {
+          lead: {
+            columns: {
+              name: true,
+            },
           },
         },
-      },
-      orderBy: (invoices, { desc }) => [desc(invoices.createdAt)],
-    });
+        orderBy: (invoices, { desc }) => [desc(invoices.createdAt)],
+        limit,
+        offset,
+      }),
+      this.db.select({ count: sql<number>`count(*)` }).from(schema.crmInvoices).where(and(...conditions)),
+    ]);
+
+    return {
+        data,
+        total: totalResult[0].count,
+    };
   }
 
   async findOne(id: number, organizationId: number) {

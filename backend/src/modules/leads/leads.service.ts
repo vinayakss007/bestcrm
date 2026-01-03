@@ -6,7 +6,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { eq, and, or, ilike } from 'drizzle-orm';
+import { eq, and, or, ilike, sql } from 'drizzle-orm';
 import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateLeadDto } from './dto/create-lead.dto';
@@ -46,7 +46,7 @@ export class LeadsService {
     });
   }
 
-  async findAll(organizationId: number, query?: string) {
+  async findAll(organizationId: number, query?: string, page: number = 1, limit: number = 10) {
     const conditions = [
         eq(schema.crmLeads.organizationId, organizationId),
         eq(schema.crmLeads.isDeleted, false),
@@ -62,18 +62,30 @@ export class LeadsService {
         )
     }
 
-    return await this.db.query.crmLeads.findMany({
-      where: and(...conditions),
-      with: {
-        owner: {
-          columns: {
-            name: true,
-            avatarUrl: true,
-          }
-        }
-      },
-      orderBy: (leads, { desc }) => [desc(leads.createdAt)],
-    });
+    const offset = (page - 1) * limit;
+
+    const [data, totalResult] = await Promise.all([
+        this.db.query.crmLeads.findMany({
+            where: and(...conditions),
+            with: {
+                owner: {
+                columns: {
+                    name: true,
+                    avatarUrl: true,
+                }
+                }
+            },
+            orderBy: (leads, { desc }) => [desc(leads.createdAt)],
+            limit,
+            offset,
+        }),
+        this.db.select({ count: sql<number>`count(*)` }).from(schema.crmLeads).where(and(...conditions))
+    ]);
+
+    return {
+        data,
+        total: totalResult[0].count,
+    };
   }
 
   async findOne(id: number, organizationId: number) {
