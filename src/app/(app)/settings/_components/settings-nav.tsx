@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import Link from "next/link"
@@ -19,39 +18,41 @@ export function SettingsNav() {
   }, []);
 
   const isSuperAdmin = user?.role.name === 'super-admin';
+  const isAdmin = user?.role.name === 'company-admin' || isSuperAdmin;
+
 
   const navItems = [
     {
       title: "General",
       links: [
         { title: "Profile", href: "/settings/profile", icon: User },
-        { title: "Brand", href: "/settings/brand", icon: Star },
+        ...(isAdmin ? [{ title: "Brand", href: "/settings/brand", icon: Star }] : []),
       ]
     },
-    {
+    ...(isAdmin ? [{
       title: "Team",
       links: [
         { title: "Users", href: "/settings/users", icon: Users },
         { title: "Roles & Permissions", href: "/settings/roles", icon: Shield },
       ],
-    },
-    {
+    }] : []),
+    ...(isAdmin ? [{
       title: "CRM",
       links: [
         { title: "Custom Fields", href: "/settings/custom-fields", icon: Blocks },
+        { title: "Assignment Rules", href: "/settings/assignment-rules", icon: Ban },
         { title: "Forecasting", href: "/settings/forecasting", icon: BarChart },
         { title: "Home Actions", href: "/settings/home-actions", icon: Home },
-        { title: "Assignment Rules", href: "/settings/assignment-rules", icon: Ban },
       ],
-    },
-    {
+    }] : []),
+    ...(isSuperAdmin ? [{
       title: "System",
       links: [
-        ...(isSuperAdmin ? [{ title: "Tenants", href: "/settings/tenants", icon: Building }] : []),
+        { title: "Tenants", href: "/settings/tenants", icon: Building },
         { title: "System Status", href: "/settings/system-status", icon: ShieldCheck },
         { title: "Audit Log", href: "/settings/audit-log", icon: Activity },
       ],
-    },
+    }] : []),
   ]
 
   return (

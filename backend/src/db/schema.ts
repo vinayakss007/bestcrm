@@ -327,3 +327,23 @@ export const crmAttachmentsRelations = relations(crmAttachments, ({ one }) => ({
     references: [crmUsers.id],
   }),
 }));
+
+// Table for storing assignment rules.
+export const assignmentRuleObjectEnum = pgEnum('assignment_rule_object', ['Lead', 'Opportunity']);
+
+export const crmAssignmentRules = pgTable("crm_assignment_rules", {
+  id: serial("id").primaryKey(),
+  object: assignmentRuleObjectEnum("object").notNull(),
+  conditionField: varchar("condition_field", { length: 255 }).notNull(),
+  conditionValue: text("condition_value").notNull(),
+  assignToId: integer("assign_to_id").notNull().references(() => crmUsers.id),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const crmAssignmentRulesRelations = relations(crmAssignmentRules, ({ one }) => ({
+  assignTo: one(crmUsers, {
+    fields: [crmAssignmentRules.assignToId],
+    references: [crmUsers.id],
+  }),
+}));

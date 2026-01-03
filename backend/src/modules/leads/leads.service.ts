@@ -12,25 +12,25 @@ import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { ConvertLeadDto } from './dto/convert-lead.dto';
+import { AssignmentRulesService } from '../assignment-rules/assignment-rules.service';
 
 @Injectable()
 export class LeadsService {
   constructor(
     @Inject(DrizzleProvider)
     private db: PostgresJsDatabase<typeof schema>,
+    private assignmentRulesService: AssignmentRulesService,
   ) {}
 
   async create(createLeadDto: CreateLeadDto, organizationId: number, userId: number) {
     return await this.db.transaction(async (tx) => {
-        const newLead = await tx
+        const [lead] = await tx
         .insert(schema.crmLeads)
         .values({
             ...createLeadDto,
             organizationId,
         })
         .returning();
-
-        const lead = newLead[0];
 
         // Log activity
         await tx.insert(schema.crmActivities).values({
@@ -41,8 +41,11 @@ export class LeadsService {
             relatedToType: 'Lead',
             relatedToId: lead.id,
         });
+        
+        // After creating, check for assignment rules
+        const updatedLead = await this.assignmentRulesService.applyRules('Lead', lead, organizationId, tx);
 
-        return lead;
+        return updatedLead;
     });
   }
 

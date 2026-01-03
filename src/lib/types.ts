@@ -355,4 +355,28 @@ export type UpdateRoleDto = {
     permissionIds?: number[];
 }
 
-    
+export const assignmentRuleObjects = ['Lead', 'Opportunity'] as const;
+export type AssignmentRuleObject = (typeof assignmentRuleObjects)[number];
+
+export type AssignmentRule = {
+    id: number;
+    object: AssignmentRuleObject;
+    conditionField: string;
+    conditionValue: string;
+    assignToId: number;
+    organizationId: number;
+    createdAt: string;
+};
+
+export type CreateAssignmentRuleDto = {
+    object: AssignmentRuleObject;
+    conditionField: string;
+    conditionValue: string;
+    assignToId: number;
+}
+
+export type UpdateAssignmentRuleDto = {
+    conditionField?: string;
+    conditionValue?: string;
+    assignToId?: number;
+}

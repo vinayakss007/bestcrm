@@ -18,6 +18,7 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { AssignmentRulesModule } from './modules/assignment-rules/assignment-rules.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -41,6 +42,7 @@ import configuration from './config/configuration';
     AttachmentsModule,
     RolesModule,
     JobsModule,
+    AssignmentRulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

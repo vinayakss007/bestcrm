@@ -11,12 +11,14 @@ import * as schema from '@/db/schema';
 import { DrizzleProvider } from '../drizzle/drizzle.provider';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
 import { UpdateOpportunityDto } from './dto/update-opportunity.dto';
+import { AssignmentRulesService } from '../assignment-rules/assignment-rules.service';
 
 @Injectable()
 export class OpportunitiesService {
   constructor(
     @Inject(DrizzleProvider)
     private db: PostgresJsDatabase<typeof schema>,
+    private assignmentRulesService: AssignmentRulesService,
   ) {}
 
   async create(
@@ -39,15 +41,13 @@ export class OpportunitiesService {
         );
         }
 
-        const newOpportunity = await tx
+        const [opportunity] = await tx
         .insert(schema.crmOpportunities)
         .values({
             ...createOpportunityDto,
             organizationId,
         })
         .returning();
-        
-        const opportunity = newOpportunity[0];
 
         // Log activity
         await tx.insert(schema.crmActivities).values({
@@ -59,7 +59,10 @@ export class OpportunitiesService {
             relatedToId: account.id,
         });
 
-        return opportunity;
+        // After creating, check for assignment rules
+        const updatedOpportunity = await this.assignmentRulesService.applyRules('Opportunity', opportunity, organizationId, tx);
+
+        return updatedOpportunity;
     });
   }
 
