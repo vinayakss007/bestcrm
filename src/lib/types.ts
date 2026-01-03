@@ -1,6 +1,7 @@
 
 
 
+
 export type Permission = {
   id: number;
   key: string;
@@ -292,7 +293,7 @@ export type RecentActivity = {
 export type Activity = {
   id: number;
   type: 'account_created' | 'contact_created' | 'lead_created' | 'opportunity_created';
-  details: any;
+  details: Record<string, any>;
   userId: number;
   organizationId: number;
   relatedToType: RelatedToType | null;
